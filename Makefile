@@ -2,13 +2,14 @@
 TSC=tsc
 FLAGS=
 MODULE=commonjs
-SOURCE=watermark.ts
-TARGET=$(SOURCE:.ts=.js)
+SOURCES=watermark.ts radixgraph.ts
+TARGET=watermark.js
+TARGETS=$(SOURCES:.ts=.js)
 
 all: $(TARGET)
 
-$(TARGET): $(SOURCE)
-	$(TSC) $(FLAGS) -m $(MODULE) $<
+$(TARGET): $(SOURCES)
+	$(TSC) $(FLAGS) -m $(MODULE) $(SOURCES)
 
 clean:
-	rm $(TARGET)
+	rm $(TARGETS)
