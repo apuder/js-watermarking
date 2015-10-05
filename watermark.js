@@ -1,11 +1,10 @@
 /// <reference path="typings/esprima/esprima.d.ts" />
 /// <reference path="typings/escodegen/escodegen.d.ts" />
 /// <reference path="typings/esmorph/esmorph.d.ts" />
-/// <reference path="radixgraph.d.ts" />
 var esprima = require("esprima");
 var escodegen = require("escodegen");
 var esmorph = require("esmorph");
-var radixgraph = require("radixgraph");
+var rg = require("./radixgraph");
 var original_code_string = 'function question() {\n return 7 * 9 }';
 var code_ast = esprima.parse(original_code_string);
 var generated_code = escodegen.generate(code_ast);
@@ -24,8 +23,10 @@ var tracerExit = esmorph.Tracer.FunctionExit(function (fn) {
 var morphed_code_entry = esmorph.modify(original_code_string, tracerEntrance);
 var morphed_code_exit = esmorph.modify(original_code_string, tracerExit);
 var morphed_code_both = esmorph.modify(morphed_code_entry, tracerExit);
-var rad = new radixgraph.radixgraph(1);
-var inst = new radixgraph.radixgraphinstructions(rad);
+console.log(JSON.stringify(rg, null, 4));
+console.log();
+var rad = new rg.radixgraph(1);
+var inst = new rg.radixgraphinstructions(rad);
 // print original code
 console.log(JSON.stringify(original_code_string, null, 4));
 console.log();

@@ -1,5 +1,10 @@
 
 module radixgraph {
+  interface radixgraphcomponent {
+    id: number;
+    is_node: boolean;
+    is_edge: boolean;
+  }
 
   class radixgraphnode {
     id: number;
@@ -57,7 +62,7 @@ module radixgraph {
       this.makeedges();
     }
 
-    private makenodes = function (): void {
+    private makenodes(): void {
       this.nodes = [];
       this.nodes.push(this.root);
       // make nodes after root
@@ -66,7 +71,7 @@ module radixgraph {
       }
     }
 
-    private makeedges = function (): void {
+    private makeedges(): void {
       this.edges = [];
       var tmpnum = this.num;
       var base = this.base;
@@ -98,12 +103,12 @@ module radixgraph {
           edge.destination.inbound_edges.push(edge);
         } else {
           // null edge, add null reference where this outbound edge should be
-          nodes[j+1].outbound_edges.push(null);
+          // nodes[j+1].outbound_edges.push(null);
         }
       }
     }
 
-    get_component = function (id: number): radixgraphnode | radixgraphedge {
+    get_component(id: number): radixgraphnode | radixgraphedge {
       if (id < this.nodes.length) {
         return this.nodes[id];
       } else {
@@ -124,33 +129,121 @@ module radixgraph {
 
   class radixgraphinstructions {
     private all_done: boolean = false;
-    private done_ids: boolean[];
-    private last_instruction: radixgraphinstruction;
+    private instructions: radixgraphinstruction[];
+    private node_stack: radixgraphinstruction[];
 
     graph: radixgraph;
 
     constructor(graph: radixgraph) {
       this.graph = graph;
-      this.done_ids = [];
-      this.last_instruction = null;
+      this.instructions = [];
+      this.node_stack = [];
     }
 
-    next = function (): radixgraphinstruction {
+    private last_node(): radixgraphinstruction {
+      var inst = this.node_stack[this.node_stack.length - 1];
+      if (!inst.component.is_node) {
+        throw ("Component in node_stack not node");
+      }
+      return inst;
+    }
+
+    private next_inbound(inst: radixgraphinstruction): radixgraphinstruction {
+      // ensure all buildable inbound edges made
+      var inbnd = (<radixgraphnode>inst.component).inbound_edges;
+      for (var edge in inbnd) {
+        // check if edge can be made
+        if (!this.instructions[edge.id] && this.instructions[edge.origin.id]) {
+          var path = this.instructions[edge.origin.id].path_from_root.slice();
+          path.push(edge);
+          var newinst = new radixgraphinstruction(path);
+          this.instructions[edge.id] = newinst;
+          return newinst;
+        }
+      }
+
+      return null;
+    }
+
+    private next_outbound(inst: radixgraphinstruction): radixgraphinstruction {
+      // ensure all buildable outbound edges made
+      var outbnd = (<radixgraphnode>inst.component).outbound_edges;
+      for (var edge in outbnd) {
+        // check if edge can be made
+        if (!this.instructions[edge.id] && this.instructions[edge.destination.id]) {
+          var path = inst.path_from_root.slice();
+          path.push(edge);
+          var newinst = new radixgraphinstruction(path);
+          this.instructions[edge.id] = newinst;
+          return newinst;
+        }
+      }
+
+      return null;
+    }
+
+    private next_node(): radixgraphinstruction {
+
+      while (this.node_stack.length > 0) {
+
+        // get a previous node and it's outbound edges
+        var inst = this.last_node();
+        var outbnd = (<radixgraphnode>inst.component).outbound_edges;
+
+        // build node through outbound link
+        for (var edge in outbnd) {
+          // check if edge can be made
+          if (!this.instructions[edge.destination.id]) {
+            var path = inst.path_from_root.slice();
+            path.push(edge);
+            path.push(edge.destination);
+            var newinst = new radixgraphinstruction(path);
+            this.instructions[edge.destination.id] = newinst;
+            this.node_stack.push(newinst);
+            return newinst;
+          }
+        }
+          
+        // backtrack through done_stack
+        this.node_stack.pop();
+      }
+
+      return null;
+    }
+
+    // depth first
+    next(): radixgraphinstruction {
       if (this.all_done) return null;
+      var inst: radixgraphinstruction;
 
-      var path_from_root: radixgraphcomponent[] = [];
+      // build root
+      if (this.node_stack.length == 0) {
+        inst = new radixgraphinstruction([this.graph.root]);
+        this.instructions[inst.component.id] = inst;
+        this.node_stack.push(inst);
+        return inst;
+      }
 
-      // encounter each edge twice, at origin and destination
-      // both guaranteed to exist the second time visiting the edge
-      // always follow forward link to keep nodes from being garbage collected
-      // check backwards links to fill in missing links
+      inst = this.last_node();
+      var newinst: radixgraphinstruction;
 
-      // todo
+      // ensure all buildable inbound edges made
+      if (newinst = this.next_inbound(inst))
+        return newinst;
 
+      // ensure all buildable outbound edges made
+      if (newinst = this.next_outbound(inst))
+        return newinst;
+      
+      // ensure all nodes built
+      if (newinst = this.next_node())
+        return newinst;
+
+      // made all possible edges and nodes
+      this.all_done = true;
+      return null;
     }
   }
 }
 
-declare module "radixgraph" {
-  export = radixgraph;
-}
+export * from radixgraph;
