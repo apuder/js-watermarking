@@ -2,7 +2,7 @@
 TSC=tsc
 FLAGS=
 MODULE=commonjs
-SOURCES=watermark.ts radixgraph.ts
+SOURCES=watermark.ts radixgraph.ts rootedgraphinstructions.ts
 TARGET=watermark.js
 TARGETS=$(SOURCES:.ts=.js)
 

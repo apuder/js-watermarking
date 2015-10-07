@@ -21,28 +21,12 @@ declare module rootedgraph {
     (id: number): rootedgraph.rootedgraphcomponent;
   }
 
-  interface rootedgraph {
-    // new(num: number);
+  export class rootedgraph {
     num: number;
     root: rootedgraphnode;
     size: number;
+    constructor(num: number);
     get_component: get_component_function;
-  }
-
-  interface rootedgraphinstruction {
-    component: rootedgraph.rootedgraphcomponent;
-    path_from_root: rootedgraph.rootedgraphcomponent[];
-    alias?: string;
-  }
-
-  interface next_function {
-    (): rootedgraph.rootedgraphinstruction;
-  }
-
-  interface rootedgraphinstructions {
-    // new(graph: rootedgraph.rootedgraph);
-    next: next_function;
-    graph: rootedgraph.rootedgraph;
   }
 
 }

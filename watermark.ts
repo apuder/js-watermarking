@@ -2,11 +2,14 @@
 /// <reference path="typings/esprima/esprima.d.ts" />
 /// <reference path="typings/escodegen/escodegen.d.ts" />
 /// <reference path="typings/esmorph/esmorph.d.ts" />
+/// <reference path="./radixgraph.d.ts" />
+/// <reference path="./rootedgraphinstructions.d.ts" />
 
 import esprima = require("esprima");
 import escodegen = require("escodegen");
 import esmorph = require("esmorph");
-import * as rg from "./radixgraph";
+import { radixgraph } from "./radixgraph";
+import { rootedgraphinstructions } from "./rootedgraphinstructions";
 
 var original_code_string : string = 'function question() {\n return 7 * 9 }';
 
@@ -34,11 +37,14 @@ var morphed_code_exit: string = esmorph.modify(original_code_string, tracerExit)
 
 var morphed_code_both: string = esmorph.modify(morphed_code_entry, tracerExit);
 
-console.log(JSON.stringify(rg, null, 4));
+console.log(radixgraph);
 console.log();
 
-var rad = new rg.radixgraph(1);
-var inst = new rg.radixgraphinstructions(rad);
+console.log(rootedgraphinstructions);
+console.log();
+
+var rad = new radixgraph.radixgraph(1024);
+var inst = new rootedgraphinstructions.rootedgraphinstructions(rad);
 
 // print original code
 console.log(JSON.stringify(original_code_string, null, 4));
@@ -60,8 +66,20 @@ console.log(JSON.stringify(morphed_code_both, null, 4));
 console.log();
 
 // print radix graph
-console.log(JSON.stringify(rad, null, 4));
+console.log(rad);
 console.log();
-// print radix graph instructions
-console.log(JSON.stringify(inst, null, 4));
-console.log();
+
+// print each instruction
+var i;
+while (i = inst.next()) {
+	// print radix graph instructions
+	var comp: rootedgraph.rootedgraphcomponent = i.component;
+	if (comp.is_node) {
+		var node: rootedgraph.rootedgraphnode = <rootedgraph.rootedgraphnode>comp;
+		console.log("Node(" + comp.id + ")");
+	} else {
+		var edge: rootedgraph.rootedgraphedge = <rootedgraph.rootedgraphedge>comp;
+		console.log("Edge(" + edge.origin.id + "->" + edge.destination.id + ")");
+	}
+	console.log();
+}

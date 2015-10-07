@@ -1,10 +1,13 @@
 /// <reference path="typings/esprima/esprima.d.ts" />
 /// <reference path="typings/escodegen/escodegen.d.ts" />
 /// <reference path="typings/esmorph/esmorph.d.ts" />
+/// <reference path="./radixgraph.d.ts" />
+/// <reference path="./rootedgraphinstructions.d.ts" />
 var esprima = require("esprima");
 var escodegen = require("escodegen");
 var esmorph = require("esmorph");
-var rg = require("./radixgraph");
+var radixgraph_1 = require("./radixgraph");
+var rootedgraphinstructions_1 = require("./rootedgraphinstructions");
 var original_code_string = 'function question() {\n return 7 * 9 }';
 var code_ast = esprima.parse(original_code_string);
 var generated_code = escodegen.generate(code_ast);
@@ -23,10 +26,12 @@ var tracerExit = esmorph.Tracer.FunctionExit(function (fn) {
 var morphed_code_entry = esmorph.modify(original_code_string, tracerEntrance);
 var morphed_code_exit = esmorph.modify(original_code_string, tracerExit);
 var morphed_code_both = esmorph.modify(morphed_code_entry, tracerExit);
-console.log(JSON.stringify(rg, null, 4));
+console.log(radixgraph_1.radixgraph);
 console.log();
-var rad = new rg.radixgraph(1);
-var inst = new rg.radixgraphinstructions(rad);
+console.log(rootedgraphinstructions_1.rootedgraphinstructions);
+console.log();
+var rad = new radixgraph_1.radixgraph.radixgraph(1024);
+var inst = new rootedgraphinstructions_1.rootedgraphinstructions.rootedgraphinstructions(rad);
 // print original code
 console.log(JSON.stringify(original_code_string, null, 4));
 console.log();
@@ -46,8 +51,20 @@ console.log();
 console.log(JSON.stringify(morphed_code_both, null, 4));
 console.log();
 // print radix graph
-console.log(JSON.stringify(rad, null, 4));
+console.log(rad);
 console.log();
-// print radix graph instructions
-console.log(JSON.stringify(inst, null, 4));
-console.log();
+// print each instruction
+var i;
+while (i = inst.next()) {
+    // print radix graph instructions
+    var comp = i.component;
+    if (comp.is_node) {
+        var node = comp;
+        console.log("Node(" + comp.id + ")");
+    }
+    else {
+        var edge = comp;
+        console.log("Edge(" + edge.origin.id + "->" + edge.destination.id + ")");
+    }
+    console.log();
+}
