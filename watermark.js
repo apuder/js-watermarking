@@ -26,45 +26,50 @@ var tracerExit = esmorph.Tracer.FunctionExit(function (fn) {
 var morphed_code_entry = esmorph.modify(original_code_string, tracerEntrance);
 var morphed_code_exit = esmorph.modify(original_code_string, tracerExit);
 var morphed_code_both = esmorph.modify(morphed_code_entry, tracerExit);
-console.log(radixgraph_1.radixgraph);
-console.log();
-console.log(rootedgraphinstructions_1.rootedgraphinstructions);
-console.log();
+// console.log(radixgraph);
+// console.log();
+// console.log(rootedgraphinstructions);
+// console.log();
 var rad = new radixgraph_1.radixgraph.radixgraph(1024);
 var inst = new rootedgraphinstructions_1.rootedgraphinstructions.rootedgraphinstructions(rad);
 // print original code
-console.log(JSON.stringify(original_code_string, null, 4));
-console.log();
-// print generated abstract syntax tree
-console.log(JSON.stringify(code_ast, null, 4));
-console.log();
-// print regenerated code
-console.log(JSON.stringify(generated_code, null, 4));
-console.log();
-// print code with extra statements at beginning
-console.log(JSON.stringify(morphed_code_entry, null, 4));
-console.log();
-// print code with extra statements at end
-console.log(JSON.stringify(morphed_code_exit, null, 4));
-console.log();
-// print code with extra statements at beginning and end
-console.log(JSON.stringify(morphed_code_both, null, 4));
-console.log();
+// console.log(JSON.stringify(original_code_string, null, 4));
+// console.log();
+// // print generated abstract syntax tree
+// console.log(JSON.stringify(code_ast, null, 4));
+// console.log();
+// // print regenerated code
+// console.log(JSON.stringify(generated_code, null, 4));
+// console.log();
+// // print code with extra statements at beginning
+// console.log(JSON.stringify(morphed_code_entry, null, 4));
+// console.log();
+// // print code with extra statements at end
+// console.log(JSON.stringify(morphed_code_exit, null, 4));
+// console.log();
+// // print code with extra statements at beginning and end
+// console.log(JSON.stringify(morphed_code_both, null, 4));
+// console.log();
 // print radix graph
-console.log(rad);
-console.log();
+// console.log(rad);
+// console.log();
 // print each instruction
+var radcode = "";
 var i;
 while (i = inst.next()) {
     // print radix graph instructions
     var comp = i.component;
     if (comp.is_node) {
         var node = comp;
-        console.log("Node(" + comp.id + ")");
+        radcode += "var nn" + node.id + " = {};\n";
     }
     else {
         var edge = comp;
-        console.log("Edge(" + edge.origin.id + "->" + edge.destination.id + ")");
+        radcode += "nn" + edge.origin.id + "[" + edge.origin_edge + "] = nn" + edge.destination.id + ";\n";
     }
-    console.log();
 }
+console.log(radcode);
+var nn0;
+eval(radcode);
+// console.log(nn0);
+console.log(radixgraph_1.radixgraph.radixgraph.findnum(nn0));

@@ -22,6 +22,7 @@ declare module rootedgraph {
   }
 
   export class rootedgraph {
+    static findnum(root: Object): number;
     num: number;
     root: rootedgraphnode;
     size: number;

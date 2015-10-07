@@ -23,6 +23,8 @@ var radixgraph;
     })();
     var radixgraph = (function () {
         function radixgraph(num) {
+            if (num < 0)
+                throw ("Invalid number");
             this.num = num;
             this.base = 2;
             // find minimal base to fit number
@@ -38,6 +40,108 @@ var radixgraph;
             this.size = this.nodes.length + this.edges.length;
             // console.log(this);
         }
+        // returns true if it finds the backlink to the second item
+        // or a recursive call returned true
+        // false otherwise
+        radixgraph.fbbhelper = function (stack) {
+            var root = stack[stack.length - 1];
+            var beststack = [];
+            for (var key in root) {
+                var val = root[key];
+                if (typeof (val) !== 'object' || !val)
+                    continue;
+                var index = stack.indexOf(val);
+                if (index == 1) {
+                    // found a backlink, update beststack with copy of stack
+                    if (beststack.length < stack.length) {
+                        beststack = stack.slice();
+                    }
+                }
+                else if (index == -1) {
+                    // the backbone does not repeat elements
+                    // add the item
+                    stack.push(val);
+                    // search further
+                    var retstack = radixgraph.fbbhelper(stack);
+                    if (beststack.length < retstack.length) {
+                        beststack = retstack;
+                    }
+                    // not found, pop and keep searching
+                    stack.pop();
+                }
+            }
+            return beststack;
+        };
+        radixgraph.findbackbone = function (root) {
+            // find the longest path that connects back to the node directly after the root
+            // multiple backbones are possible for an arbitrary radixgraph
+            // this may not recover the desired number
+            var stack = [];
+            var beststack = [];
+            stack.push(root);
+            for (var key in root) {
+                var val = root[key];
+                stack.push(val);
+                var retstack = radixgraph.fbbhelper(stack);
+                if (beststack.length < retstack.length) {
+                    // found a longer radixgraph
+                    beststack = retstack;
+                }
+                stack.pop();
+            }
+            // console.log(beststack);
+            return beststack.length > 0 ? beststack : null;
+        };
+        radixgraph.calccoef = function (key, ind, numitems) {
+            // deal with the case that the link goes backwards in the chain
+            ind = ind < key ? ind + numitems - 1 : ind;
+            // links to self have a value of 1
+            return ind - key + 1;
+        };
+        radixgraph.findcoef = function (key, backbone) {
+            // should find at least one link to the next item in backbone
+            var foundforwardlink = false;
+            var node = backbone[key];
+            for (var inkey in node) {
+                var innode = node[inkey];
+                // find where and if this link goes in the backbone
+                var ind = backbone.indexOf(innode);
+                if (ind >= 0) {
+                    // array points into array
+                    var coef = radixgraph.calccoef(key, ind, backbone.length);
+                    // check if this is the forward link in the backbone
+                    // a forward link always wold represent a coefficient of 2
+                    if (coef == 2 && !foundforwardlink) {
+                        foundforwardlink = true;
+                    }
+                    else {
+                        return coef;
+                    }
+                }
+            }
+            // a node that does not link to any other nodes except as a backbone link
+            // represents a coefficient of 0
+            return 0;
+        };
+        radixgraph.findnum = function (root) {
+            if (typeof (root) !== 'object')
+                return null;
+            var backbone = radixgraph.findbackbone(root);
+            if (!backbone)
+                return null;
+            var num = 0;
+            var base = backbone.length;
+            var powers = [];
+            powers.unshift(1);
+            for (var i = 1; i < base; ++i) {
+                powers.unshift(powers[0] * base);
+            }
+            for (var key in backbone) {
+                var coef = radixgraph.findcoef(key, backbone);
+                num += coef * powers[key];
+            }
+            return num;
+        };
         radixgraph.prototype.makenodes = function () {
             this.nodes = [];
             this.nodes.push(this.root);

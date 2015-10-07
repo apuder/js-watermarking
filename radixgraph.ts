@@ -47,11 +47,130 @@ export module radixgraph {
     private nodes: radixgraphnode[];
     private edges: radixgraphedge[];
 
+    // returns true if it finds the backlink to the second item
+    // or a recursive call returned true
+    // false otherwise
+    private static fbbhelper(stack: Object[]): Object[] {
+      var root = stack[stack.length - 1];
+      var beststack: Object[] = [];
+      for (var key in root) {
+        var val = root[key];
+
+        if (typeof (val) !== 'object' || !val) continue;
+
+        var index = stack.indexOf(val);
+        if (index == 1) {
+          // found a backlink, update beststack with copy of stack
+          if (beststack.length < stack.length) {
+            beststack = stack.slice();
+          }
+        } else if (index == -1){
+          // the backbone does not repeat elements
+          // add the item
+          stack.push(val);
+          // search further
+          var retstack = radixgraph.fbbhelper(stack);
+          if (beststack.length < retstack.length) {
+            beststack = retstack;
+          }
+          // not found, pop and keep searching
+          stack.pop();
+        }
+      }
+      return beststack;
+    }
+
+    private static findbackbone(root: Object): Object[] {
+      // find the longest path that connects back to the node directly after the root
+
+      // multiple backbones are possible for an arbitrary radixgraph
+      // this may not recover the desired number
+
+      var stack: Object[] = [];
+      var beststack: Object[] = [];
+
+      stack.push(root);
+
+      for (var key in root) {
+        var val = root[key];
+
+        stack.push(val);
+
+        var retstack = radixgraph.fbbhelper(stack)
+        if (beststack.length < retstack.length) {
+          // found a longer radixgraph
+          beststack = retstack;
+        }
+        
+        stack.pop();
+      }
+
+      // console.log(beststack);
+
+      return beststack.length > 0 ? beststack : null;
+    }
+
+    private static calccoef(key: number, ind: number, numitems: number):number {
+      // deal with the case that the link goes backwards in the chain
+      ind = ind < key ? ind + numitems - 1 : ind;
+      // links to self have a value of 1
+      return ind - key + 1;
+    }
+
+    private static findcoef(key: number, backbone: Object[]): number {
+      // should find at least one link to the next item in backbone
+      var foundforwardlink: boolean = false;
+
+      var node = backbone[key];
+      for (var inkey in node) {
+        var innode = node[inkey];
+        // find where and if this link goes in the backbone
+        var ind = backbone.indexOf(innode);
+        if (ind >= 0) {
+          // array points into array
+          var coef = radixgraph.calccoef(key, ind, backbone.length);
+          // check if this is the forward link in the backbone
+          // a forward link always wold represent a coefficient of 2
+          if (coef == 2 && !foundforwardlink) {
+            foundforwardlink = true;
+          } else {
+            return coef;
+          }
+        }
+      }
+      // a node that does not link to any other nodes except as a backbone link
+      // represents a coefficient of 0
+      return 0;
+    }
+
+    static findnum(root: any): number {
+      if (typeof (root) !== 'object') return null;
+
+      var backbone: Object[] = radixgraph.findbackbone(root);
+      if (!backbone) return null;
+
+      var num: number = 0;
+      var base = backbone.length;
+      var powers: number[] = [];
+      powers.unshift(1);
+      for (var i = 1; i < base; ++i) {
+        powers.unshift(powers[0] * base);
+      }
+
+      for(var key in backbone) {
+        var coef = radixgraph.findcoef(key, backbone);
+        num += coef * powers[key];
+      }
+      
+      return num;
+    }
+
     num: number;
     size: number;
     root: radixgraphnode;
 
     constructor(num: number) {
+      if (num < 0) throw ("Invalid number");
       this.num = num;
       this.base = 2;
       // find minimal base to fit number
