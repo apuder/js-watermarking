@@ -5,130 +5,207 @@
 /// <reference path="./radixgraph.d.ts" />
 /// <reference path="./rootedgraphinstructions.d.ts" />
 
+
+var fs = require('fs');
+
 import esprima = require("esprima");
 import escodegen = require("escodegen");
 import esmorph = require("esmorph");
 import { radixgraph } from "./radixgraph";
 import { rootedgraphinstructions } from "./rootedgraphinstructions";
 
-var original_code_string : string = 'function question() {\n return 7 * 9 }';
+function printUsage() {
+	var usage = "Usage: node watermark.js ";
+	usage += "watermark_number ";
+	usage += "file_to_watermark ";
+	usage += "command_that_makes_watermark";
+	console.log(usage);
+}
 
-var code_ast : ESTree.Program = esprima.parse(original_code_string);
+var numarg: string = process.argv[2];
+var fname: string = process.argv[3];
+var cmd: string = process.argv[4];
 
-var generated_code : string = escodegen.generate(code_ast);
+var num: number = parseInt(numarg);
 
-var tracerEntrance = esmorph.Tracer.FunctionEntrance(function (fn) {
-	var sig = 'console.log("Call ' + fn.name;
-	sig += ' at line ' + fn.loc.start.line;
-	sig += ' in range [' + fn.range[0] + ',' + fn.range[1] + ']");';
-	return sig;
-});
+if (!numarg || typeof (numarg) !== 'string') {
+	console.log("Error: no number given");
+	printUsage();
+	process.exit(1);
+} else if (!num) {
+	console.log("Error: Invalid number given");
+	printUsage();
+	process.exit(1);
+}
 
-var tracerExit = esmorph.Tracer.FunctionExit(function (fn) {
-	var sig = 'console.log("Exit ' + fn.name;
-	sig += ' at line ' + fn.loc.end.line;
-	sig += ' in range [' + fn.range[0] + ',' + fn.range[1] + ']");';
-	return sig;
-});
+if (!fname || typeof (fname) !== 'string') {
+	console.log("Error: no file name given");
+	printUsage();
+	process.exit(1);
+}
 
-var morphed_code_entry: string = esmorph.modify(original_code_string, tracerEntrance);
+if (!cmd || typeof (cmd) !== 'string') {
+	console.log("Error: no command given");
+	printUsage();
+	process.exit(1);
+}
 
-var morphed_code_exit: string = esmorph.modify(original_code_string, tracerExit);
+try {
+	var original_code_string: string = fs.readFileSync(fname, 'utf-8');
 
-var morphed_code_both: string = esmorph.modify(morphed_code_entry, tracerExit);
+	// make a radix graph representing number num
+	var rad = new radixgraph.radixgraph(num);
+	var inst = new rootedgraphinstructions.rootedgraphinstructions(rad);
 
-// console.log(radixgraph);
-// console.log();
+	// name and declare root variable
+	var rootname: string = "theRoot";
+	var theRoot;
 
-// console.log(rootedgraphinstructions);
-// console.log();
+	// returns a string that if evaluated follows the edges from the root to the component in instruction
+	function pathfromroot(instruction: rootedgraphinstructions.rootedgraphinstruction): string {
+		var inst = rootname;
 
-var rad = new radixgraph.radixgraph(1509325484);
-var inst = new rootedgraphinstructions.rootedgraphinstructions(rad);
+		var path: rootedgraph.rootedgraphcomponent[] = instruction.path_from_root;
+		for (var i = 0; i < path.length; ++i) {
+			if (path[i].is_edge) {
+				var edge: rootedgraph.rootedgraphedge = <rootedgraph.rootedgraphedge>path[i];
+				inst += "[" + edge.origin_edge + "]";
+			}
+		}
 
-// print original code
-// console.log(JSON.stringify(original_code_string, null, 4));
-// console.log();
-// // print generated abstract syntax tree
-// console.log(JSON.stringify(code_ast, null, 4));
-// console.log();
-// // print regenerated code
-// console.log(JSON.stringify(generated_code, null, 4));
-// console.log();
-// // print code with extra statements at beginning
-// console.log(JSON.stringify(morphed_code_entry, null, 4));
-// console.log();
-// // print code with extra statements at end
-// console.log(JSON.stringify(morphed_code_exit, null, 4));
-// console.log();
-// // print code with extra statements at beginning and end
-// console.log(JSON.stringify(morphed_code_both, null, 4));
-// console.log();
+		return inst;
+	}
 
-// print radix graph
-// console.log(rad);
-// console.log();
+	// make an array of instructions to inject
+	var radcode = [];
+	var last_is_node = false;
+	var i: rootedgraphinstructions.rootedgraphinstruction;
+	var nodes: rootedgraphinstructions.rootedgraphinstruction[] = [];
+	while (i = inst.next()) {
+		// find type
+		var comp: rootedgraph.rootedgraphcomponent = i.component;
+		if (comp.is_node) {
+			var node: rootedgraph.rootedgraphnode = <rootedgraph.rootedgraphnode>comp;
+			// nodes creation except root creation happens when the first edge
+			// to it is created to leave no nodes unconnected
+			if (node.id == 0) {
+				radcode.push(rootname + " || (" + rootname + " = {});");
+			} else {
+				// mark that a node is to be created as the destination of the next edge
+				last_is_node = true;
+			}
+			// console.log("n" + node.id + " = {};");
+		} else {
+			var edge: rootedgraph.rootedgraphedge = <rootedgraph.rootedgraphedge>comp;
+			// edge creation may occur with node creation, or between two existing nodes
+			var instruction: string = "";
 
-function pathfromroot(instruction: rootedgraphinstructions.rootedgraphinstruction): string {
-	var inst = "root";
+			// path to the originating node of an edge is guaranteed safe
+			// the path given through the edge itself may not be
+			if (nodes[edge.origin.id]) {
+				// possible for the given path from root to current edge 
+				// to use an edge about to be created in this edge batch
+				// the node whose outgoing edge is being set exists
+				// but an edge on the path to that node (probably the last one) is yet to be
+				// created, but will be created later in this batch of edges
+				instruction += pathfromroot(nodes[edge.origin.id]) + "[" + edge.origin_edge + "]";
+			} else {
+				instruction += pathfromroot(i);
+			}
 
-	var path: rootedgraph.rootedgraphcomponent[] = instruction.path_from_root;
-	for (var i = 0; i < path.length; ++i) {
-		if (path[i].is_edge) {
-			var edge: rootedgraph.rootedgraphedge = <rootedgraph.rootedgraphedge>path[i];
-			inst += "[" + edge.origin_edge + "]";
+			// avoid recreating nodes, breaks existing links
+			instruction += " || (" + instruction + " = ";
+
+			if (last_is_node) {
+				// a node should be made at the destination of this edge
+				instruction += "{}";
+				last_is_node = false;
+				// save the path used to create this node, it will be safe
+				nodes[edge.destination.id] = i;
+			} else {
+				instruction += pathfromroot(nodes[edge.destination.id]);
+			}
+			radcode.push(instruction + "); ");
+			// console.log("n" + edge.origin.id + "[" + edge.origin_edge + "]" + " = n" + edge.destination.id + ";");
 		}
 	}
 
-	return inst;
-}
+	// console.log(rad.num);
+	// console.log(rad.size);
+	// console.log(radcode);
+	// var root;
+	// for (var k in radcode) {
+		// eval(radcode[k]);
+	// }
+	// console.log(radixgraph.radixgraph.findnum(root));
 
-// print each instruction
-var radcode = [];
-var last_is_node = false;
-var i: rootedgraphinstructions.rootedgraphinstruction;
-var nodes: rootedgraphinstructions.rootedgraphinstruction[] = [];
-while (i = inst.next()) {
-	// print radix graph instructions
-	var comp: rootedgraph.rootedgraphcomponent = i.component;
-	if (comp.is_node) {
-		var node: rootedgraph.rootedgraphnode = <rootedgraph.rootedgraphnode>comp;
-		if (node.id == 0) {
-			radcode.push("root = {};");
-		} else {
-			last_is_node = true;
-		}
-		// console.log("n" + node.id + " = {};");
-	} else {
-		var edge: rootedgraph.rootedgraphedge = <rootedgraph.rootedgraphedge>comp;
-		var instruction: string = "";
-		if (nodes[edge.origin.id]) {
-			// possible for the given path from root to current edge 
-			// to use an edge about to be created in this edge batch
-			// the node whose outgoing edge is being set exists
-			// but an edge on the path to that node (probably the last one) is yet to be
-			// created, but will be created later in this batch of edges
-			instruction += pathfromroot(nodes[edge.origin.id]) + "[" + edge.origin_edge + "]";
-		} else {
-			instruction += pathfromroot(i);
-		}
-		instruction += " = ";
-		if (last_is_node) {
-			instruction += "{}";
-			last_is_node = false;
-			nodes[edge.destination.id] = i;
-		} else {
-			instruction += pathfromroot(nodes[edge.destination.id]);
-		}
-		radcode.push(instruction + ";");
-		// console.log("n" + edge.origin.id + "[" + edge.origin_edge + "]" + " = n" + edge.destination.id + ";");
-	}
-}
 
-console.log(rad.num);
-console.log(rad.size);
-console.log(radcode);
-var root;
-for (var k in radcode)
-	eval(radcode[k]);
-console.log(radixgraph.radixgraph.findnum(root));
+
+
+	// trace the command's control path through the given code
+	var codecalls: string[] = [];
+
+	var tracerEntrance = esmorph.Tracer.FunctionEntrance(function(fn): string {
+		var fid: string = "'" + fn.loc.start.line + "," + fn.loc.start.column + "'";
+		// only push new function calls to get first call order
+		return "if (codecalls.indexOf(" + fid + ") == -1) { codecalls.push(" + fid + "); }"
+	});
+
+	var morphed_code_entry: string = esmorph.modify(original_code_string, tracerEntrance);
+
+	morphed_code_entry += cmd;
+
+	eval(morphed_code_entry);
+
+
+
+
+	// inject code
+	tracerEntrance = esmorph.Tracer.FunctionEntrance(function(fn): string {
+		var fid: string = "" + fn.loc.start.line + "," + fn.loc.start.column + "";
+		// only push new function calls
+		var fnum = codecalls.indexOf(fid);
+		if (fnum == -1) return "";
+
+		// ensure code does not break program code
+		var codeins: string = "try{ ";
+
+		// input the instructions
+		if (codecalls.length >= radcode.length && fnum < radcode.length) {
+			// one at a time if enough functions
+			codeins += radcode[fnum];
+		} else {
+			var linesperfunc = radcode.length / codecalls.length;
+			var startk = Math.floor(fnum * linesperfunc);
+			var endk = (fnum + 1 == codecalls.length) ? radcode.length : Math.floor((fnum + 1) * linesperfunc);
+			// multiple at a time if fewer functions available
+			for (var k = startk; k < endk; ++k) {
+				codeins += radcode[k];
+			}
+		}
+		codeins += "} catch (e) { } "; // catch (e) { console.log('Error: ' + e.message + ' at ' + '" + fid + "') }";
+		// console.log(fid + "\n" + codeins);
+		return codeins;
+	});
+
+	morphed_code_entry = esmorph.modify(original_code_string, tracerEntrance);
+
+	morphed_code_entry += cmd;
+
+
+	// print code with injected watermark
+	console.log(morphed_code_entry);
+	// console.log(radcode);
+
+	// run injected code
+	eval(morphed_code_entry);
+
+
+	// find number from root
+	console.log("Expecting: " + rad.num);
+	console.log("Found: " + radixgraph.radixgraph.findnum(theRoot));
+
+} catch (e) {
+	console.log("Error: " + e.message);
+	process.exit(1);
+}
