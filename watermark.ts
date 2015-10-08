@@ -43,7 +43,7 @@ var morphed_code_both: string = esmorph.modify(morphed_code_entry, tracerExit);
 // console.log(rootedgraphinstructions);
 // console.log();
 
-var rad = new radixgraph.radixgraph(1024);
+var rad = new radixgraph.radixgraph(1509325484);
 var inst = new rootedgraphinstructions.rootedgraphinstructions(rad);
 
 // print original code
@@ -69,23 +69,66 @@ var inst = new rootedgraphinstructions.rootedgraphinstructions(rad);
 // console.log(rad);
 // console.log();
 
+function pathfromroot(instruction: rootedgraphinstructions.rootedgraphinstruction): string {
+	var inst = "root";
+
+	var path: rootedgraph.rootedgraphcomponent[] = instruction.path_from_root;
+	for (var i = 0; i < path.length; ++i) {
+		if (path[i].is_edge) {
+			var edge: rootedgraph.rootedgraphedge = <rootedgraph.rootedgraphedge>path[i];
+			inst += "[" + edge.origin_edge + "]";
+		}
+	}
+
+	return inst;
+}
+
 // print each instruction
-var radcode = "";
-var i;
+var radcode = [];
+var last_is_node = false;
+var i: rootedgraphinstructions.rootedgraphinstruction;
+var nodes: rootedgraphinstructions.rootedgraphinstruction[] = [];
 while (i = inst.next()) {
 	// print radix graph instructions
 	var comp: rootedgraph.rootedgraphcomponent = i.component;
 	if (comp.is_node) {
 		var node: rootedgraph.rootedgraphnode = <rootedgraph.rootedgraphnode>comp;
-		radcode += "var nn" + node.id + " = {};\n";
+		if (node.id == 0) {
+			radcode.push("root = {};");
+		} else {
+			last_is_node = true;
+		}
+		// console.log("n" + node.id + " = {};");
 	} else {
 		var edge: rootedgraph.rootedgraphedge = <rootedgraph.rootedgraphedge>comp;
-		radcode += "nn" + edge.origin.id + "[" + edge.origin_edge + "] = nn" + edge.destination.id + ";\n";
+		var instruction: string = "";
+		if (nodes[edge.origin.id]) {
+			// possible for the given path from root to current edge 
+			// to use an edge about to be created in this edge batch
+			// the node whose outgoing edge is being set exists
+			// but an edge on the path to that node (probably the last one) is yet to be
+			// created, but will be created later in this batch of edges
+			instruction += pathfromroot(nodes[edge.origin.id]) + "[" + edge.origin_edge + "]";
+		} else {
+			instruction += pathfromroot(i);
+		}
+		instruction += " = ";
+		if (last_is_node) {
+			instruction += "{}";
+			last_is_node = false;
+			nodes[edge.destination.id] = i;
+		} else {
+			instruction += pathfromroot(nodes[edge.destination.id]);
+		}
+		radcode.push(instruction + ";");
+		// console.log("n" + edge.origin.id + "[" + edge.origin_edge + "]" + " = n" + edge.destination.id + ";");
 	}
 }
 
+console.log(rad.num);
+console.log(rad.size);
 console.log(radcode);
-var nn0;
-eval(radcode);
-// console.log(nn0);
-console.log(radixgraph.radixgraph.findnum(nn0));
+var root;
+for (var k in radcode)
+	eval(radcode[k]);
+console.log(radixgraph.radixgraph.findnum(root));

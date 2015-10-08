@@ -7,6 +7,7 @@ export module rootedgraphinstructions {
   class rootedgraphinstruction {
       component: rootedgraph.rootedgraphcomponent;
       path_from_root: rootedgraph.rootedgraphcomponent[];
+      alias: string;
 
       constructor(path_from_root: rootedgraph.rootedgraphcomponent[]) {
         this.component = path_from_root[path_from_root.length - 1];
