@@ -1,15 +1,23 @@
-# watermark uses the typescript compiler to make a JavaScript file
-TSC=tsc
-FLAGS=
-MODULE=commonjs
-SOURCES=watermark.ts radixgraph.ts rootedgraphinstructions.ts
-TARGET=watermark.js
-TARGETS=$(SOURCES:.ts=.js)
+# watermark makes a firefox addon by compiling typescript code to javascript
+# then zipping the code and dependencies into a zip file
 
-all: $(TARGET)
+ADDONTARGETS=addon manifest.json
 
-$(TARGET): $(SOURCES)
-	$(TSC) $(FLAGS) -m $(MODULE) $(SOURCES)
+CODE_DIR = watermark
+
+TARGET = js-watermarking.xpi
+
+.PHONY: all code addon clean
+
+
+all: code addon
+
+code:
+	$(MAKE) -C $(CODE_DIR)
+
+addon: code $(ADDONTARGETS)
+	zip -r $(TARGET) $(ADDONTARGETS)
 
 clean:
-	rm $(TARGETS)
+	rm $(TARGET)
+	$(MAKE) -C $(CODE_DIR) clean

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>js-watermarking</title>
+
+  <link rel="stylesheet" type="text/css" media="screen" href="./js-watermarking.css"></link>
+</head>
+
+<body>
+
+<div class="row">
+<div class="column">
+    <nav class="topbar">
+        <ul>
+            <li>
+                <h1 style="color:white;">jsw</h1>
+            </li>
+        </ul>
+    </nav>
+</div>
+</div>
+
+<div class="row">
+<div class="column">
+    <h2>
+        js-watermarking
+    </h2>
+</div>
+</div>
+
+<div class="row">
+<label>Scripts</label>
+<ul id="scripts">
+    
+</ul>
+</div>
+
+<div class="row">
+<div class="column left forty">
+	<pre id="editor_in" class="editor">function foo(items) {
+	    var i;
+	    for (i = 0; i &lt; items.length; i++) {
+	        alert("Ace Rocks " + items[i]);
+	    }
+	}</pre>
+</div>
+
+<div class="column right forty">
+    <pre id="editor_out" class="editor"></pre>
+</div>
+</div>
+
+
+
+<script src="ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor_in = ace.edit("editor_in");
+    editor_in.setTheme("ace/theme/twilight");
+    editor_in.session.setMode("ace/mode/javascript");
+</script>
+
+<script>
+    var editor_out = ace.edit("editor_out");
+    editor_out.setTheme("ace/theme/twilight");
+    editor_out.session.setMode("ace/mode/javascript");
+</script>
+
+</body>
+</html>
