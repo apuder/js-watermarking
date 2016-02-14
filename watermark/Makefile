@@ -2,9 +2,11 @@
 TSC=tsc
 FLAGS=
 MODULE=commonjs
-SOURCES=watermark.ts radixgraph.ts rootedgraphinstructions.ts powergraph.ts
-TARGET=watermark.js
+SOURCES=watermark.ts radixgraph.ts rootedgraphinstructions.ts powergraph.ts jswpp.ts
+SOURCE=watermark.ts
+
 TARGETS=$(SOURCES:.ts=.js)
+TARGET=$(SOURCE:.ts=.js)
 
 CODE_DIR = watermark
 
@@ -13,7 +15,7 @@ CODE_DIR = watermark
 all: $(TARGET)
 
 $(TARGET): $(SOURCES)
-	$(TSC) $(FLAGS) -m $(MODULE) $(SOURCES)
+	$(TSC) $(FLAGS) -m $(MODULE) $(SOURCE)
 
 clean:
 	rm $(TARGETS)

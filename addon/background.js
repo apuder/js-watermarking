@@ -11,3 +11,4 @@
       "url": chrome.extension.getURL("addon/js-watermarking.html")
     }); 
  }
+ 

@@ -1,17 +1,21 @@
+/// <reference path="typings/main/ambient/node/node.d.ts" />
 /// <reference path="typings/esprima/esprima.d.ts" />
 /// <reference path="typings/escodegen/escodegen.d.ts" />
 /// <reference path="typings/esmorph/esmorph.d.ts" />
 /// <reference path="./radixgraph.d.ts" />
 /// <reference path="./rootedgraphinstructions.d.ts" />
+/// <reference path="./trace.d.ts" />
+"use strict";
 var fs = require('fs');
 var esmorph = require("esmorph");
 var radixgraph_1 = require("./radixgraph");
 var rootedgraphinstructions_1 = require("./rootedgraphinstructions");
+var rootedgraph = radixgraph_1.radixgraph;
 function printUsage() {
     var usage = "Usage: node watermark.js ";
-    usage += "watermark_number ";
-    usage += "file_to_watermark ";
-    usage += "command_that_makes_watermark";
+    usage += "number ";
+    usage += "file ";
+    usage += "command";
     console.log(usage);
 }
 var numarg = process.argv[2];
@@ -40,9 +44,10 @@ if (!cmd || typeof (cmd) !== 'string') {
 }
 try {
     var original_code_string = fs.readFileSync(fname, 'utf-8');
-    // make a radix graph representing number num
-    var rad = new radixgraph_1.radixgraph.radixgraph(num);
-    var inst = new rootedgraphinstructions_1.rootedgraphinstructions.rootedgraphinstructions(rad);
+    console.log(preprocess(original_code_string, "var jsw = {trace: function () {}, watermark: function() {}}\n"));
+    // // make a radix graph representing number num
+    var rad = new rootedgraph(num);
+    var inst = new rootedgraphinstructions_1.rootedgraphinstructions(rad);
     // name and declare root variable
     var rootname = "theRoot";
     var theRoot;
@@ -164,7 +169,7 @@ try {
     eval(morphed_code_entry);
     // find number from root
     console.log("Expecting: " + rad.num);
-    console.log("Found: " + radixgraph_1.radixgraph.radixgraph.findnum(theRoot));
+    console.log("Found: " + rootedgraph.findnum(theRoot));
 }
 catch (e) {
     console.log("Error: " + e.message);

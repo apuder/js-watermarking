@@ -1,24 +1,28 @@
 
+/// <reference path="typings/main/ambient/node/node.d.ts" />
 /// <reference path="typings/esprima/esprima.d.ts" />
 /// <reference path="typings/escodegen/escodegen.d.ts" />
 /// <reference path="typings/esmorph/esmorph.d.ts" />
 /// <reference path="./radixgraph.d.ts" />
 /// <reference path="./rootedgraphinstructions.d.ts" />
+/// <reference path="./preprocess.d.ts" />
 
-
-var fs = require('fs');
+import fs = require('fs');
 
 import esprima = require("esprima");
 import escodegen = require("escodegen");
 import esmorph = require("esmorph");
 import { radixgraph } from "./radixgraph";
 import { rootedgraphinstructions } from "./rootedgraphinstructions";
+import { preprocess } from "./preprocess";
+
+var rootedgraph = radixgraph;
 
 function printUsage() {
 	var usage = "Usage: node watermark.js ";
-	usage += "watermark_number ";
-	usage += "file_to_watermark ";
-	usage += "command_that_makes_watermark";
+	usage += "number ";
+	usage += "file ";
+	usage += "command";
 	console.log(usage);
 }
 
@@ -50,12 +54,27 @@ if (!cmd || typeof (cmd) !== 'string') {
 	process.exit(1);
 }
 
+function apply_trace(code: string): string {
+
+	var header: string = "var trace_stack = [];\n"
+		+ "var orig_code = " + code + "\n";
+
+	code = preprocess(original_code_string, header);
+
+	return code + "\n" + cmd;
+}
+
 try {
 	var original_code_string: string = fs.readFileSync(fname, 'utf-8');
 
-	// make a radix graph representing number num
-	var rad = new radixgraph.radixgraph(num);
-	var inst = new rootedgraphinstructions.rootedgraphinstructions(rad);
+	// // make a radix graph representing number num
+	var rad = new rootedgraph(num);
+	var inst = new rootedgraphinstructions(rad);
+
+	var trace_code: string = apply_trace(original_code_string);
+
+	eval(trace_code);
+
 
 	// name and declare root variable
 	var rootname: string = "theRoot";
@@ -142,20 +161,7 @@ try {
 
 
 
-	// trace the command's control path through the given code
-	var codecalls: string[] = [];
-
-	var tracerEntrance = esmorph.Tracer.FunctionEntrance(function(fn): string {
-		var fid: string = "'" + fn.loc.start.line + "," + fn.loc.start.column + "'";
-		// only push new function calls to get first call order
-		return "if (codecalls.indexOf(" + fid + ") == -1) { codecalls.push(" + fid + "); }"
-	});
-
-	var morphed_code_entry: string = esmorph.modify(original_code_string, tracerEntrance);
-
-	morphed_code_entry += cmd;
-
-	eval(morphed_code_entry);
+	
 
 
 
@@ -203,7 +209,7 @@ try {
 
 	// find number from root
 	console.log("Expecting: " + rad.num);
-	console.log("Found: " + radixgraph.radixgraph.findnum(theRoot));
+	console.log("Found: " + rootedgraph.findnum(theRoot));
 
 } catch (e) {
 	console.log("Error: " + e.message);
