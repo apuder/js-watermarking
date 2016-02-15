@@ -2,7 +2,7 @@
 TSC=tsc
 FLAGS=
 MODULE=commonjs
-SOURCES=watermark.ts radixgraph.ts rootedgraphinstructions.ts powergraph.ts jswpp.ts
+SOURCES=watermark.ts radixgraph.ts rootedgraphinstructions.ts powergraph.ts preprocess.ts
 SOURCE=watermark.ts
 
 TARGETS=$(SOURCES:.ts=.js)

@@ -13,10 +13,15 @@ declare module rootedgraphinstructions {
     (): rootedgraphinstruction;
   }
 
+  interface fringe_function {
+    (): rootedgraphinstruction[];
+  }
+
   export class rootedgraphinstructions {
     graph: rootedgraph.rootedgraph;
     constructor(graph: rootedgraph.rootedgraph);
     next: next_function;
+    fringe: fringe_function;
   }
 
 }
