@@ -9,22 +9,33 @@
   //   "url": "https://github.com/apuder/js-watermarking"
   // },
 
-  "minimum_chrome_version": "33.0.1715.0",
+  // "minimum_chrome_version": "33.0.1715.0",
+
+  "icons": {
+    "32": "icons/jsw-32.png"
+  },
 
   "permissions": [
+    // "appview"//,
     // "activeTab",
-    {"fileSystem": ["write"]},
+    // {"fileSystem": ["write"]},
     // "tabs", 
-    "http://*/*"//,
+    // "http://*/*"//,
     // "webview",
     // "system.network"
   ],
 
   "app": {
+    // "urls": [
+    //   "http://mysubdomain.example.com/"
+    // ],
+    // "launch": {
+    //   "web_url": "http://mysubdomain.example.com/"
+    // }//,
     "background": {
       "scripts": ["background.js"]
     }
-  },
+  }//,
 
   // "browser_action": {
   //     "default_icon": "addon/icons/jsw-32.png"//,
@@ -37,8 +48,6 @@
   //   }
   // },
 
-  "icons": {
-    "32": "icons/jsw-32.png"
-  }
+  
 
 }
