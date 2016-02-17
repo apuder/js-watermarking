@@ -1,0 +1,30 @@
+{
+  "description": "Applies a watermark, or finds a watermark on a given page",
+  "manifest_version": 2,
+  "name": "js-watermarking",
+  "version": "0.1",
+  // "homepage_url": "https://github.com/apuder/js-watermarking",
+  // "repository": {
+  //   "type": "git",
+  //   "url": "https://github.com/apuder/js-watermarking"
+  // },
+
+  "minimum_chrome_version": "33.0.1715.0",
+
+  "browser_action": {
+    "default_title": "Send message",
+    "default_icon": "icons/jsw-32.png"
+  },
+
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+
+  "permissions": ["notifications"],
+
+  "icons": {
+    "32": "icons/jsw-32.png"
+  }
+
+}

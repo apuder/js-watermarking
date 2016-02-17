@@ -1,23 +1,28 @@
 /// <reference path="typings/main/ambient/node/node.d.ts" />
-/// <reference path="./radixgraph.d.ts" />
-/// <reference path="./rootedgraphinstructions.d.ts" />
-/// <reference path="./rootedgraphinserter.d.ts" />
 /// <reference path="./preprocess.d.ts" />
 "use strict";
-var fs = require('fs');
-var radixgraph_1 = require("./radixgraph");
-var preprocess_1 = require("./preprocess");
-var rootedgraph = radixgraph_1.radixgraph;
+const fs = require('fs');
+const path = require('path');
+const preprocess_1 = require("./preprocess");
 function printUsage() {
     var usage = "Usage: node watermark.js ";
-    usage += "number ";
     usage += "file ";
-    usage += "command";
+    usage += "number ";
+    usage += "size ";
+    // usage += "url ";
     console.log(usage);
 }
-var numarg = process.argv[2];
-var fname = process.argv[3];
+var fname = process.argv[2];
+var numarg = process.argv[3];
+var sizearg = process.argv[4];
+// var page: string = process.argv[5];
 var num = parseInt(numarg);
+var size = parseInt(sizearg);
+if (!fname || typeof (fname) !== 'string') {
+    console.log("Error: no file name given");
+    printUsage();
+    process.exit(1);
+}
 if (!numarg || typeof (numarg) !== 'string') {
     console.log("Error: no number given");
     printUsage();
@@ -28,24 +33,33 @@ else if (!num) {
     printUsage();
     process.exit(1);
 }
-if (!fname || typeof (fname) !== 'string') {
-    console.log("Error: no file name given");
+if (!sizearg || typeof (sizearg) !== 'string') {
+    console.log("Error: no size given");
     printUsage();
     process.exit(1);
 }
-function apply_trace(code) {
-    var header = "var trace_stack = [];\n"
-        + "function jsw_watermark() { };\n";
-    // + "var orig_code = " + code + "\n";
+else if (!size) {
+    console.log("Error: Invalid size given");
+    printUsage();
+    process.exit(1);
+}
+function apply_preprocessor(code) {
+    var abs_fname = path.resolve('fname');
+    abs_fname.replace('.js', '_watermarked.js');
+    // TODO fix hardcoded filepath
+    var header = JSON.stringify(fs.readFileSync('~/workspace/js-watermark/watermark/watermarkapplier.js', 'utf-8')) + "\n"
+        + "var trace_stack = [];\n"
+        + "trace_stack.watermark_num = " + JSON.stringify(num) + ";\n"
+        + "trace_stack.watermark_size = " + JSON.stringify(size) + ";\n"
+        + "trace_stack.watermark = apply_watermark;\n"
+        + "trace_stack.file_name = " + JSON.stringify(abs_fname) + ";\n"
+        + "trace_stack.orig_code = " + JSON.stringify(code) + ";\n";
     code = preprocess_1.preprocess(original_code_string, header);
     return code + "\n";
 }
 try {
     var original_code_string = fs.readFileSync(fname, 'utf-8');
-    // make a radix graph representing number num
-    // var rad = new rootedgraph(num);
-    // var inst = new rootedgraphinstructions(rad);
-    var trace_code = apply_trace(original_code_string);
+    var trace_code = apply_preprocessor(original_code_string);
     var out_name = fname;
     if (out_name.indexOf('_jswpp.js') >= 0) {
         out_name = out_name.replace('_jswpp.js', '_jsw.js');

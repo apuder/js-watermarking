@@ -18,7 +18,7 @@ function replace_jsw_global(code) {
     return "trace_stack.global_context = {" + code + "};";
 }
 function replace_jsw_end(code) {
-    return "jsw_watermark()";
+    return "trace_stack.watermark(trace_stack)";
 }
 function replace_jsw(code) {
     if (code.indexOf("///jsw_end") == 0) {

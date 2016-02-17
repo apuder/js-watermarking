@@ -23,7 +23,7 @@ function replace_jsw_global(code: string): string {
 }
 
 function replace_jsw_end(code: string): string {
-	return "jsw_watermark()";
+	return "trace_stack.watermark(trace_stack)";
 }
 
 function replace_jsw(code: string): string {
