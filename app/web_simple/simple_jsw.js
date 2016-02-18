@@ -760,3 +760,23 @@ var watermarkapplier;
     }
     watermarkapplier.apply_watermark = apply_watermark;
 })(watermarkapplier || (watermarkapplier = {}));
+
+var trace_stack = [];
+trace_stack.watermark_num = 0;
+trace_stack.watermark_size = 3;
+trace_stack.watermark = watermarkapplier.apply_watermark;
+trace_stack.file_name = "/home/jburmark/workspace/js-watermarking/app/web_simple/simple_jswpp.js";
+trace_stack.orig_code = "\nvar root = {};\n\nfunction trivial() {\n\t///jsw\n}\n\ntrivial();\n\n///jsw_global root\n\n///jsw_end\n";
+
+var root = {};
+
+function trivial() {
+	trace_stack.push({location:0,context:{}});
+}
+
+trivial();
+
+trace_stack.global_context = {'root':root};
+
+trace_stack.watermark(trace_stack)
+

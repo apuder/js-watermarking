@@ -16,6 +16,7 @@
   },
 
   "permissions": [
+    "http://localhost/*"
     // "appview"//,
     // "activeTab",
     // {"fileSystem": ["write"]},

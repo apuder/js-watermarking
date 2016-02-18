@@ -1,9 +1,13 @@
 /// <reference path="typings/main/ambient/node/node.d.ts" />
+/// <reference path="typings/main/ambient/express/express.d.ts" />
+/// <reference path="typings/main/ambient/body-parser/body-parser.d.ts" />
 /// <reference path="./preprocess.d.ts" />
 "use strict";
-const fs = require('fs');
-const path = require('path');
-const preprocess_1 = require("./preprocess");
+var fs = require('fs');
+var path = require('path');
+var express = require('express');
+var bodyParser = require('body-parser');
+var preprocess_1 = require("./preprocess");
 function printUsage() {
     var usage = "Usage: node watermark.js ";
     usage += "file ";
@@ -28,7 +32,7 @@ if (!numarg || typeof (numarg) !== 'string') {
     printUsage();
     process.exit(1);
 }
-else if (!num) {
+else if (num < 0) {
     console.log("Error: Invalid number given");
     printUsage();
     process.exit(1);
@@ -44,18 +48,37 @@ else if (!size) {
     process.exit(1);
 }
 function apply_preprocessor(code) {
-    var abs_fname = path.resolve('fname');
+    var abs_fname = path.resolve(fname);
     abs_fname.replace('.js', '_watermarked.js');
     // TODO fix hardcoded filepath
-    var header = JSON.stringify(fs.readFileSync('~/workspace/js-watermark/watermark/watermarkapplier.js', 'utf-8')) + "\n"
+    var header = fs.readFileSync('/home/jburmark/workspace/js-watermarking/watermark/watermarkapplier.js', 'utf-8') + "\n"
         + "var trace_stack = [];\n"
         + "trace_stack.watermark_num = " + JSON.stringify(num) + ";\n"
         + "trace_stack.watermark_size = " + JSON.stringify(size) + ";\n"
-        + "trace_stack.watermark = apply_watermark;\n"
+        + "trace_stack.watermark = watermarkapplier.apply_watermark;\n"
         + "trace_stack.file_name = " + JSON.stringify(abs_fname) + ";\n"
         + "trace_stack.orig_code = " + JSON.stringify(code) + ";\n";
     code = preprocess_1.preprocess(original_code_string, header);
     return code + "\n";
+}
+function do_server() {
+    var app = express();
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
+    var port = process.env.PORT || 3560;
+    var router = express.Router();
+    var server;
+    router.put('/', function (req, res) {
+        var b = req.body;
+        console.log(b);
+        fs.writeFileSync(wm_name, b);
+        res.send(200);
+        server.close();
+        process.exit(0);
+    });
+    app.use('/jsw', router);
+    server = app.listen(port);
+    console.log('listen');
 }
 try {
     var original_code_string = fs.readFileSync(fname, 'utf-8');
@@ -68,6 +91,8 @@ try {
         out_name = out_name.replace('.js', '_jsw.js');
     }
     fs.writeFileSync(out_name, trace_code);
+    var wm_name = fname.replace('.js', '_watermark.js').replace('_jswpp', '');
+    do_server();
 }
 catch (e) {
     console.log("Error: " + e.message);

@@ -1,9 +1,13 @@
 
-function doExportToDisk() {
+var contents = '';
+
+function doExportToDisk(txt) {
+
+  contents = txt;
 
   chrome.fileSystem.chooseEntry( {
     type: 'saveFile',
-    suggestedName: 'todos.txt'//,
+    suggestedName: 'test.js'//,
     // accepts: [ { description: 'Text files (*.txt)',
     //              extensions: ['txt']} ],
     // acceptsAllTypes: true
@@ -16,8 +20,6 @@ function exportToFileEntry(fileEntry) {
   // chrome.fileSystem.getDisplayPath(fileEntry, function(path) {
   //   // fileDisplayPath = path;
   // });
-
-  var contents = 'yay';
 
   fileEntry.createWriter(function(fileWriter) {
 

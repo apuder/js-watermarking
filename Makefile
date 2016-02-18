@@ -5,19 +5,13 @@ ADDONTARGETS = addon manifest.json # lib
 
 CODE_DIR = watermark
 
-TARGET = js-watermarking.xpi
-
-.PHONY: all code addon clean
+.PHONY: all code clean
 
 
-all: code addon
+all: code
 
 code:
 	$(MAKE) -C $(CODE_DIR)
 
-addon: code $(ADDONTARGETS)
-	zip -r $(TARGET) $(ADDONTARGETS)
-
 clean:
-	rm $(TARGET)
 	$(MAKE) -C $(CODE_DIR) clean
