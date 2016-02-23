@@ -12,21 +12,26 @@ module watermarkapplier {
 		var inserter = new cyclicgraphinserter.cyclicgraphinserter(inst);
 		var code = inserter.insert(trace);
 
+		console.log(code);
+
+		var body = encodeURIComponent(JSON.stringify(code));
+
 		var url = "http://localhost:3560/jsw";
 
 		var client = new XMLHttpRequest();
 
-		client.open("PUT", url, true);
+		client.open("POST", url, true);
 
-		client.setRequestHeader("Content-Type", "application/json");
+		// client.setRequestHeader("Content-Type", "application/json");
+		client.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		// client.setRequestHeader("Content-Length", body.length.toString());
+		// client.setRequestHeader("Connection", "close");
 
 		client.onerror = function(e) {
 			console.error(client.statusText);
 		};
 
-		console.log(code);
-
-		client.send(JSON.stringify(code));
+		client.send(body);
 	}
 
 }

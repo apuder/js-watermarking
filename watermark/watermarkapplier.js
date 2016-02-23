@@ -43,6 +43,8 @@ var permutationgraph;
         constructor(origin, destination) {
             this.alias = '';
             this.built = false;
+            this.backbone = false;
+            this.checked = false;
             this.destination = destination;
             this.origin = origin;
         }
@@ -216,8 +218,9 @@ var permutationgraph;
                 this.nodes.push(new permutationgraphnode(i));
             }
         }
-        add_edge(source, destination) {
+        add_edge(source, destination, backbone) {
             var edge = new permutationgraphedge(source, destination);
+            edge.backbone = backbone;
             source.outbound_edges.push(edge);
             destination.inbound_edges.push(edge);
             this.num_edges++;
@@ -229,11 +232,11 @@ var permutationgraph;
             var perm = permutationgraph.fact_to_perm(permutationgraph.num_to_fact(this.num, this.size));
             for (var i = 0; i < size; i++) {
                 // make backbone edges
-                this.add_edge(nodes[i], nodes[(i + 1) % size]);
-                var dest = (i + perm[i]) % size;
-                if (dest != i) {
-                    // edge does not point back to this node
-                    this.add_edge(nodes[i], nodes[dest]);
+                this.add_edge(nodes[i], nodes[(i + 1) % size], true);
+                var dest = (i + perm[size - i - 1]) % size;
+                if (dest != 0 || i != 0) {
+                    // edge is not from 0 node to zero node
+                    this.add_edge(nodes[i], nodes[dest], false);
                 }
             }
         }
@@ -505,23 +508,42 @@ var cyclicgraphinserter;
         }
         static get_edge_alias(edge) {
             var alias = '';
-            while (!alias) {
-                alias = cyclicgraphinserter.rand_from_array(cyclicgraphinserter.dictionary);
-                for (var k in edge.origin.outbound_edges) {
-                    var e = edge.origin.outbound_edges[k];
-                    if (e.alias === alias) {
-                        alias = '';
-                        break;
+            if (edge.backbone) {
+                // find name
+                while (!alias) {
+                    alias = cyclicgraphinserter.rand_from_array(cyclicgraphinserter.dictionary);
+                    for (var k in edge.origin.outbound_edges) {
+                        var e = edge.origin.outbound_edges[k];
+                        if (e.alias === alias) {
+                            alias = '';
+                            break;
+                        }
+                    }
+                }
+                alias = '.' + alias;
+            }
+            else {
+                // give number
+                var n = 0;
+                while (!alias) {
+                    alias = "[" + n + "]";
+                    for (var k in edge.origin.outbound_edges) {
+                        var e = edge.origin.outbound_edges[k];
+                        if (e.alias === alias) {
+                            alias = '';
+                            n++;
+                            break;
+                        }
                     }
                 }
             }
-            return '.' + alias;
+            return alias;
         }
         static code_from_idiom(check, set) {
             var code = '';
             if (check) {
                 code += "if (" + check + ") {\n";
-                code += "\t" + set + "\n";
+                code += "\t" + set + ";\n";
                 code += "}\n";
             }
             else {
@@ -544,8 +566,10 @@ var cyclicgraphinserter;
             return code;
         }
         static path_set_check(path) {
-            if (!path.first || path.length == 0)
+            if (!path.first)
                 return '';
+            else if (path.length == 0)
+                return "!" + path.first.alias_string([path.first_obj]);
             var code = '';
             var part = '';
             code += path.first.alias_string([path.first_obj]);
@@ -576,7 +600,7 @@ var cyclicgraphinserter;
             var code = '';
             var check = cyclicgraphinserter.path_set_check(path_set);
             var set = cyclicgraphinserter.path_code(path_set);
-            set += ' = {};';
+            set += ' = {}';
             return cyclicgraphinserter.code_from_idiom(check, set);
         }
         // must be called after appropriate aliases are added
@@ -748,15 +772,19 @@ var watermarkapplier;
         var inst = new cyclicgraphinstructions.cyclicgraphinstructions(graph);
         var inserter = new cyclicgraphinserter.cyclicgraphinserter(inst);
         var code = inserter.insert(trace);
+        console.log(code);
+        var body = encodeURIComponent(JSON.stringify(code));
         var url = "http://localhost:3560/jsw";
         var client = new XMLHttpRequest();
-        client.open("PUT", url, true);
-        client.setRequestHeader("Content-Type", "application/json");
+        client.open("POST", url, true);
+        // client.setRequestHeader("Content-Type", "application/json");
+        client.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        // client.setRequestHeader("Content-Length", body.length.toString());
+        // client.setRequestHeader("Connection", "close");
         client.onerror = function (e) {
             console.error(client.statusText);
         };
-        console.log(code);
-        client.send(JSON.stringify(code));
+        client.send(body);
     }
     watermarkapplier.apply_watermark = apply_watermark;
 })(watermarkapplier || (watermarkapplier = {}));

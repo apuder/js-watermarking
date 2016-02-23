@@ -53,12 +53,16 @@ module permutationgraph {
   export class permutationgraphedge implements cyclicgraphedge {
     alias: string;
     built: boolean;
+    backbone: boolean;
+    checked: boolean;
     destination: permutationgraphnode;
     origin: permutationgraphnode;
 
     constructor(origin: permutationgraphnode, destination: permutationgraphnode) {
       this.alias = '';
       this.built = false;
+      this.backbone = false;
+      this.checked = false;
       this.destination = destination;
       this.origin = origin;
     }
@@ -265,8 +269,9 @@ module permutationgraph {
       }
     }
 
-    private add_edge(source: permutationgraphnode, destination: permutationgraphnode): void {
+    private add_edge(source: permutationgraphnode, destination: permutationgraphnode, backbone: boolean): void {
       var edge = new permutationgraphedge(source, destination);
+      edge.backbone = backbone;
 
       source.outbound_edges.push(edge);
       destination.inbound_edges.push(edge);
@@ -282,12 +287,12 @@ module permutationgraph {
 
       for (var i = 0; i < size; i++) {
         // make backbone edges
-        this.add_edge(nodes[i], nodes[(i + 1) % size]);
+        this.add_edge(nodes[i], nodes[(i + 1) % size], true);
 
-        var dest: number = (i + perm[i]) % size;
-        if (dest != i) {
-          // edge does not point back to this node
-          this.add_edge(nodes[i], nodes[dest]);
+        var dest: number = (i + perm[size - i - 1]) % size;
+        if (dest != 0 || i != 0) {
+          // edge is not from 0 node to zero node
+          this.add_edge(nodes[i], nodes[dest], false);
         }
       }
     }

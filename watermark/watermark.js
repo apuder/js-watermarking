@@ -64,15 +64,21 @@ function apply_preprocessor(code) {
 function do_server() {
     var app = express();
     app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(bodyParser.json());
-    var port = process.env.PORT || 3560;
+    // app.use(bodyParser.json());
+    var port = 3560;
     var router = express.Router();
     var server;
-    router.put('/', function (req, res) {
-        var b = req.body;
+    router.post('/', function (req, res) {
+        // var b = JSON.parse(decodeURIComponent(req.body));
+        var b;
+        console.log(b);
+        for (var k in req.body) {
+            console.log(k);
+            b = JSON.parse(k);
+        }
         console.log(b);
         fs.writeFileSync(wm_name, b);
-        res.send(200);
+        res.sendStatus(200);
         server.close();
         process.exit(0);
     });

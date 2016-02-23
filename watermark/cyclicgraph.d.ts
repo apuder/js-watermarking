@@ -18,6 +18,8 @@
   interface cyclicgraphedge {
     alias: string; // ex ".next", "[2]" ...
     built: boolean;
+    backbone: boolean;
+    checked: boolean;
     destination: cyclicgraphnode;
     origin: cyclicgraphnode;
   }

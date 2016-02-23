@@ -21,7 +21,7 @@
 chrome.app.runtime.onLaunched.addListener(function() {
   chrome.app.window.create(
   	// 'web/web/viewer.html', {
-  	'web_simple/index.html', {
+  	'website/index.html', {
     id: "host",
     innerBounds: {
       width: 800,

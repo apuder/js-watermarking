@@ -202,26 +202,48 @@ module cyclicgraphinserter {
 		private static get_edge_alias(edge: cyclicgraphedge): string {
 			var alias: string = '';
 
-			while (!alias) {
-				alias = cyclicgraphinserter.rand_from_array(cyclicgraphinserter.dictionary);
+			if (edge.backbone) {
+				// find name
+				while (!alias) {
+					alias = cyclicgraphinserter.rand_from_array(cyclicgraphinserter.dictionary);
 
-				for (var k in edge.origin.outbound_edges) {
-					var e = edge.origin.outbound_edges[k];
-					if (e.alias === alias) {
-						alias = '';
-						break;
+					for (var k in edge.origin.outbound_edges) {
+						var e = edge.origin.outbound_edges[k];
+						if (e.alias === alias) {
+							alias = '';
+							break;
+						}
+					}
+				}
+				alias = '.' + alias;
+			}
+			else
+			{
+				// give number
+				var n = 0;
+
+				while (!alias) {
+					alias = "[" + n + "]";
+
+					for (var k in edge.origin.outbound_edges) {
+						var e = edge.origin.outbound_edges[k];
+						if (e.alias === alias) {
+							alias = '';
+							n++;
+							break;
+						}
 					}
 				}
 			}
 
-			return '.' + alias;
+			return alias;
 		}
 
 		private static code_from_idiom(check: string, set: string): string {
 			var code: string = '';
 			if (check) {
 				code += "if (" + check + ") {\n";
-				code += "\t" + set + "\n";
+				code += "\t" + set + ";\n";
 				code += "}\n";
 			} else {
 				code += set + "\n";
@@ -248,7 +270,8 @@ module cyclicgraphinserter {
 		}
 
 		private static path_set_check(path: cyclicgraphinstructions.path_type): string {
-			if (!path.first || path.length == 0) return '';
+			if (!path.first) return '';
+			else if (path.length == 0) return "!" + path.first.alias_string([path.first_obj]);
 			var code = '';
 			var part = '';
 
@@ -291,7 +314,7 @@ module cyclicgraphinserter {
 
 			var set = cyclicgraphinserter.path_code(path_set);
 
-			set += ' = {};'
+			set += ' = {}'
 
 			return cyclicgraphinserter.code_from_idiom(check, set);
 		}
