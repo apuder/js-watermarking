@@ -54,7 +54,6 @@ module permutationgraph {
     alias: string;
     built: boolean;
     backbone: boolean;
-    checked: boolean;
     destination: permutationgraphnode;
     origin: permutationgraphnode;
 
@@ -62,7 +61,6 @@ module permutationgraph {
       this.alias = '';
       this.built = false;
       this.backbone = false;
-      this.checked = false;
       this.destination = destination;
       this.origin = origin;
     }
@@ -87,106 +85,126 @@ module permutationgraph {
       return permutationgraph.fact[n];
     }
 
-    // returns true if it finds the backlink to the second item
-    // or a recursive call returned true
-    // false otherwise
-    private static fbbhelper(stack: Object[]): Object[] {
-      var root = stack[stack.length - 1];
-      var beststack: Object[] = [];
-      for (var key in root) {
-        var val = root[key];
+    private static fbbhelper(stack: Object[], found: Object[][], size: number) {
+      var top = stack[stack.length - 1];
 
-        if (typeof (val) !== 'object' || !val) continue;
+      for (var k in top) {
+        var val = top[k];
+
+        // skip non objects and numberic keys
+        // numberic keys are not allowed in the backbone
+        if (typeof (val) !== 'object' || /^\d/.test(k)) continue;
 
         var index = stack.indexOf(val);
-        if (index == 1) {
-          // found a backlink, update beststack with copy of stack
-          if (beststack.length < stack.length) {
-            beststack = stack.slice();
+        if (index >= 0) {
+          // cycle found
+          if (stack.length - index == size) {
+            console.log("found cycle");
+            // cycle of length size, save in found array
+            found.push(stack.slice(index));
+          } else {
+            // found a wrong-length cycle, keep looking
+            continue;
           }
-        } else if (index == -1) {
-          // the backbone does not repeat elements
-          // add the item
+        } 
+        else {
+          // cycle not yet found
+          // add item
           stack.push(val);
           // search further
-          var retstack = permutationgraph.fbbhelper(stack);
-          if (beststack.length < retstack.length) {
-            beststack = retstack;
-          }
-          // not found, pop and keep searching
+          permutationgraph.fbbhelper(stack, found, size);
+          // remove item
           stack.pop();
         }
       }
-      return beststack;
     }
 
-    private static findbackbone(root: Object): Object[] {
-      // find the longest path that connects back to the node directly after the root
-
-      // multiple backbones are possible for an arbitrary permutationgraph
+    private static findbackbones(root: Object, size: number): Object[][] {
+      // find circular paths of length size via depth first search
 
       var stack: Object[] = [];
-      var beststack: Object[] = [];
+      var found: Object[][] = [];
 
       stack.push(root);
 
-      for (var key in root) {
-        var val = root[key];
+      permutationgraph.fbbhelper(stack, found, size)
 
-        stack.push(val);
-
-        var retstack = permutationgraph.fbbhelper(stack)
-        if (beststack.length < retstack.length) {
-          // found a longer permutationgraph
-          beststack = retstack;
-        }
-
-        stack.pop();
-      }
-
-      // console.log(beststack);
-
-      return beststack.length > 0 ? beststack : null;
+      return found;
     }
 
-    private static findcoef(i: number, backbone: Object[]): number {
-      // should find at least one link to the next item in backbone
-      var foundforwardlink: boolean = false;
-      var forwardlink_ind = (i % (backbone.length - 1)) + 1;
+    static findnums(size: number): number[] {
+      var win = window || {};
 
-      var node = backbone[i];
-      for (var inkey in node) {
-        var innode = node[inkey];
-        // find where and if this link goes in the backbone
-        var ind = backbone.indexOf(innode);
-        if (ind > 0) {
-          // points into body of array
-          // check if this is the forward link in the backbone
-          if (ind == forwardlink_ind && !foundforwardlink) {
-            foundforwardlink = true;
-          } else {
-            return ind - 1;
+      var backbones: Object[][] = permutationgraph.findbackbones(win, size);
+      
+      var nums: number[] = [];
+
+      for (var i = 0; i < backbones.length; i++) {
+        var backbone = backbones[i];
+        var perm = permutationgraph.backbone_to_perm(backbone);
+        if (perm) {
+          nums.push(permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm)));
+        }
+      }
+
+      return nums;
+    }
+
+    private static backbone_to_perm(backbone: Object[]): number[] {
+      // check backbone valid if so return permutation represented
+      // else null
+      var size = backbone.length;
+      var perm = [];
+      var i;
+      var i_zero = -1;
+      for (i = 0; i < size; i++) {
+        var obj = backbone[i];
+        var found_backbone_link = false;
+        var val = 0;
+        for (var k in obj) {
+          var other = obj[k];
+          var j = backbone.indexOf(other);
+          if (j >= 0) {
+            // other in backbone
+            if (j == i) {
+              // invalid graph, no nodes link to themselves
+              console.log("self link, discarding backbone");
+              return null;
+            }
+            else if (!found_backbone_link && j == ((i + 1) % size)) {
+              found_backbone_link = true;
+            }
+            else if (j > i) {
+              val = j - i;
+            }
+            else if (j < i) {
+              val = size + j - i;
+            }
           }
         }
+        if (val == 0) {
+            i_zero = i;
+        }
+        if (perm.indexOf(val) >= 0) {
+          // already found this edge, invalid permutation graph
+          console.log("invalid permutation, number repeated");
+          return null;
+        }
+        perm.push(val);
       }
-      // a node that does not link to any other nodes except as a backbone link
-      // represents a number not moved in the permutation
-      return i - 1;
-    }
-
-    static findnum(root: any): number {
-      if (typeof (root) !== 'object') return null;
-
-      var backbone: Object[] = permutationgraph.findbackbone(root);
-      if (!backbone) return null;
-
-      var perm: number[] = [];
-      for (var i: number = 1; i < backbone.length; i++) {
-        var coef = permutationgraph.findcoef(i, backbone);
-        perm[i - 1] = coef;
+      if (i_zero < 0) {
+        console.log("invalid permutation, no zero node");
+        return null; // should never happen
       }
 
-      return permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm));
+      var perm_reordered = [];
+      for (i = 1; i <= size; ++i) {
+        perm_reordered.push(perm[(i + i_zero) % size]);
+      }
+
+      console.log(perm_reordered);
+
+      return perm_reordered;
     }
 
     private static num_size(num: number): number {
@@ -289,9 +307,9 @@ module permutationgraph {
         // make backbone edges
         this.add_edge(nodes[i], nodes[(i + 1) % size], true);
 
-        var dest: number = (i + perm[size - i - 1]) % size;
-        if (dest != 0 || i != 0) {
-          // edge is not from 0 node to zero node
+        var dest: number = (i + perm[i]) % size;
+        if (i != dest) {
+          // edge is not representing zero
           this.add_edge(nodes[i], nodes[dest], false);
         }
       }

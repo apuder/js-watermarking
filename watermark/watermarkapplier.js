@@ -44,7 +44,6 @@ var permutationgraph;
             this.alias = '';
             this.built = false;
             this.backbone = false;
-            this.checked = false;
             this.destination = destination;
             this.origin = origin;
         }
@@ -75,93 +74,111 @@ var permutationgraph;
             }
             return permutationgraph.fact[n];
         }
-        // returns true if it finds the backlink to the second item
-        // or a recursive call returned true
-        // false otherwise
-        static fbbhelper(stack) {
-            var root = stack[stack.length - 1];
-            var beststack = [];
-            for (var key in root) {
-                var val = root[key];
-                if (typeof (val) !== 'object' || !val)
+        static fbbhelper(stack, found, size) {
+            var top = stack[stack.length - 1];
+            for (var k in top) {
+                var val = top[k];
+                // skip non objects and numberic keys
+                // numberic keys are not allowed in the backbone
+                if (typeof (val) !== 'object' || /^\d/.test(k))
                     continue;
                 var index = stack.indexOf(val);
-                if (index == 1) {
-                    // found a backlink, update beststack with copy of stack
-                    if (beststack.length < stack.length) {
-                        beststack = stack.slice();
+                if (index >= 0) {
+                    // cycle found
+                    if (stack.length - index == size) {
+                        console.log("found cycle");
+                        // cycle of length size, save in found array
+                        found.push(stack.slice(index));
+                    }
+                    else {
+                        // found a wrong-length cycle, keep looking
+                        continue;
                     }
                 }
-                else if (index == -1) {
-                    // the backbone does not repeat elements
-                    // add the item
+                else {
+                    // cycle not yet found
+                    // add item
                     stack.push(val);
                     // search further
-                    var retstack = permutationgraph.fbbhelper(stack);
-                    if (beststack.length < retstack.length) {
-                        beststack = retstack;
-                    }
-                    // not found, pop and keep searching
+                    permutationgraph.fbbhelper(stack, found, size);
+                    // remove item
                     stack.pop();
                 }
             }
-            return beststack;
         }
-        static findbackbone(root) {
-            // find the longest path that connects back to the node directly after the root
-            // multiple backbones are possible for an arbitrary permutationgraph
+        static findbackbones(root, size) {
+            // find circular paths of length size via depth first search
             var stack = [];
-            var beststack = [];
+            var found = [];
             stack.push(root);
-            for (var key in root) {
-                var val = root[key];
-                stack.push(val);
-                var retstack = permutationgraph.fbbhelper(stack);
-                if (beststack.length < retstack.length) {
-                    // found a longer permutationgraph
-                    beststack = retstack;
-                }
-                stack.pop();
-            }
-            // console.log(beststack);
-            return beststack.length > 0 ? beststack : null;
+            permutationgraph.fbbhelper(stack, found, size);
+            return found;
         }
-        static findcoef(i, backbone) {
-            // should find at least one link to the next item in backbone
-            var foundforwardlink = false;
-            var forwardlink_ind = (i % (backbone.length - 1)) + 1;
-            var node = backbone[i];
-            for (var inkey in node) {
-                var innode = node[inkey];
-                // find where and if this link goes in the backbone
-                var ind = backbone.indexOf(innode);
-                if (ind > 0) {
-                    // points into body of array
-                    // check if this is the forward link in the backbone
-                    if (ind == forwardlink_ind && !foundforwardlink) {
-                        foundforwardlink = true;
-                    }
-                    else {
-                        return ind - 1;
-                    }
+        static findnums(size) {
+            var win = window || {};
+            var backbones = permutationgraph.findbackbones(win, size);
+            var nums = [];
+            for (var i = 0; i < backbones.length; i++) {
+                var backbone = backbones[i];
+                var perm = permutationgraph.backbone_to_perm(backbone);
+                if (perm) {
+                    nums.push(permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm)));
                 }
             }
-            // a node that does not link to any other nodes except as a backbone link
-            // represents a number not moved in the permutation
-            return i - 1;
+            return nums;
         }
-        static findnum(root) {
-            if (typeof (root) !== 'object')
-                return null;
-            var backbone = permutationgraph.findbackbone(root);
-            if (!backbone)
-                return null;
+        static backbone_to_perm(backbone) {
+            // check backbone valid if so return permutation represented
+            // else null
+            var size = backbone.length;
             var perm = [];
-            for (var i = 1; i < backbone.length; i++) {
-                var coef = permutationgraph.findcoef(i, backbone);
-                perm[i - 1] = coef;
+            var i;
+            var i_zero = -1;
+            for (i = 0; i < size; i++) {
+                var obj = backbone[i];
+                var found_backbone_link = false;
+                var val = 0;
+                for (var k in obj) {
+                    var other = obj[k];
+                    var j = backbone.indexOf(other);
+                    if (j >= 0) {
+                        // other in backbone
+                        if (j == i) {
+                            // invalid graph, no nodes link to themselves
+                            console.log("self link, discarding backbone");
+                            return null;
+                        }
+                        else if (!found_backbone_link && j == ((i + 1) % size)) {
+                            found_backbone_link = true;
+                        }
+                        else if (j > i) {
+                            val = j - i;
+                        }
+                        else if (j < i) {
+                            val = size + j - i;
+                        }
+                    }
+                }
+                if (val == 0) {
+                    i_zero = i;
+                }
+                if (perm.indexOf(val) >= 0) {
+                    // already found this edge, invalid permutation graph
+                    console.log("invalid permutation, number repeated");
+                    return null;
+                }
+                perm.push(val);
             }
-            return permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm));
+            if (i_zero < 0) {
+                console.log("invalid permutation, no zero node");
+                return null; // should never happen
+            }
+            var perm_reordered = [];
+            for (i = 1; i <= size; ++i) {
+                perm_reordered.push(perm[(i + i_zero) % size]);
+            }
+            console.log(perm_reordered);
+            return perm_reordered;
         }
         static num_size(num) {
             var size = 1;
@@ -233,9 +250,9 @@ var permutationgraph;
             for (var i = 0; i < size; i++) {
                 // make backbone edges
                 this.add_edge(nodes[i], nodes[(i + 1) % size], true);
-                var dest = (i + perm[size - i - 1]) % size;
-                if (dest != 0 || i != 0) {
-                    // edge is not from 0 node to zero node
+                var dest = (i + perm[i]) % size;
+                if (i != dest) {
+                    // edge is not representing zero
                     this.add_edge(nodes[i], nodes[dest], false);
                 }
             }
@@ -543,7 +560,7 @@ var cyclicgraphinserter;
             var code = '';
             if (check) {
                 code += "if (" + check + ") {\n";
-                code += "\t" + set + ";\n";
+                code += "\t" + set + "\n";
                 code += "}\n";
             }
             else {
@@ -551,37 +568,60 @@ var cyclicgraphinserter;
             }
             return code;
         }
-        static path_get_check(path) {
+        static path_get_check(path, checked) {
             if (!path.first)
                 return '';
             var code = '';
             var part = '';
-            code += path.first.alias_string([path.first_obj]);
-            part += code;
+            part += path.first.alias_string([path.first_obj]);
+            if (checked.get(path.first_obj) != path.first) {
+                code += part;
+                checked.set(path.first_obj, path.first); // checking external alias node now
+            }
             for (var i = 0; i < path.length; i++) {
                 var edge = path[i];
                 part += edge.alias;
-                code += ' && ' + part;
+                if (!checked.get(edge)) {
+                    code += (code ? ' && ' : '') + part;
+                    checked.set(edge, true); // checking edge now
+                }
             }
             return code;
         }
-        static path_set_check(path) {
+        static path_set_check(path, checked) {
             if (!path.first)
                 return '';
-            else if (path.length == 0)
-                return "!" + path.first.alias_string([path.first_obj]);
             var code = '';
             var part = '';
-            code += path.first.alias_string([path.first_obj]);
-            part += code;
+            part += path.first.alias_string([path.first_obj]);
+            if (checked.get(path.first_obj) != path.first) {
+                code += part;
+                checked.set(path.first_obj, path.first); // checking external alias node now
+            }
             for (var i = 0; i < path.length - 1; i++) {
                 var edge = path[i];
                 part += edge.alias;
-                code += ' && ' + part;
+                if (!checked.get(edge)) {
+                    code += (code ? ' && ' : '') + part;
+                    checked.set(edge, true); // checking edge now
+                }
             }
-            var edge = path[i];
-            part += edge.alias;
-            code += ' && !' + part;
+            if (path.length == 0) {
+                // making edge from external object to a node, always check
+                checked.set(path.first, true); // making node now
+                code = '!' + part;
+            }
+            else {
+                // making edge from node to node
+                var edge = path[i];
+                part += edge.alias;
+                if (!checked.get(edge.origin)) {
+                    // no need to check edges of nodes made during these instructions
+                    code += (code ? ' && ' : '') + '!' + part;
+                }
+                checked.set(edge, true); // making edge now
+                checked.set(edge.destination, true); // making node now
+            }
             return code;
         }
         static path_code(path) {
@@ -596,61 +636,79 @@ var cyclicgraphinserter;
             return code;
         }
         // must be called after appropriate aliases are added
-        static code_new_node(path_set) {
+        static code_new_node(path_set, checked) {
             var code = '';
-            var check = cyclicgraphinserter.path_set_check(path_set);
+            var check = cyclicgraphinserter.path_set_check(path_set, checked);
             var set = cyclicgraphinserter.path_code(path_set);
-            set += ' = {}';
-            return cyclicgraphinserter.code_from_idiom(check, set);
+            set += ' = {};\n';
+            return { 'check': check, 'set': set };
         }
         // must be called after appropriate aliases are added
-        static code_new_edge(path_get, path_set) {
+        static code_new_edge(path_get, path_set, checked) {
             var code = '';
             // TODO combine paths and checks
-            var set_check = cyclicgraphinserter.path_set_check(path_set);
-            var get_check = cyclicgraphinserter.path_get_check(path_get);
+            var set_check = cyclicgraphinserter.path_set_check(path_set, checked);
+            var get_check = cyclicgraphinserter.path_get_check(path_get, checked);
             var set = cyclicgraphinserter.path_code(path_set);
             var get = cyclicgraphinserter.path_code(path_get);
-            var check = set_check + ' && ' + get_check;
-            set += ' = ' + get;
-            return cyclicgraphinserter.code_from_idiom(check, set);
+            var check = set_check + (set_check && get_check ? ' && ' : '') + get_check;
+            set += ' = ' + get + ';\n';
+            return { 'check': check, 'set': set };
         }
-        add_first_node(trace, inst) {
-            var location = trace[inst.instance].location;
-            var context = inst.context;
-            // place reference in global variable
-            var glob = cyclicgraphinserter.rand_from_obj(trace.global_context);
-            var node = this.instructions.graph.nodes[0];
-            // generate alias for node
-            var alias = cyclicgraphinserter.get_obj_alias(glob.value);
-            // add alias before finding path
-            this.instructions.add_node_alias(node, glob.value, glob.key + alias);
-            this.instructions.consume_node(node);
-            // find path to node
-            var path = this.instructions.shortest_path(node, [glob.value]);
-            var code = cyclicgraphinserter.code_new_node(path);
-            this.loc_code[location] = (this.loc_code[location] || '') + code;
+        code_instructions(instructions, location) {
+            var code = (this.loc_code[location] || '');
+            var check = '';
+            var set = '';
+            var checked = new Map();
+            for (var i = 0; i < instructions.length; i++) {
+                var instruct = instructions[i];
+                var cs;
+                if (instruct.path_get) {
+                    cs = cyclicgraphinserter.code_new_edge(instruct.path_get, instruct.path_set, checked);
+                }
+                else {
+                    cs = cyclicgraphinserter.code_new_node(instruct.path_set, checked);
+                }
+                if (cs.check)
+                    check += (check ? ' && ' : '') + cs.check;
+                set += cs.set;
+            }
+            code += cyclicgraphinserter.code_from_idiom(check, set);
+            this.loc_code[location] = code;
             // TODO add context alias
         }
-        add_another_node(edge, trace, inst) {
-            var location = trace[inst.instance].location;
+        add_node(edge, trace, inst) {
             var context = inst.context;
             var glob = cyclicgraphinserter.rand_from_obj(trace.global_context);
-            var node = edge.destination;
-            var alias = cyclicgraphinserter.get_edge_alias(edge);
-            // consume and alias edge and node, forcing edge to be used (only valid path to node)
-            this.instructions.consume_edge(edge, alias);
-            this.instructions.consume_node(node);
-            // find path to node
-            var path_set = this.instructions.shortest_path(node, [context]);
-            if (!path_set.first)
+            var path_set;
+            if (edge) {
+                var node = edge.destination;
+                var alias = cyclicgraphinserter.get_edge_alias(edge);
+                // consume and alias edge and node, forcing edge to be used (only valid path to node)
+                this.instructions.consume_edge(edge, alias);
+                this.instructions.consume_node(node);
+                // find path to node
+                path_set = this.instructions.shortest_path(node, [context]);
+                if (!path_set.first)
+                    path_set = this.instructions.shortest_path(node, [glob.value]);
+            }
+            else {
+                var node = this.instructions.graph.nodes[0];
+                var node = this.instructions.graph.nodes[0];
+                // generate alias for node
+                var alias = cyclicgraphinserter.get_obj_alias(glob.value);
+                // add alias before finding path
+                this.instructions.add_node_alias(node, glob.value, glob.key + alias);
+                this.instructions.consume_node(node);
+                // find path to node
                 path_set = this.instructions.shortest_path(node, [glob.value]);
-            var code = cyclicgraphinserter.code_new_node(path_set);
-            this.loc_code[location] = (this.loc_code[location] || '') + code;
-            // TODO add context alias
+            }
+            return {
+                path_get: null,
+                path_set: path_set
+            };
         }
-        add_another_edge(edge, trace, inst) {
-            var location = trace[inst.instance].location;
+        add_edge(edge, trace, inst) {
             var context = inst.context;
             var glob = cyclicgraphinserter.rand_from_obj(trace.global_context);
             var origin = edge.origin;
@@ -667,35 +725,34 @@ var cyclicgraphinserter;
             var alias = cyclicgraphinserter.get_edge_alias(edge);
             // consume and alias edge
             this.instructions.consume_edge(edge, alias);
-            var code = cyclicgraphinserter.code_new_edge(path_get, path_set);
-            this.loc_code[location] = (this.loc_code[location] || '') + code;
-            // TODO add context alias
-        }
-        add_another_instruction(trace, inst) {
-            var edge = cyclicgraphinserter.rand_from_set(this.instructions.fringe_edge);
-            if (edge.destination.built) {
-                // make edge only
-                this.add_another_edge(edge, trace, inst);
-            }
-            else {
-                // make edge to new node
-                this.add_another_node(edge, trace, inst);
-            }
+            return {
+                path_get: path_get,
+                path_set: path_set
+            };
         }
         handle_instance(trace, inst, i) {
             var num_instruct = cyclicgraphinserter.num_instruct(i, this.instructions.size, this.chosen_contexts.size);
             if (num_instruct <= 0)
                 return;
-            var num_done = 0;
+            var instructions = [];
             for (var num_done = 0; num_done < num_instruct; num_done++) {
                 if (i == 0 && num_done == 0) {
-                    this.add_first_node(trace, inst);
+                    // make first node
+                    instructions.push(this.add_node(null, trace, inst));
                 }
                 else {
-                    this.add_another_instruction(trace, inst);
+                    var edge = cyclicgraphinserter.rand_from_set(this.instructions.fringe_edge);
+                    if (edge.destination.built) {
+                        // make edge only
+                        instructions.push(this.add_edge(edge, trace, inst));
+                    }
+                    else {
+                        // make edge to new node
+                        instructions.push(this.add_node(edge, trace, inst));
+                    }
                 }
             }
-            // add or move alias
+            this.code_instructions(instructions, trace[inst.instance].location);
         }
         construct_site_code(trace) {
             this.construct_common_contexts(trace);

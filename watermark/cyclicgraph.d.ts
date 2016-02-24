@@ -19,7 +19,6 @@
     alias: string; // ex ".next", "[2]" ...
     built: boolean;
     backbone: boolean;
-    checked: boolean;
     destination: cyclicgraphnode;
     origin: cyclicgraphnode;
   }
@@ -29,7 +28,7 @@
   }
 
   declare class cyclicgraph {
-    static findnum(root: Object): number;
+    static findnums(size: number): number[];
     nodes: cyclicgraphnode[];
     num: number;
     size: number;

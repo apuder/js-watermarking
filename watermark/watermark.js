@@ -71,7 +71,6 @@ function do_server() {
     router.post('/', function (req, res) {
         // var b = JSON.parse(decodeURIComponent(req.body));
         var b;
-        console.log(b);
         for (var k in req.body) {
             console.log(k);
             b = JSON.parse(k);

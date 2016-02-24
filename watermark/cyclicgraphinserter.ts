@@ -36,6 +36,16 @@ module cyclicgraphinserter {
 		value: any;
 	}
 
+	interface insertion_instruction {
+		path_get: cyclicgraphinstructions.path_type;
+		path_set: cyclicgraphinstructions.path_type;
+	}
+
+	interface check_and_set {
+		check: string;
+		set: string;
+	}
+
 	export class cyclicgraphinserter {
 
 		private static dictionary = [
@@ -243,7 +253,7 @@ module cyclicgraphinserter {
 			var code: string = '';
 			if (check) {
 				code += "if (" + check + ") {\n";
-				code += "\t" + set + ";\n";
+				code += "\t" + set + "\n";
 				code += "}\n";
 			} else {
 				code += set + "\n";
@@ -252,42 +262,66 @@ module cyclicgraphinserter {
 			return code;
 		}
 
-		private static path_get_check(path: cyclicgraphinstructions.path_type): string {
+		private static path_get_check(path: cyclicgraphinstructions.path_type, checked: Map<Object, any>): string {
 			if (!path.first) return '';
 			var code = '';
 			var part = '';
 
-			code += path.first.alias_string([path.first_obj]);
-			part += code;
+			part += path.first.alias_string([path.first_obj]);
+			if (checked.get(path.first_obj) != path.first) {
+				code += part;
+				checked.set(path.first_obj, path.first); // checking external alias node now
+			}
 
 			for (var i = 0; i < path.length; i++) {
 				var edge = path[i];
 				part += edge.alias;
-				code += ' && ' + part;
+				if (!checked.get(edge)) {
+					code += (code ? ' && ' : '') + part;
+					checked.set(edge, true); // checking edge now
+				}
 			}
 
 			return code;
 		}
 
-		private static path_set_check(path: cyclicgraphinstructions.path_type): string {
+		private static path_set_check(path: cyclicgraphinstructions.path_type, checked: Map<Object, any>): string {
 			if (!path.first) return '';
-			else if (path.length == 0) return "!" + path.first.alias_string([path.first_obj]);
 			var code = '';
 			var part = '';
 
-			code += path.first.alias_string([path.first_obj]);
-			part += code;
+			part += path.first.alias_string([path.first_obj]);
+			if (checked.get(path.first_obj) != path.first) {
+				code += part;
+				checked.set(path.first_obj, path.first); // checking external alias node now
+			}
 
 			for (var i = 0; i < path.length - 1; i++) {
 				var edge = path[i];
 				part += edge.alias;
-				code += ' && ' + part;
+				if (!checked.get(edge)) {
+					code += (code ? ' && ' : '') + part;
+					checked.set(edge, true); // checking edge now
+				}
 			}
 
-			var edge = path[i];
-			part += edge.alias;
-			code += ' && !' + part;			
-
+			if (path.length == 0) {
+				// making edge from external object to a node, always check
+				checked.set(path.first, true); // making node now
+				code = '!' + part;
+			} 
+			else {
+				// making edge from node to node
+				var edge = path[i];
+				part += edge.alias;
+				if (!checked.get(edge.origin)) {
+					// no need to check edges of nodes made during these instructions
+					code += (code ? ' && ' : '') + '!' + part;
+				}
+				checked.set(edge, true); // making edge now
+				checked.set(edge.destination, true); // making node now
+			}
+			
 			return code;
 		}
 
@@ -307,104 +341,122 @@ module cyclicgraphinserter {
 
 
 		// must be called after appropriate aliases are added
-		private static code_new_node(path_set: cyclicgraphinstructions.path_type): string {
+		private static code_new_node(path_set: cyclicgraphinstructions.path_type, checked: Map<Object, any>): check_and_set {
 			var code = '';
 
-			var check = cyclicgraphinserter.path_set_check(path_set);
+			var check = cyclicgraphinserter.path_set_check(path_set, checked);
 
 			var set = cyclicgraphinserter.path_code(path_set);
 
-			set += ' = {}'
+			set += ' = {};\n'
 
-			return cyclicgraphinserter.code_from_idiom(check, set);
+			return { 'check': check, 'set': set };
 		}
 
 		// must be called after appropriate aliases are added
-		private static code_new_edge(path_get: cyclicgraphinstructions.path_type, path_set: cyclicgraphinstructions.path_type): string {
+		private static code_new_edge(path_get: cyclicgraphinstructions.path_type, path_set: cyclicgraphinstructions.path_type, checked: Map<Object, any>): check_and_set {
 			var code = '';
 
 			// TODO combine paths and checks
 
-			var set_check = cyclicgraphinserter.path_set_check(path_set);
+			var set_check = cyclicgraphinserter.path_set_check(path_set, checked);
 
-			var get_check = cyclicgraphinserter.path_get_check(path_get);
+			var get_check = cyclicgraphinserter.path_get_check(path_get, checked);
 
 			var set = cyclicgraphinserter.path_code(path_set);
 
 			var get = cyclicgraphinserter.path_code(path_get);
 
-			var check = set_check + ' && ' + get_check;
+			var check = set_check + (set_check && get_check ? ' && ' : '') + get_check;
 
-			set += ' = ' + get;
+			set += ' = ' + get + ';\n';
 
-			return cyclicgraphinserter.code_from_idiom(check, set);
+			return { 'check': check, 'set': set };
 		}
-
-		private add_first_node(trace: trace_stack, inst: chosen_instance_obj) {
-			var location = trace[inst.instance].location;
-			var context = inst.context;
-
-			// place reference in global variable
-			var glob: key_value = cyclicgraphinserter.rand_from_obj(trace.global_context);
-
-			var node = this.instructions.graph.nodes[0];
-
-			// generate alias for node
-			var alias = cyclicgraphinserter.get_obj_alias(glob.value);
-
-			// add alias before finding path
-			this.instructions.add_node_alias(node, glob.value, glob.key + alias);
-			this.instructions.consume_node(node);
-
-			// find path to node
-			var path = this.instructions.shortest_path(node, [glob.value]);
-
-			var code = cyclicgraphinserter.code_new_node(path);
-
-			this.loc_code[location] = (this.loc_code[location] || '') + code;
-
-			// TODO add context alias
-
-
-
-
-
-
-		}
-
-		private add_another_node(edge: cyclicgraphedge, trace: trace_stack, inst: chosen_instance_obj) {
-			var location = trace[inst.instance].location;
-			var context = inst.context;
-			var glob: key_value = cyclicgraphinserter.rand_from_obj(trace.global_context);
-
-			var node: cyclicgraphnode = edge.destination;
-
-			var alias = cyclicgraphinserter.get_edge_alias(edge);
-
-			// consume and alias edge and node, forcing edge to be used (only valid path to node)
-			this.instructions.consume_edge(edge, alias);
-			this.instructions.consume_node(node);
-
-			// find path to node
-			var path_set = this.instructions.shortest_path(node, [context]);
-			if (!path_set.first)
-				path_set = this.instructions.shortest_path(node, [glob.value]);
-
-
-			var code = cyclicgraphinserter.code_new_node(path_set);
-
-			this.loc_code[location] = (this.loc_code[location] || '') + code;
-
-			// TODO add context alias
-
-
-
 
 		
+
+		private code_instructions(instructions: insertion_instruction[], location: number) {
+
+			var code = (this.loc_code[location] || '');
+
+			var check = '';
+			var set = '';
+
+			var checked: Map<Object, any> = new Map();
+
+			for (var i = 0; i < instructions.length; i++) {
+
+				var instruct = instructions[i];
+				var cs: check_and_set;
+
+				if (instruct.path_get) {
+					cs = cyclicgraphinserter.code_new_edge(instruct.path_get, instruct.path_set, checked);
+				}
+				else {
+					cs = cyclicgraphinserter.code_new_node(instruct.path_set, checked);
+				}
+
+				if (cs.check)
+					check += (check ? ' && ' : '') + cs.check;
+
+				set += cs.set;
+			}
+
+			code += cyclicgraphinserter.code_from_idiom(check, set);
+
+			this.loc_code[location] = code;
+
+			// TODO add context alias
+
+
+
+
+
 		}
 
-		private add_another_edge(edge: cyclicgraphedge, trace: trace_stack, inst: chosen_instance_obj) {
-			var location = trace[inst.instance].location;
+		private add_node(edge: cyclicgraphedge, trace: trace_stack, inst: chosen_instance_obj): insertion_instruction {
+			var context = inst.context;
+			var glob: key_value = cyclicgraphinserter.rand_from_obj(trace.global_context);
+
+			var path_set: cyclicgraphinstructions.path_type;
+			if (edge) {
+				var node: cyclicgraphnode = edge.destination;
+
+				var alias = cyclicgraphinserter.get_edge_alias(edge);
+
+				// consume and alias edge and node, forcing edge to be used (only valid path to node)
+				this.instructions.consume_edge(edge, alias);
+				this.instructions.consume_node(node);
+
+				// find path to node
+				path_set = this.instructions.shortest_path(node, [context]);
+				if (!path_set.first)
+					path_set = this.instructions.shortest_path(node, [glob.value]);
+			}
+			else {
+				var node: cyclicgraphnode = this.instructions.graph.nodes[0];
+
+				var node = this.instructions.graph.nodes[0];
+
+				// generate alias for node
+				var alias = cyclicgraphinserter.get_obj_alias(glob.value);
+
+				// add alias before finding path
+				this.instructions.add_node_alias(node, glob.value, glob.key + alias);
+				this.instructions.consume_node(node);
+
+				// find path to node
+				path_set = this.instructions.shortest_path(node, [glob.value]);
+			}
+
+			return {
+				path_get: null,
+				path_set: path_set
+			};
+		}
+
+		private add_edge(edge: cyclicgraphedge, trace: trace_stack, inst: chosen_instance_obj): insertion_instruction {
 			var context = inst.context;
 			var glob: key_value = cyclicgraphinserter.rand_from_obj(trace.global_context);
 
@@ -428,30 +480,10 @@ module cyclicgraphinserter {
 			// consume and alias edge
 			this.instructions.consume_edge(edge, alias);
 
-			var code = cyclicgraphinserter.code_new_edge(path_get, path_set);
-
-			this.loc_code[location] = (this.loc_code[location] || '') + code;
-
-			// TODO add context alias
-
-
-
-
-		
-
-		}
-
-		private add_another_instruction(trace: trace_stack, inst: chosen_instance_obj) {
-
-			var edge: cyclicgraphedge = cyclicgraphinserter.rand_from_set(this.instructions.fringe_edge);
-
-			if (edge.destination.built) {
-				// make edge only
-				this.add_another_edge(edge, trace, inst);
-			} else {
-				// make edge to new node
-				this.add_another_node(edge, trace, inst);
-			}
+			return {
+				path_get: path_get,
+				path_set: path_set
+			};
 		}
 
 		private handle_instance(trace: trace_stack, inst: chosen_instance_obj, i: number) {
@@ -461,17 +493,27 @@ module cyclicgraphinserter {
 
 			if (num_instruct <= 0) return;
 
-			var num_done = 0;
+			var instructions: insertion_instruction[] = [];
 
 			for (var num_done = 0; num_done < num_instruct; num_done++) {
 
 				if (i == 0 && num_done == 0) {
-					this.add_first_node(trace, inst);
+					// make first node
+					instructions.push(this.add_node(null, trace, inst));
 				} else {
-					this.add_another_instruction(trace, inst);
+					var edge: cyclicgraphedge = cyclicgraphinserter.rand_from_set(this.instructions.fringe_edge);
+
+					if (edge.destination.built) {
+						// make edge only
+						instructions.push(this.add_edge(edge, trace, inst));
+					} else {
+						// make edge to new node
+						instructions.push(this.add_node(edge, trace, inst));
+					}
 				}
 			}
-			// add or move alias
+
+			this.code_instructions(instructions, trace[inst.instance].location);
 		}
 
 		private construct_site_code(trace: trace_stack) {
