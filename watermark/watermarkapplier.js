@@ -830,18 +830,19 @@ var watermarkapplier;
         var inserter = new cyclicgraphinserter.cyclicgraphinserter(inst);
         var code = inserter.insert(trace);
         console.log(code);
-        var body = encodeURIComponent(JSON.stringify(code));
-        var url = "http://localhost:3560/jsw";
-        var client = new XMLHttpRequest();
-        client.open("POST", url, true);
-        // client.setRequestHeader("Content-Type", "application/json");
-        client.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        // client.setRequestHeader("Content-Length", body.length.toString());
-        // client.setRequestHeader("Connection", "close");
-        client.onerror = function (e) {
-            console.error(client.statusText);
-        };
-        client.send(body);
+        var mime = "application/javascript";
+        var bb = new Blob([code], { type: mime });
+        var url = window.URL.createObjectURL(bb);
+        var a = document.createElement('a');
+        a.download = trace.file_name;
+        a.href = url;
+        a.textContent = 'Watermark ready';
+        a.dataset.downloadurl = [mime, a.download, a.href].join(':');
+        a.draggable = true; // Don't really need, but good practice.
+        a.style.position = 'fixed';
+        a.style.left = '0px';
+        a.style.top = '0px';
+        document.body.appendChild(a);
     }
     watermarkapplier.apply_watermark = apply_watermark;
 })(watermarkapplier || (watermarkapplier = {}));

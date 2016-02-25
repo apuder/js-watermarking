@@ -44,7 +44,6 @@ var permutationgraph;
             this.alias = '';
             this.built = false;
             this.backbone = false;
-            this.checked = false;
             this.destination = destination;
             this.origin = origin;
         }
@@ -87,6 +86,7 @@ var permutationgraph;
                 if (index >= 0) {
                     // cycle found
                     if (stack.length - index == size) {
+                        console.log("found cycle");
                         // cycle of length size, save in found array
                         found.push(stack.slice(index));
                     }
@@ -830,24 +830,38 @@ var watermarkapplier;
         var inserter = new cyclicgraphinserter.cyclicgraphinserter(inst);
         var code = inserter.insert(trace);
         console.log(code);
-        var body = encodeURIComponent(JSON.stringify(code));
-        var url = "http://localhost:3560/jsw";
-        var client = new XMLHttpRequest();
-        client.open("POST", url, true);
-        // client.setRequestHeader("Content-Type", "application/json");
-        client.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        // client.setRequestHeader("Content-Length", body.length.toString());
-        // client.setRequestHeader("Connection", "close");
-        client.onerror = function (e) {
-            console.error(client.statusText);
-        };
-        client.send(body);
+        var MIME_TYPE = "application/javascript";
+        var bb = new Blob([code], { type: MIME_TYPE });
+        var url = window.URL.createObjectURL(bb);
+        // window.open(url);
+        var a = document.createElement('a');
+        a.download = trace.file_name;
+        a.href = url;
+        a.textContent = 'Watermark ready';
+        a.dataset.downloadurl = [MIME_TYPE, a.download, a.href].join(':');
+        a.draggable = true; // Don't really need, but good practice.
+        a.style.position = 'fixed';
+        a.style.left = '0px';
+        a.style.top = '0px';
+        document.appendChild(a);
+        // var body = encodeURIComponent(JSON.stringify(code));
+        // var url = "http://localhost:3560/jsw";
+        // var client = new XMLHttpRequest();
+        // client.open("POST", url, true);
+        // // client.setRequestHeader("Content-Type", "application/json");
+        // client.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        // // client.setRequestHeader("Content-Length", body.length.toString());
+        // // client.setRequestHeader("Connection", "close");
+        // client.onerror = function(e) {
+        // 	console.error(client.statusText);
+        // };
+        // client.send(body);
     }
     watermarkapplier.apply_watermark = apply_watermark;
 })(watermarkapplier || (watermarkapplier = {}));
 
 var trace_stack = [];
-trace_stack.watermark_num = 0;
+trace_stack.watermark_num = 10357350;
 trace_stack.watermark_size = 15;
 trace_stack.watermark = watermarkapplier.apply_watermark;
 trace_stack.file_name = "/home/jburmark/workspace/js-watermarking/app/website/simple_jswpp.js";

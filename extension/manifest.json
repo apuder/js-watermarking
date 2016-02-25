@@ -23,6 +23,10 @@
     "https://*/*"
   ],
 
+  "web_accessible_resources": [
+    "permutationgraph.js"
+  ],
+
   "icons": {
     "32": "icons/jsw-32.png"
   }

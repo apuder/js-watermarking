@@ -14,24 +14,25 @@ module watermarkapplier {
 
 		console.log(code);
 
-		var body = encodeURIComponent(JSON.stringify(code));
+		var mime = "application/javascript";
 
-		var url = "http://localhost:3560/jsw";
+		var bb = new Blob([code], { type: mime });
 
-		var client = new XMLHttpRequest();
+		var url = window.URL.createObjectURL(bb);
 
-		client.open("POST", url, true);
+		var a = document.createElement('a');
+		a.download = trace.file_name;
+		a.href = url;
+		a.textContent = 'Watermark ready';
 
-		// client.setRequestHeader("Content-Type", "application/json");
-		client.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-		// client.setRequestHeader("Content-Length", body.length.toString());
-		// client.setRequestHeader("Connection", "close");
+		a.dataset.downloadurl = [mime, a.download, a.href].join(':');
+		a.draggable = true; // Don't really need, but good practice.
 
-		client.onerror = function(e) {
-			console.error(client.statusText);
-		};
+		a.style.position = 'fixed';
+		a.style.left = '0px';
+		a.style.top = '0px';
 
-		client.send(body);
+		document.body.appendChild(a);
 	}
 
 }

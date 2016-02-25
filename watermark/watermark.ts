@@ -76,42 +76,42 @@ function apply_preprocessor(code: string): string {
 	return code + "\n";
 }
 
-function do_server() {
-	var app = express();
-	app.use(bodyParser.urlencoded({ extended: true }));
-	// app.use(bodyParser.json());
+// function do_server() {
+// 	var app = express();
+// 	app.use(bodyParser.urlencoded({ extended: true }));
+// 	// app.use(bodyParser.json());
 
-	var port: number = 3560;
+// 	var port: number = 3560;
 
-	var router = express.Router();
-	var server;
+// 	var router = express.Router();
+// 	var server;
 
-	router.post('/', function(req, res) {
-		// var b = JSON.parse(decodeURIComponent(req.body));
-		var b;
+// 	router.post('/', function(req, res) {
+// 		// var b = JSON.parse(decodeURIComponent(req.body));
+// 		var b;
 
-		for (var k in req.body) {
-			console.log(k);
-			b = JSON.parse(k);
-		}
+// 		for (var k in req.body) {
+// 			console.log(k);
+// 			b = JSON.parse(k);
+// 		}
 
-		console.log(b);
+// 		console.log(b);
 
-		fs.writeFileSync(wm_name, b);
+// 		fs.writeFileSync(wm_name, b);
 
-		res.sendStatus(200);
+// 		res.sendStatus(200);
 
-		server.close();
+// 		server.close();
 
-		process.exit(0);
-	});
+// 		process.exit(0);
+// 	});
 
-	app.use('/jsw', router);
+// 	app.use('/jsw', router);
 
-	server = app.listen(port);
+// 	server = app.listen(port);
 
-	console.log('listen');
-}
+// 	console.log('listen');
+// }
 
 try {
 	var original_code_string: string = fs.readFileSync(fname, 'utf-8');
@@ -128,9 +128,9 @@ try {
 
 	fs.writeFileSync(out_name, trace_code);
 
-	var wm_name = fname.replace('.js', '_watermark.js').replace('_jswpp', '');
+	// var wm_name = fname.replace('.js', '_watermark.js').replace('_jswpp', '');
 
-	do_server();
+	// do_server();
 
 } catch (e) {
 	console.log("Error: " + e.message);
