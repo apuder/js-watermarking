@@ -1,7 +1,5 @@
 {
 	"dependencies" :
-	{	"express" : "4.x"
-	,	"body-parser" : "1.x"
-	,	"typescript" : ">=1.8.0"
+	{	"typescript" : ">=1.8.0"
 	}
 }

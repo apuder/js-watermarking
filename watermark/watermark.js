@@ -1,12 +1,8 @@
 /// <reference path="typings/main/ambient/node/node.d.ts" />
-/// <reference path="typings/main/ambient/express/express.d.ts" />
-/// <reference path="typings/main/ambient/body-parser/body-parser.d.ts" />
 /// <reference path="./preprocess.d.ts" />
 "use strict";
 var fs = require('fs');
 var path = require('path');
-var express = require('express');
-var bodyParser = require('body-parser');
 var preprocess_1 = require("./preprocess");
 function printUsage() {
     var usage = "Usage: node watermark.js ";
@@ -61,30 +57,6 @@ function apply_preprocessor(code) {
     code = preprocess_1.preprocess(original_code_string, header);
     return code + "\n";
 }
-function do_server() {
-    var app = express();
-    app.use(bodyParser.urlencoded({ extended: true }));
-    // app.use(bodyParser.json());
-    var port = 3560;
-    var router = express.Router();
-    var server;
-    router.post('/', function (req, res) {
-        // var b = JSON.parse(decodeURIComponent(req.body));
-        var b;
-        for (var k in req.body) {
-            console.log(k);
-            b = JSON.parse(k);
-        }
-        console.log(b);
-        fs.writeFileSync(wm_name, b);
-        res.sendStatus(200);
-        server.close();
-        process.exit(0);
-    });
-    app.use('/jsw', router);
-    server = app.listen(port);
-    console.log('listen');
-}
 try {
     var original_code_string = fs.readFileSync(fname, 'utf-8');
     var trace_code = apply_preprocessor(original_code_string);
@@ -96,8 +68,6 @@ try {
         out_name = out_name.replace('.js', '_jsw.js');
     }
     fs.writeFileSync(out_name, trace_code);
-    var wm_name = fname.replace('.js', '_watermark.js').replace('_jswpp', '');
-    do_server();
 }
 catch (e) {
     console.log("Error: " + e.message);
