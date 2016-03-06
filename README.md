@@ -41,9 +41,20 @@ In order to generete the code necessary to create the watermark,
 the code must be preprocessed and run to trace the code.
 In order to do this jswpp.js must be run on the code and the code
 run in chrome.
-######	1. node jswpp.js file.jsw.pp.js number size
+######	1. ```node jswpp.js file.jsw.pp.js number size```
 ######	2. In Chrome, open the page with script file.jsw.js. A download link will appear when watermark insertion is complete.
 
 ##3. Minify watermarked code
 To increase the difficulty of detecting the watermark code
 minify or otherwise obfuscate the code before release.
+
+##4. Find watermarks
+To find watermarks open Chrome/Chromium and navigate to about:extensions.
+Ensure Developer Mode is enabled, then click load unpackaged extension and select the extension folder in js-watermarking.
+The letters jsw should appear on the extension bar next to the menu icon.
+Upon navigating to a website with the watermark, click jsw and input the size of the watermark and click Find.
+Results, along with other logs should appear in the console (ctrl + shift + I).
+
+####Notes:
+The find watermarks extension is still under development.  It may fail to find some watermarks, or run indefinitely.
+In the future the Tracing and Watermarking insertion step may be also implemented in a Chrome extension, eliminating the need for node and the command line.
