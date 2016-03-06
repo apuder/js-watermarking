@@ -1,7 +1,7 @@
 
 var count: number;
 
-// TODO verify validity of identifiers, check for commas
+// TODO verify validity of identifiers
 
 function replace_identifier(identifier: string): string {
 	identifier = identifier.replace(/,$/, ''); // remove trailing comma

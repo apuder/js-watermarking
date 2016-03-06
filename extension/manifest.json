@@ -1,13 +1,8 @@
 {
-  "description": "Finds a watermark on a given page",
+  "description": "Find a watermark made with js-watermarking",
   "manifest_version": 2,
   "name": "js-watermarking",
   "version": "0.1",
-  // "homepage_url": "https://github.com/apuder/js-watermarking",
-  // "repository": {
-  //   "type": "git",
-  //   "url": "https://github.com/apuder/js-watermarking"
-  // },
 
   "minimum_chrome_version": "33.0.1715.0",
 
@@ -19,12 +14,11 @@
 
   "permissions": [
     "tabs",
-    "http://*/*",
-    "https://*/*"
+    "*://*/*"
   ],
 
   "web_accessible_resources": [
-    "permutationgraph.js"
+    "find_watermark.js"
   ],
 
   "icons": {

@@ -75,191 +75,11 @@ var permutationgraph;
             }
             return permutationgraph.fact[n];
         }
-        static make_tarjanNode(obj, stk, map) {
-            var obj_node = map.get(obj);
-            if (!obj_node) {
-                // new node
-                obj_node = {
-                    id: permutationgraph.count_id,
-                    component_id: permutationgraph.count_id,
-                    on_stack: true
-                };
-                permutationgraph.count_id++;
-                stk.push(obj);
-                map.set(obj, obj_node);
-            }
-            return obj_node;
-        }
-        static tarjan_recurse(obj, stk, map, components) {
-            var obj_node = permutationgraph.make_tarjanNode(obj, stk, map);
-            for (var k in obj) {
-                // skip non objects, numeric keys, and null
-                // (numeric keys are not allowed in the backbone)
-                var v = obj[k];
-                if (!v
-                    || permutationgraph.begin_digit.test(k)
-                    || typeof (v) !== 'object')
-                    continue;
-                var v_node = map.get(v);
-                if (!v_node) {
-                    // visit v
-                    permutationgraph.tarjan_recurse(v, stk, map, components);
-                    // v_node will be in the map now
-                    v_node = map.get(v);
-                    obj_node.component_id = (obj_node.component_id > v_node.component_id) ? v_node.component_id : obj_node.component_id;
-                }
-                else if (v_node.on_stack) {
-                    obj_node.component_id = (obj_node.component_id > v_node.component_id) ? v_node.component_id : obj_node.component_id;
-                }
-            }
-            if (obj_node.id == obj_node.component_id) {
-                // found an entire strongly connected component, remove it from the stack
-                var component = stk.splice(stk.indexOf(obj));
-                for (var i = 0; i < component.length; i++) {
-                    var v = component[i];
-                    var v_node = map.get(v);
-                    v_node.on_stack = false;
-                }
-                components.push(component);
-                console.log('found strongly connected component');
-            }
-        }
-        static tarjan(root, blacklist) {
-            // finds strongly connected components of the graph starting from root
-            var stk = [];
-            var map = new Map();
-            var components = [];
-            permutationgraph.count_id = 0;
-            for (var k in root) {
-                // skip non objects, numeric keys, null and blacklisted keys
-                // (numeric keys are not allowed in the backbone)
-                var v = root[k];
-                if (!v
-                    || permutationgraph.begin_digit.test(k)
-                    || typeof (v) !== 'object'
-                    || blacklist.indexOf(k) >= 0)
-                    continue;
-                if (!map.get(v)) {
-                    // visit v
-                    permutationgraph.tarjan_recurse(v, stk, map, components);
-                }
-            }
-            return components;
-        }
-        static johnson_unblock(obj_info) {
-            // unblocks the node and all of its next_blocked
-            obj_info.blocked = false;
-            var v_info;
-            for (v_info in obj_info.next_blocked.keys()) {
-                v_info = v_info;
-                if (v_info.blocked)
-                    permutationgraph.johnson_unblock(v_info);
-            }
-            obj_info.next_blocked.clear();
-        }
-        static johnson_circuit(obj, stk, map, circuits) {
-            // finds circuits starting and ending at stk[0]
-            var found_circuit = false;
-            stk.push(obj);
-            var obj_info = map.get(obj);
-            obj_info.blocked = true;
-            for (var k in obj) {
-                var v = obj[k];
-                var v_info = map.get(v);
-                // skip edges not part of this connected component
-                if (!v_info)
-                    continue;
-                if (v == stk[0]) {
-                    // found a circuit
-                    circuits.push(stk.slice());
-                    console.log('found circuit');
-                    found_circuit = true;
-                }
-                else if (!v_info.blocked) {
-                    // recurse using v
-                    if (permutationgraph.johnson_circuit(v, stk, map, circuits)) {
-                        found_circuit = true;
-                    }
-                }
-            }
-            if (found_circuit) {
-                permutationgraph.johnson_unblock(obj_info);
-            }
-            else {
-                for (var k in obj) {
-                    var v = obj[k];
-                    var v_info = map.get(v);
-                    // skip edges not part of this connected component
-                    if (!v_info)
-                        continue;
-                    if (!v_info.next_blocked.has(obj_info)) {
-                        v_info.next_blocked.add(obj_info);
-                    }
-                }
-            }
-            stk.pop();
-            return found_circuit;
-        }
-        static johnson(components, size) {
-            // find all circuits in the graph
-            var circuits = [];
-            var stk = [];
-            var map = new Map();
-            for (var i = 0; i < components.length; i++) {
-                var component = components[i];
-                // skip components smaller than size
-                if (component.length < size)
-                    continue;
-                // set-up map for this component
-                for (var j = 0; j < component.length; j++) {
-                    var obj = component[j];
-                    map.set(obj, {
-                        blocked: false,
-                        next_blocked: new Set()
-                    });
-                }
-                // find circuits in this component
-                for (var j = 0; j < component.length; j++) {
-                    var obj = component[j];
-                    // only examine sub-components at least as big as size
-                    if (component.length - j < size)
-                        break;
-                    // reset map
-                    for (var k = j; k < component.length; k++) {
-                        var v = component[k];
-                        var v_info = map.get(v);
-                        v_info.blocked = false;
-                        v_info.next_blocked.clear();
-                    }
-                    // find circuits
-                    permutationgraph.johnson_circuit(obj, stk, map, circuits);
-                    // remove finished node
-                    map.delete(obj);
-                }
-                // remove component from map
-                map.clear();
-            }
-            return circuits;
-        }
-        static findbackbones(root, size, blacklist) {
-            // find circular paths of length >= size via depth first search
-            var found;
-            // find strongly connected components
-            found = permutationgraph.tarjan(root, blacklist);
-            // find circuits in strongly connected components
-            found = permutationgraph.johnson(found, size);
-            return found;
-        }
-        static findnums(root, size, blacklist) {
-            // find all numbers represented by permutation graphs reachable from root
-            // done if root null or not an object
-            if (!root || typeof (root) !== 'object')
-                return [];
-            blacklist = blacklist || [];
-            var backbones = permutationgraph.findbackbones(root, size, blacklist);
+        static findnums(cycles) {
+            // find all numbers represented by permutation graphs in cycles
             var nums = [];
-            for (var i = 0; i < backbones.length; i++) {
-                var backbone = backbones[i];
+            for (var i = 0; i < cycles.length; i++) {
+                var backbone = cycles[i];
                 var perm = permutationgraph.backbone_to_perm(backbone);
                 if (perm) {
                     nums.push(permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm)));
@@ -401,7 +221,6 @@ var permutationgraph;
             return this.nodes[id];
         }
     }
-    permutationgraph.begin_digit = /^\d/;
     permutationgraph_1.permutationgraph = permutationgraph;
 })(permutationgraph || (permutationgraph = {}));
 /// <reference path="./set_map.d.ts" />
@@ -945,9 +764,6 @@ var cyclicgraphinserter;
         'heap',
         'other',
         'tmp',
-        'a',
-        'b',
-        'c',
         'value',
         'check',
         'result',
@@ -955,7 +771,20 @@ var cyclicgraphinserter;
         'current',
         'last',
         'default',
-        'pos'
+        'pos',
+        'rest',
+        'before',
+        'after',
+        'gry',
+        'car',
+        'cdr',
+        'head',
+        'aware',
+        'miyabi',
+        'yugen',
+        'wabi',
+        'sabi',
+        'tsukimi'
     ];
     cyclicgraphinserter_1.cyclicgraphinserter = cyclicgraphinserter;
 })(cyclicgraphinserter || (cyclicgraphinserter = {}));
@@ -969,7 +798,6 @@ var watermarkapplier;
         var graph = new permutationgraph.permutationgraph(trace.watermark_num, trace.watermark_size);
         var inst = new cyclicgraphinstructions.cyclicgraphinstructions(graph);
         var inserter = new cyclicgraphinserter.cyclicgraphinserter(inst);
-        var window_black_list = ['external', 'chrome', 'document', 'speechSynthesis', 'caches', 'localStorage', 'sessionStorage', 'webkitStorageInfo', 'indexedDB', 'webkitIndexedDB', 'ondeviceorientation', 'ondevicemotion', 'crypto', 'postMessage', 'blur', 'focus', 'close', 'onautocompleteerror', 'onautocomplete', 'applicationCache', 'performance', 'onunload', 'onstorage', 'onpopstate', 'onpageshow', 'onpagehide', 'ononline', 'onoffline', 'onmessage', 'onlanguagechange', 'onhashchange', 'onbeforeunload', 'onwaiting', 'onvolumechange', 'ontoggle', 'ontimeupdate', 'onsuspend', 'onsubmit', 'onstalled', 'onshow', 'onselect', 'onseeking', 'onseeked', 'onscroll', 'onresize', 'onreset', 'onratechange', 'onprogress', 'onplaying', 'onplay', 'onpause', 'onmousewheel', 'onmouseup', 'onmouseover', 'onmouseout', 'onmousemove', 'onmouseleave', 'onmouseenter', 'onmousedown', 'onloadstart', 'onloadedmetadata', 'onloadeddata', 'onload', 'onkeyup', 'onkeypress', 'onkeydown', 'oninvalid', 'oninput', 'onfocus', 'onerror', 'onended', 'onemptied', 'ondurationchange', 'ondrop', 'ondragstart', 'ondragover', 'ondragleave', 'ondragenter', 'ondragend', 'ondrag', 'ondblclick', 'oncuechange', 'oncontextmenu', 'onclose', 'onclick', 'onchange', 'oncanplaythrough', 'oncanplay', 'oncancel', 'onblur', 'onabort', 'isSecureContext', 'onwheel', 'onwebkittransitionend', 'onwebkitanimationstart', 'onwebkitanimationiteration', 'onwebkitanimationend', 'ontransitionend', 'onsearch', 'onanimationstart', 'onanimationiteration', 'onanimationend', 'styleMedia', 'defaultstatus', 'defaultStatus', 'screenTop', 'screenLeft', 'clientInformation', 'console', 'devicePixelRatio', 'outerHeight', 'outerWidth', 'screenY', 'screenX', 'pageYOffset', 'scrollY', 'pageXOffset', 'scrollX', 'innerHeight', 'innerWidth', 'screen', 'navigator', 'frameElement', 'parent', 'opener', 'top', 'length', 'frames', 'closed', 'status', 'toolbar', 'statusbar', 'scrollbars', 'personalbar', 'menubar', 'locationbar', 'history', 'location', 'name', 'self', 'window', 'stop', 'open', 'alert', 'confirm', 'prompt', 'print', 'requestAnimationFrame', 'cancelAnimationFrame', 'captureEvents', 'releaseEvents', 'getComputedStyle', 'matchMedia', 'moveTo', 'moveBy', 'resizeTo', 'resizeBy', 'getSelection', 'find', 'getMatchedCSSRules', 'webkitRequestAnimationFrame', 'webkitCancelAnimationFrame', 'webkitCancelRequestAnimationFrame', 'btoa', 'atob', 'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'requestIdleCallback', 'cancelIdleCallback', 'scroll', 'scrollTo', 'scrollBy', 'fetch', 'webkitRequestFileSystem', 'webkitResolveLocalFileSystemURL', 'openDatabase'];
         var code = inserter.insert(trace);
         console.log(code);
         var mime = "application/javascript";
@@ -981,7 +809,7 @@ var watermarkapplier;
         a.href = url;
         a.textContent = 'Watermark ready';
         a.dataset.downloadurl = [mime, a.download, a.href].join(':');
-        a.draggable = true; // Don't really need, but good practice.
+        a.draggable = true;
         a.style.position = 'fixed';
         a.style.left = '0px';
         a.style.top = '0px';

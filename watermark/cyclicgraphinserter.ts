@@ -59,9 +59,6 @@ module cyclicgraphinserter {
 			'heap',
 			'other',
 			'tmp',
-			'a',
-			'b',
-			'c',
 			'value',
 			'check',
 			'result',
@@ -69,7 +66,20 @@ module cyclicgraphinserter {
 			'current',
 			'last',
 			'default',
-			'pos'
+			'pos',
+			'rest',
+			'before',
+			'after',
+			'gry',
+			'car',
+			'cdr',
+			'head',
+			'aware',
+			'miyabi',
+			'yugen',
+			'wabi',
+			'sabi',
+			'tsukimi'
 		];
 
 		private static rand_from_array(col: any[]): any {

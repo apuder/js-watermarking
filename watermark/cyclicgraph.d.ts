@@ -28,7 +28,7 @@
   }
 
   declare class cyclicgraph {
-    static findnums(size: number): number[];
+    static findnums(cycles: Object[][]): number[];
     nodes: cyclicgraphnode[];
     num: number;
     size: number;

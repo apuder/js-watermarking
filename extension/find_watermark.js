@@ -75,191 +75,11 @@ var permutationgraph;
             }
             return permutationgraph.fact[n];
         }
-        static make_tarjanNode(obj, stk, map) {
-            var obj_node = map.get(obj);
-            if (!obj_node) {
-                // new node
-                obj_node = {
-                    id: permutationgraph.count_id,
-                    component_id: permutationgraph.count_id,
-                    on_stack: true
-                };
-                permutationgraph.count_id++;
-                stk.push(obj);
-                map.set(obj, obj_node);
-            }
-            return obj_node;
-        }
-        static tarjan_recurse(obj, stk, map, components) {
-            var obj_node = permutationgraph.make_tarjanNode(obj, stk, map);
-            for (var k in obj) {
-                // skip non objects, numeric keys, and null
-                // (numeric keys are not allowed in the backbone)
-                var v = obj[k];
-                if (!v
-                    || permutationgraph.begin_digit.test(k)
-                    || typeof (v) !== 'object')
-                    continue;
-                var v_node = map.get(v);
-                if (!v_node) {
-                    // visit v
-                    permutationgraph.tarjan_recurse(v, stk, map, components);
-                    // v_node will be in the map now
-                    v_node = map.get(v);
-                    obj_node.component_id = (obj_node.component_id > v_node.component_id) ? v_node.component_id : obj_node.component_id;
-                }
-                else if (v_node.on_stack) {
-                    obj_node.component_id = (obj_node.component_id > v_node.component_id) ? v_node.component_id : obj_node.component_id;
-                }
-            }
-            if (obj_node.id == obj_node.component_id) {
-                // found an entire strongly connected component, remove it from the stack
-                var component = stk.splice(stk.indexOf(obj));
-                for (var i = 0; i < component.length; i++) {
-                    var v = component[i];
-                    var v_node = map.get(v);
-                    v_node.on_stack = false;
-                }
-                components.push(component);
-                console.log('found strongly connected component');
-            }
-        }
-        static tarjan(root, blacklist) {
-            // finds strongly connected components of the graph starting from root
-            var stk = [];
-            var map = new Map();
-            var components = [];
-            permutationgraph.count_id = 0;
-            for (var k in root) {
-                // skip non objects, numeric keys, null and blacklisted keys
-                // (numeric keys are not allowed in the backbone)
-                var v = root[k];
-                if (!v
-                    || permutationgraph.begin_digit.test(k)
-                    || typeof (v) !== 'object'
-                    || blacklist.indexOf(k) >= 0)
-                    continue;
-                if (!map.get(v)) {
-                    // visit v
-                    permutationgraph.tarjan_recurse(v, stk, map, components);
-                }
-            }
-            return components;
-        }
-        static johnson_unblock(obj_info) {
-            // unblocks the node and all of its next_blocked
-            obj_info.blocked = false;
-            var v_info;
-            for (v_info in obj_info.next_blocked.keys()) {
-                v_info = v_info;
-                if (v_info.blocked)
-                    permutationgraph.johnson_unblock(v_info);
-            }
-            obj_info.next_blocked.clear();
-        }
-        static johnson_circuit(obj, stk, map, circuits) {
-            // finds circuits starting and ending at stk[0]
-            var found_circuit = false;
-            stk.push(obj);
-            var obj_info = map.get(obj);
-            obj_info.blocked = true;
-            for (var k in obj) {
-                var v = obj[k];
-                var v_info = map.get(v);
-                // skip edges not part of this connected component
-                if (!v_info)
-                    continue;
-                if (v == stk[0]) {
-                    // found a circuit
-                    circuits.push(stk.slice());
-                    console.log('found circuit');
-                    found_circuit = true;
-                }
-                else if (!v_info.blocked) {
-                    // recurse using v
-                    if (permutationgraph.johnson_circuit(v, stk, map, circuits)) {
-                        found_circuit = true;
-                    }
-                }
-            }
-            if (found_circuit) {
-                permutationgraph.johnson_unblock(obj_info);
-            }
-            else {
-                for (var k in obj) {
-                    var v = obj[k];
-                    var v_info = map.get(v);
-                    // skip edges not part of this connected component
-                    if (!v_info)
-                        continue;
-                    if (!v_info.next_blocked.has(obj_info)) {
-                        v_info.next_blocked.add(obj_info);
-                    }
-                }
-            }
-            stk.pop();
-            return found_circuit;
-        }
-        static johnson(components, size) {
-            // find all circuits in the graph
-            var circuits = [];
-            var stk = [];
-            var map = new Map();
-            for (var i = 0; i < components.length; i++) {
-                var component = components[i];
-                // skip components smaller than size
-                if (component.length < size)
-                    continue;
-                // set-up map for this component
-                for (var j = 0; j < component.length; j++) {
-                    var obj = component[j];
-                    map.set(obj, {
-                        blocked: false,
-                        next_blocked: new Set()
-                    });
-                }
-                // find circuits in this component
-                for (var j = 0; j < component.length; j++) {
-                    var obj = component[j];
-                    // only examine sub-components at least as big as size
-                    if (component.length - j < size)
-                        break;
-                    // reset map
-                    for (var k = j; k < component.length; k++) {
-                        var v = component[k];
-                        var v_info = map.get(v);
-                        v_info.blocked = false;
-                        v_info.next_blocked.clear();
-                    }
-                    // find circuits
-                    permutationgraph.johnson_circuit(obj, stk, map, circuits);
-                    // remove finished node
-                    map.delete(obj);
-                }
-                // remove component from map
-                map.clear();
-            }
-            return circuits;
-        }
-        static findbackbones(root, size, blacklist) {
-            // find circular paths of length >= size via depth first search
-            var found;
-            // find strongly connected components
-            found = permutationgraph.tarjan(root, blacklist);
-            // find circuits in strongly connected components
-            found = permutationgraph.johnson(found, size);
-            return found;
-        }
-        static findnums(root, size, blacklist) {
-            // find all numbers represented by permutation graphs reachable from root
-            // done if root null or not an object
-            if (!root || typeof (root) !== 'object')
-                return [];
-            blacklist = blacklist || [];
-            var backbones = permutationgraph.findbackbones(root, size, blacklist);
+        static findnums(cycles) {
+            // find all numbers represented by permutation graphs in cycles
             var nums = [];
-            for (var i = 0; i < backbones.length; i++) {
-                var backbone = backbones[i];
+            for (var i = 0; i < cycles.length; i++) {
+                var backbone = cycles[i];
                 var perm = permutationgraph.backbone_to_perm(backbone);
                 if (perm) {
                     nums.push(permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm)));
@@ -401,6 +221,197 @@ var permutationgraph;
             return this.nodes[id];
         }
     }
-    permutationgraph.begin_digit = /^\d/;
     permutationgraph_1.permutationgraph = permutationgraph;
 })(permutationgraph || (permutationgraph = {}));
+/// <reference path="set_map.d.ts" />
+var cycles;
+(function (cycles) {
+    "use strict";
+    var count_id;
+    var begin_digit = /^\d/;
+    function make_tarjanNode(obj, stk, map) {
+        var obj_node = map.get(obj);
+        if (!obj_node) {
+            // new node
+            obj_node = {
+                id: count_id,
+                component_id: count_id,
+                on_stack: true
+            };
+            count_id++;
+            stk.push(obj);
+            map.set(obj, obj_node);
+        }
+        return obj_node;
+    }
+    function tarjan_recurse(obj, stk, map, components) {
+        var obj_node = make_tarjanNode(obj, stk, map);
+        for (var k in obj) {
+            // skip non objects, numeric keys, and null
+            // (numeric keys are not allowed in the backbone)
+            var v = obj[k];
+            if (!v
+                || begin_digit.test(k)
+                || typeof (v) !== 'object')
+                continue;
+            var v_node = map.get(v);
+            if (!v_node) {
+                // visit v
+                tarjan_recurse(v, stk, map, components);
+                // v_node will be in the map now
+                v_node = map.get(v);
+                obj_node.component_id = (obj_node.component_id > v_node.component_id) ? v_node.component_id : obj_node.component_id;
+            }
+            else if (v_node.on_stack) {
+                obj_node.component_id = (obj_node.component_id > v_node.component_id) ? v_node.component_id : obj_node.component_id;
+            }
+        }
+        if (obj_node.id == obj_node.component_id) {
+            // found an entire strongly connected component, remove it from the stack
+            var component = stk.splice(stk.indexOf(obj));
+            for (var i = 0; i < component.length; i++) {
+                var v = component[i];
+                var v_node = map.get(v);
+                v_node.on_stack = false;
+            }
+            components.push(component);
+            console.log('found strongly connected component');
+        }
+    }
+    function tarjan(root, blacklist) {
+        // finds strongly connected components of the graph starting from root
+        var stk = [];
+        var map = new Map();
+        var components = [];
+        count_id = 0;
+        for (var k in root) {
+            // skip non objects, numeric keys, null and blacklisted keys
+            // (numeric keys are not allowed in the backbone)
+            var v = root[k];
+            if (!v
+                || begin_digit.test(k)
+                || typeof (v) !== 'object'
+                || blacklist.indexOf(k) >= 0)
+                continue;
+            if (!map.get(v)) {
+                // visit v
+                tarjan_recurse(v, stk, map, components);
+            }
+        }
+        return components;
+    }
+    function johnson_unblock(obj_info) {
+        // unblocks the node and all of its next_blocked
+        obj_info.blocked = false;
+        var v_info;
+        for (v_info in obj_info.next_blocked.keys()) {
+            v_info = v_info;
+            if (v_info.blocked)
+                johnson_unblock(v_info);
+        }
+        obj_info.next_blocked.clear();
+    }
+    function johnson_circuit(obj, stk, map, circuits) {
+        // finds circuits starting and ending at stk[0]
+        var found_circuit = false;
+        stk.push(obj);
+        var obj_info = map.get(obj);
+        obj_info.blocked = true;
+        for (var k in obj) {
+            var v = obj[k];
+            var v_info = map.get(v);
+            // skip edges not part of this connected component
+            if (!v_info)
+                continue;
+            if (v == stk[0]) {
+                // found a circuit
+                circuits.push(stk.slice());
+                console.log('found circuit');
+                found_circuit = true;
+            }
+            else if (!v_info.blocked) {
+                // recurse using v
+                if (johnson_circuit(v, stk, map, circuits)) {
+                    found_circuit = true;
+                }
+            }
+        }
+        if (found_circuit) {
+            johnson_unblock(obj_info);
+        }
+        else {
+            for (var k in obj) {
+                var v = obj[k];
+                var v_info = map.get(v);
+                // skip edges not part of this connected component
+                if (!v_info)
+                    continue;
+                if (!v_info.next_blocked.has(obj_info)) {
+                    v_info.next_blocked.add(obj_info);
+                }
+            }
+        }
+        stk.pop();
+        return found_circuit;
+    }
+    function johnson(components, size) {
+        // find all circuits in the graph
+        var circuits = [];
+        var stk = [];
+        var map = new Map();
+        for (var i = 0; i < components.length; i++) {
+            var component = components[i];
+            // skip components smaller than size
+            if (component.length < size)
+                continue;
+            // set-up map for this component
+            for (var j = 0; j < component.length; j++) {
+                var obj = component[j];
+                map.set(obj, {
+                    blocked: false,
+                    next_blocked: new Set()
+                });
+            }
+            // find circuits in this component
+            for (var j = 0; j < component.length; j++) {
+                var obj = component[j];
+                // only examine sub-components at least as big as size
+                if (component.length - j < size)
+                    break;
+                // reset map
+                for (var k = j; k < component.length; k++) {
+                    var v = component[k];
+                    var v_info = map.get(v);
+                    v_info.blocked = false;
+                    v_info.next_blocked.clear();
+                }
+                // find circuits
+                johnson_circuit(obj, stk, map, circuits);
+                // remove finished node
+                map.delete(obj);
+            }
+            // remove component from map
+            map.clear();
+        }
+        return circuits;
+    }
+    function find_cycles(root, size, blacklist) {
+        // find circular paths of length >= size via depth first search
+        // ensure the blacklist exists
+        blacklist = blacklist || [];
+        var found;
+        // find strongly connected components
+        found = tarjan(root, blacklist);
+        // find circuits in strongly connected components
+        found = johnson(found, size);
+        return found;
+    }
+    cycles.find_cycles = find_cycles;
+})(cycles || (cycles = {}));
+/// <reference path="./permutationgraph.ts" />
+/// <reference path="./cycles.ts" />
+function find_watermark(root, size, blacklist) {
+    var cy = cycles.find_cycles(root, size, blacklist);
+    var nums = permutationgraph.permutationgraph.findnums(cy);
+    // TODO send message of numbers found
+}

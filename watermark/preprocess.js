@@ -1,6 +1,6 @@
 "use strict";
 var count;
-// TODO verify validity of identifiers, check for commas
+// TODO verify validity of identifiers
 function replace_identifier(identifier) {
     identifier = identifier.replace(/,$/, ''); // remove trailing comma
     return "'" + identifier + "':" + identifier + ',';
