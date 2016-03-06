@@ -65,7 +65,6 @@ module cyclicgraphinserter {
 			'status',
 			'current',
 			'last',
-			'default',
 			'pos',
 			'rest',
 			'before',

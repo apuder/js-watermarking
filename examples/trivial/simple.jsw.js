@@ -1,3 +1,4 @@
+/// <reference path="set_map.d.ts" />
 /// <reference path="./cyclicgraph.d.ts" />
 var permutationgraph;
 (function (permutationgraph_1) {
@@ -74,55 +75,15 @@ var permutationgraph;
             }
             return permutationgraph.fact[n];
         }
-        static fbbhelper(stack, found, size) {
-            var top = stack[stack.length - 1];
-            for (var k in top) {
-                var val = top[k];
-                // skip non objects and numberic keys
-                // numberic keys are not allowed in the backbone
-                if (typeof (val) !== 'object' || /^\d/.test(k))
-                    continue;
-                var index = stack.indexOf(val);
-                if (index >= 0) {
-                    // cycle found
-                    if (stack.length - index == size) {
-                        console.log("found cycle");
-                        // cycle of length size, save in found array
-                        found.push(stack.slice(index));
-                    }
-                    else {
-                        // found a wrong-length cycle, keep looking
-                        continue;
-                    }
-                }
-                else {
-                    // cycle not yet found
-                    // add item
-                    stack.push(val);
-                    // search further
-                    permutationgraph.fbbhelper(stack, found, size);
-                    // remove item
-                    stack.pop();
-                }
-            }
-        }
-        static findbackbones(root, size) {
-            // find circular paths of length size via depth first search
-            var stack = [];
-            var found = [];
-            stack.push(root);
-            permutationgraph.fbbhelper(stack, found, size);
-            return found;
-        }
-        static findnums(size) {
-            var win = window || {};
-            var backbones = permutationgraph.findbackbones(win, size);
+        static findnums(cycles) {
+            // find all numbers represented by permutation graphs in cycles
             var nums = [];
-            for (var i = 0; i < backbones.length; i++) {
-                var backbone = backbones[i];
+            for (var i = 0; i < cycles.length; i++) {
+                var backbone = cycles[i];
                 var perm = permutationgraph.backbone_to_perm(backbone);
                 if (perm) {
                     nums.push(permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm)));
+                    console.log('found number: ' + nums[nums.length - 1]);
                 }
             }
             return nums;
@@ -177,7 +138,6 @@ var permutationgraph;
             for (i = 1; i <= size; ++i) {
                 perm_reordered.push(perm[(i + i_zero) % size]);
             }
-            console.log(perm_reordered);
             return perm_reordered;
         }
         static num_size(num) {
@@ -804,17 +764,26 @@ var cyclicgraphinserter;
         'heap',
         'other',
         'tmp',
-        'a',
-        'b',
-        'c',
         'value',
         'check',
         'result',
         'status',
         'current',
         'last',
-        'default',
-        'pos'
+        'pos',
+        'rest',
+        'before',
+        'after',
+        'gry',
+        'car',
+        'cdr',
+        'head',
+        'aware',
+        'miyabi',
+        'yugen',
+        'wabi',
+        'sabi',
+        'tsukimi'
     ];
     cyclicgraphinserter_1.cyclicgraphinserter = cyclicgraphinserter;
 })(cyclicgraphinserter || (cyclicgraphinserter = {}));
@@ -830,41 +799,29 @@ var watermarkapplier;
         var inserter = new cyclicgraphinserter.cyclicgraphinserter(inst);
         var code = inserter.insert(trace);
         console.log(code);
-        var MIME_TYPE = "application/javascript";
-        var bb = new Blob([code], { type: MIME_TYPE });
+        var mime = "application/javascript";
+        var bb = new Blob([code], { type: mime });
         var url = window.URL.createObjectURL(bb);
-        // window.open(url);
+        // use any to avoid compile time errors over HTML5
         var a = document.createElement('a');
         a.download = trace.file_name;
         a.href = url;
         a.textContent = 'Watermark ready';
-        a.dataset.downloadurl = [MIME_TYPE, a.download, a.href].join(':');
-        a.draggable = true; // Don't really need, but good practice.
+        a.dataset.downloadurl = [mime, a.download, a.href].join(':');
+        a.draggable = true;
         a.style.position = 'fixed';
         a.style.left = '0px';
         a.style.top = '0px';
-        document.appendChild(a);
-        // var body = encodeURIComponent(JSON.stringify(code));
-        // var url = "http://localhost:3560/jsw";
-        // var client = new XMLHttpRequest();
-        // client.open("POST", url, true);
-        // // client.setRequestHeader("Content-Type", "application/json");
-        // client.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        // // client.setRequestHeader("Content-Length", body.length.toString());
-        // // client.setRequestHeader("Connection", "close");
-        // client.onerror = function(e) {
-        // 	console.error(client.statusText);
-        // };
-        // client.send(body);
+        document.body.appendChild(a);
     }
     watermarkapplier.apply_watermark = apply_watermark;
 })(watermarkapplier || (watermarkapplier = {}));
 
 var trace_stack = [];
-trace_stack.watermark_num = 10357350;
-trace_stack.watermark_size = 15;
+trace_stack.watermark_num = 1012411357;
+trace_stack.watermark_size = 14;
 trace_stack.watermark = watermarkapplier.apply_watermark;
-trace_stack.file_name = "/home/jburmark/workspace/js-watermarking/app/website/simple_jswpp.js";
+trace_stack.file_name = "/home/jburmark/workspace/js-watermarking/examples/trivial/simple.js";
 trace_stack.orig_code = "\nvar root = {};\n\nfunction trivial() {\n\t///jsw\n}\n\ntrivial();\n\n///jsw_global root\n\n///jsw_end\n";
 
 var root = {};
@@ -877,5 +834,5 @@ trivial();
 
 trace_stack.global_context = {'root':root};
 
-trace_stack.watermark(trace_stack)
+window.onload = function() { trace_stack.watermark(trace_stack); }
 

@@ -2,41 +2,43 @@
 var root = {};
 
 function trivial() {
-	if (!root.next) {
-	root.next = {};
-root.next.current = {};
-root.next.current.heap = {};
-root.next[0] = {};
-root.next[0].pos = {};
-root.next.current[0] = root.next[0];
-root.next[0][0] = {};
-root.next.current.heap.default = {};
-root.next[0][0].previous = root.next;
-root.next[0].pos.pos = root.next[0][0];
-root.next.current.heap[0] = {};
-root.next.current.heap.default[0] = root.next[0].pos;
-root.next.current.heap[0].prev = {};
-root.next.current.heap[0][0] = {};
-root.next.current.heap[0][0][0] = {};
-root.next.current.heap[0].prev.stack = {};
-root.next.current.heap[0].prev[0] = root.next.current.heap;
-root.next.current.heap[0].prev.stack.mpx = root.next.current.heap[0][0][0];
-root.next.current.heap[0][0][0][0] = root.next.current;
-root.next.current.heap[0][0][0].status = {};
-root.next.current.heap[0][0][0].status[0] = root.next[0][0];
-root.next[0].pos[0] = root.next[0][0];
-root.next.current.heap[0][0].default = root.next.current.heap[0];
-root.next.current.heap[0][0][0].status.stack = root.next[0];
-root.next.current.heap[0].prev.stack[0] = root.next.current.heap[0];
-root.next.current.heap.default.self = {};
-root.next.current.heap.default.self[0] = root.next[0];
-root.next.current.heap.default.self.heap = {};
-root.next.current.heap.default.self.heap.next = root.next.current.heap[0][0];
-root.next.current.heap.default.self.heap[0] = root.next[0];
+	if (!root.other) {
+	root.other = {};
+root.other[0] = {};
+root.other[0].head = {};
+root.other[0].head[0] = root.other[0];
+root.other.car = {};
+root.other[0].head.wabi = {};
+root.other[0][0] = {};
+root.other.car[0] = {};
+root.other[0][0][0] = root.other[0].head.wabi;
+root.other.car.aware = {};
+root.other.car[0][0] = {};
+root.other.car.aware.tmp = {};
+root.other.car.aware.tmp.wabi = {};
+root.other.car.aware[0] = root.other.car.aware.tmp;
+root.other[0].head.wabi[0] = root.other.car.aware;
+root.other.car.aware.tmp.wabi[0] = root.other[0].head;
+root.other.car[0].last = {};
+root.other.car[0].last.last = root.other.car[0][0];
+root.other[0].head.wabi.tsukimi = root.other.car[0];
+root.other.car.aware.tmp.wabi.before = {};
+root.other.car[0].last[0] = root.other.car;
+root.other.car.aware.tmp.wabi.before.last = root.other[0][0];
+root.other.car[0][0].sabi = root.other;
+root.other.car.aware.tmp.wabi.before[0] = root.other.car.aware;
+root.other[0][0].status = {};
+root.other[0][0].status[0] = root.other;
+root.other.car.aware.tmp[0] = root.other.car[0].last;
+root.other[0][0].status.sabi = root.other[0];
 
 }
+
 
 }
 
 trivial();
+
+
+
 

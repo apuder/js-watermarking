@@ -1,26 +1,72 @@
 
 /// <reference path="typings/main/ambient/node/node.d.ts" />
-/// <reference path="./preprocess.d.ts" />
+
+declare var applier: string; // "forward declaration"
+
+module preprocess {
+	"use strict"
+
+	var count: number;
+
+	// TODO verify validity of identifiers
+
+	function replace_identifier(identifier: string): string {
+		identifier = identifier.replace(/,$/, ''); // remove trailing comma
+		return "'" + identifier + "':" + identifier + ',';
+	}
+
+	function replace_jsw_default(code: string): string {
+		code = code.substring(6).trim();
+		code = code.replace(/\w+,?/g, replace_identifier);
+		code = code.replace(/,$/, ''); // remove trailing comma
+		return "trace_stack.push({location:" + count++ + ",context:{" + code + "}});";
+	}
+
+	function replace_jsw_global(code: string): string {
+		code = code.substring(13).trim();
+		code = code.replace(/\w+,?/g, replace_identifier);
+		code = code.replace(/,$/, ''); // remove trailing comma
+		return "trace_stack.global_context = {" + code + "};";
+	}
+
+	function replace_jsw_end(code: string): string {
+		return "window.onload = function() { trace_stack.watermark(trace_stack); }";
+	}
+
+	function replace_jsw(code: string): string {
+		if (code.indexOf("///jsw_end") == 0) {
+			return replace_jsw_end(code);
+		} else if (code.indexOf("///jsw_global") == 0) {
+			return replace_jsw_global(code);
+		} else {
+			return replace_jsw_default(code);
+		}
+	}
+
+	export function preprocess(code: string, header?: string): string {
+		count = 0;
+		// var orig_code = code;
+		// match ///jsw to end of line
+		code = code.replace(/\/\/\/jsw.*/g, replace_jsw);
+		return (header || "") + code;
+	}
+
+}
 
 import fs = require('fs');
-import net = require('net');
 import path = require('path');
-
-import { preprocess } from "./preprocess";
 
 function printUsage() {
 	var usage = "Usage: node watermark.js ";
 	usage += "file ";
 	usage += "number ";
 	usage += "size ";
-	// usage += "url ";
 	console.log(usage);
 }
 
 var fname: string = process.argv[2];
 var numarg: string = process.argv[3];
 var sizearg: string = process.argv[4];
-// var page: string = process.argv[5];
 
 var num: number = parseInt(numarg);
 var size: number = parseInt(sizearg);
@@ -57,18 +103,18 @@ function apply_preprocessor(fname: string, code: string): string {
 	abs_fname = abs_fname.replace('.pp', '');
 	abs_fname = abs_fname.replace('.jsw', '');
 
-	// TODO fix hardcoded filepath
+	var watermarkapplier = applier || '';
 
-	var header: string = fs.readFileSync('/home/jburmark/workspace/js-watermarking/watermark/watermarkapplier.js', 'utf-8') + "\n"
+	var header: string = watermarkapplier + "\n"
 		+ "var trace_stack = [];\n"
-		// + "trace_stack.watermark_num = " + JSON.stringify(num) + ";\n"
-		// + "trace_stack.watermark_size = " + JSON.stringify(size) + ";\n"
-		// + "trace_stack.watermark = watermarkapplier.apply_watermark;\n"
+		+ "trace_stack.watermark_num = " + JSON.stringify(num) + ";\n"
+		+ "trace_stack.watermark_size = " + JSON.stringify(size) + ";\n"
+		+ "trace_stack.watermark = watermarkapplier.apply_watermark;\n"
 		+ "trace_stack.file_name = " + JSON.stringify(abs_fname) + ";\n"
 		+ "trace_stack.orig_code = " + JSON.stringify(code) + ";\n"
 		;
 
-	code = preprocess(original_code_string, header);
+	code = preprocess.preprocess(original_code_string, header);
 
 	return code + "\n";
 }

@@ -91,13 +91,14 @@ var permutationgraph;
         static backbone_to_perm(backbone) {
             // check backbone valid if so return permutation represented
             // else null
+            var begin_digit = /^\d/;
             var size = backbone.length;
             var perm = [];
             var i;
             var i_zero = -1;
+            console.log(backbone.length, backbone);
             for (i = 0; i < size; i++) {
                 var obj = backbone[i];
-                var found_backbone_link = false;
                 var val = 0;
                 for (var k in obj) {
                     var other = obj[k];
@@ -109,14 +110,14 @@ var permutationgraph;
                             console.log("self link, discarding backbone");
                             return null;
                         }
-                        else if (!found_backbone_link && j == ((i + 1) % size)) {
-                            found_backbone_link = true;
-                        }
-                        else if (j > i) {
-                            val = j - i;
-                        }
-                        else if (j < i) {
-                            val = size + j - i;
+                        if (begin_digit.test(k)) {
+                            // data link, record value
+                            if (j > i) {
+                                val = j - i;
+                            }
+                            else if (j < i) {
+                                val = size + j - i;
+                            }
                         }
                     }
                 }
@@ -125,7 +126,7 @@ var permutationgraph;
                 }
                 if (perm.indexOf(val) >= 0) {
                     // already found this edge, invalid permutation graph
-                    console.log("invalid permutation, number repeated");
+                    console.log("invalid permutation, number repeated", perm);
                     return null;
                 }
                 perm.push(val);

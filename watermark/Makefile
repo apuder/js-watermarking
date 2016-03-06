@@ -1,8 +1,8 @@
 # watermark uses the typescript compiler to make a JavaScript file
 TSC=tsc
 BROWSERFLAGS=--target es6
-NODEFLAGS=-m commonjs
-SOURCES=watermark.ts preprocess.ts watermarkapplier.ts permutationgraph.ts cyclicgraphinstructions.ts cyclicgraphinserter.ts cycles.ts find_watermark.ts
+NODEFLAGS=
+SOURCES=watermark.ts watermarkapplier.ts permutationgraph.ts cyclicgraphinstructions.ts cyclicgraphinserter.ts cycles.ts find_watermark.ts jsonify.ts
 SOURCE=watermark.ts
 
 TARGETS=$(SOURCES:.ts=.js)
@@ -14,16 +14,27 @@ CODE_DIR = watermark
 
 all: watermark.js watermarkapplier.js find_watermark.js
 
-watermark.js: watermark.ts preprocess.ts
+watermark.js: watermark.ts watermarkapplier.json
 	$(TSC) $(NODEFLAGS) watermark.ts
-	cp watermark.js ../jswpp.js
+	echo "var applier = " > watermark2.js
+	cat watermarkapplier.json >> watermark2.js
+	echo ";\n" >> watermark2.js
+	cat watermark.js >> watermark2.js
+	cp watermark2.js ../jswpp.js
+	rm watermark2.js
 
 watermarkapplier.js: watermarkapplier.ts permutationgraph.ts cyclicgraphinstructions.ts cyclicgraphinserter.ts
 	$(TSC) $(BROWSERFLAGS) watermarkapplier.ts permutationgraph.ts cyclicgraphinstructions.ts cyclicgraphinserter.ts --outFile watermarkapplier.js
 
+watermarkapplier.json: watermarkapplier.js jsonify.js
+	node jsonify.js watermarkapplier.js
+
 find_watermark.js: permutationgraph.ts cycles.ts find_watermark.ts
 	$(TSC) $(BROWSERFLAGS) permutationgraph.ts cycles.ts find_watermark.ts --outFile find_watermark.js
 	cp find_watermark.js ../extension/find_watermark.js
+
+jsonify.js: jsonify.ts
+	$(TSC) $(NODEFLAGS) jsonify.ts
 
 $(SOURCES):
 	# dummy for dependencies
