@@ -5,7 +5,7 @@ ADDONTARGETS = addon manifest.json # lib
 
 CODE_DIR = watermark
 
-.PHONY: all code clean
+.PHONY: all code clean tidy
 
 
 all: code
@@ -15,3 +15,6 @@ code:
 
 clean:
 	$(MAKE) -C $(CODE_DIR) clean
+
+tidy:
+	$(MAKE) -C $(CODE_DIR) tidy

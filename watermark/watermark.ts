@@ -51,18 +51,19 @@ if (!sizearg || typeof (sizearg) !== 'string') {
 	process.exit(1);
 }
 
-function apply_preprocessor(code: string): string {
+function apply_preprocessor(fname: string, code: string): string {
 
 	var abs_fname = path.resolve(fname);
-	abs_fname.replace('.js', '_watermarked.js');
+	abs_fname = abs_fname.replace('.pp', '');
+	abs_fname = abs_fname.replace('.jsw', '');
 
 	// TODO fix hardcoded filepath
 
 	var header: string = fs.readFileSync('/home/jburmark/workspace/js-watermarking/watermark/watermarkapplier.js', 'utf-8') + "\n"
 		+ "var trace_stack = [];\n"
-		+ "trace_stack.watermark_num = " + JSON.stringify(num) + ";\n"
-		+ "trace_stack.watermark_size = " + JSON.stringify(size) + ";\n"
-		+ "trace_stack.watermark = watermarkapplier.apply_watermark;\n"
+		// + "trace_stack.watermark_num = " + JSON.stringify(num) + ";\n"
+		// + "trace_stack.watermark_size = " + JSON.stringify(size) + ";\n"
+		// + "trace_stack.watermark = watermarkapplier.apply_watermark;\n"
 		+ "trace_stack.file_name = " + JSON.stringify(abs_fname) + ";\n"
 		+ "trace_stack.orig_code = " + JSON.stringify(code) + ";\n"
 		;
@@ -75,17 +76,19 @@ function apply_preprocessor(code: string): string {
 try {
 	var original_code_string: string = fs.readFileSync(fname, 'utf-8');
 
-	var trace_code: string = apply_preprocessor(original_code_string);
+	var trace_code: string = apply_preprocessor(fname, original_code_string);
 
 	var out_name = fname;
 
-	if (out_name.indexOf('_jswpp.js') >= 0) {
-		out_name = out_name.replace('_jswpp.js', '_jsw.js');
+	if (out_name.indexOf('.pp') < 0) {
+		out_name = "out.jsw.js"
 	} else {
-		out_name = out_name.replace('.js', '_jsw.js');
+		out_name = out_name.replace('.pp', '');
 	}
 
 	fs.writeFileSync(out_name, trace_code);
+
+	
 
 } catch (e) {
 	console.log("Error: " + e.message);
