@@ -8,5 +8,8 @@ function find_watermark(root: Object, size: number, blacklist: string[]) {
 
 	var nums: number[] = permutationgraph.permutationgraph.findnums(cy);
 
-	// TODO send message of numbers found
+	console.log("Found " + nums.length + " watermarks");
+
+	window.postMessage({ type: "jsw_found_watermark", text: JSON.stringify(nums) }, "*");
+
 }

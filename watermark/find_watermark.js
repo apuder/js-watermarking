@@ -83,7 +83,7 @@ var permutationgraph;
                 var perm = permutationgraph.backbone_to_perm(backbone);
                 if (perm) {
                     nums.push(permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm)));
-                    console.log('found number: ' + nums[nums.length - 1]);
+                    console.log('found watermark number: ' + nums[nums.length - 1] + ' (size: ' + perm.length + ')');
                 }
             }
             return nums;
@@ -96,7 +96,7 @@ var permutationgraph;
             var perm = [];
             var i;
             var i_zero = -1;
-            console.log(backbone.length, backbone);
+            // console.log(backbone.length, backbone)
             for (i = 0; i < size; i++) {
                 var obj = backbone[i];
                 var val = 0;
@@ -107,7 +107,7 @@ var permutationgraph;
                         // other in backbone
                         if (j == i) {
                             // invalid graph, no nodes link to themselves
-                            console.log("self link, discarding backbone");
+                            // console.log("self link, discarding backbone");
                             return null;
                         }
                         if (begin_digit.test(k)) {
@@ -126,13 +126,13 @@ var permutationgraph;
                 }
                 if (perm.indexOf(val) >= 0) {
                     // already found this edge, invalid permutation graph
-                    console.log("invalid permutation, number repeated", perm);
+                    // console.log("invalid permutation, number repeated", perm);
                     return null;
                 }
                 perm.push(val);
             }
             if (i_zero < 0) {
-                console.log("invalid permutation, no zero node");
+                // console.log("invalid permutation, no zero node");
                 return null; // should never happen
             }
             var perm_reordered = [];
@@ -276,7 +276,6 @@ var cycles;
                 v_node.on_stack = false;
             }
             components.push(component);
-            console.log('found strongly connected component');
         }
     }
     function tarjan(root, blacklist) {
@@ -319,6 +318,9 @@ var cycles;
         var obj_info = map.get(obj);
         obj_info.blocked = true;
         for (var k in obj) {
+            // ignore edges whose keys start with digits
+            if (begin_digit.test(k))
+                continue;
             var v = obj[k];
             var v_info = map.get(v);
             // skip edges not part of this connected component
@@ -327,7 +329,7 @@ var cycles;
             if (v == stk[0]) {
                 // found a circuit
                 circuits.push(stk.slice());
-                console.log('found circuit');
+                // console.log('found circuit');
                 found_circuit = true;
             }
             else if (!v_info.blocked) {
@@ -342,6 +344,9 @@ var cycles;
         }
         else {
             for (var k in obj) {
+                // ignore edges whose keys start with digits
+                if (begin_digit.test(k))
+                    continue;
                 var v = obj[k];
                 var v_info = map.get(v);
                 // skip edges not part of this connected component
@@ -414,5 +419,6 @@ var cycles;
 function find_watermark(root, size, blacklist) {
     var cy = cycles.find_cycles(root, size, blacklist);
     var nums = permutationgraph.permutationgraph.findnums(cy);
-    // TODO send message of numbers found
+    console.log("Found " + nums.length + " watermarks");
+    window.postMessage({ type: "jsw_found_watermark", text: JSON.stringify(nums) }, "*");
 }

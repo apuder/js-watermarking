@@ -65,7 +65,7 @@ module cycles {
                 v_node.on_stack = false;
             }
             components.push(component);
-            console.log('found strongly connected component');
+            // console.log('found strongly connected component');
         }
     }
 
@@ -119,6 +119,8 @@ module cycles {
         obj_info.blocked = true;
 
         for (var k in obj) {
+            // ignore edges whose keys start with digits
+            if (begin_digit.test(k)) continue;
             var v: Object = obj[k];
             var v_info = map.get(v);
             // skip edges not part of this connected component
@@ -126,7 +128,7 @@ module cycles {
             if (v == stk[0]) {
                 // found a circuit
                 circuits.push(stk.slice());
-                console.log('found circuit');
+                // console.log('found circuit');
                 found_circuit = true;
             }
             else if (!v_info.blocked) {
@@ -142,6 +144,8 @@ module cycles {
         }
         else {
             for (var k in obj) {
+                // ignore edges whose keys start with digits
+                if (begin_digit.test(k)) continue;
                 var v: Object = obj[k];
                 var v_info = map.get(v);
                 // skip edges not part of this connected component

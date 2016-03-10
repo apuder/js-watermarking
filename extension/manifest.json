@@ -18,6 +18,7 @@
   ],
 
   "web_accessible_resources": [
+    "content.js",
     "find_watermark.js"
   ],
 

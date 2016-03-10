@@ -83,7 +83,7 @@ var permutationgraph;
                 var perm = permutationgraph.backbone_to_perm(backbone);
                 if (perm) {
                     nums.push(permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm)));
-                    console.log('found number: ' + nums[nums.length - 1]);
+                    console.log('found watermark number: ' + nums[nums.length - 1] + ' (size: ' + perm.length + ')');
                 }
             }
             return nums;
@@ -96,7 +96,7 @@ var permutationgraph;
             var perm = [];
             var i;
             var i_zero = -1;
-            console.log(backbone.length, backbone);
+            // console.log(backbone.length, backbone)
             for (i = 0; i < size; i++) {
                 var obj = backbone[i];
                 var val = 0;
@@ -107,7 +107,7 @@ var permutationgraph;
                         // other in backbone
                         if (j == i) {
                             // invalid graph, no nodes link to themselves
-                            console.log("self link, discarding backbone");
+                            // console.log("self link, discarding backbone");
                             return null;
                         }
                         if (begin_digit.test(k)) {
@@ -126,13 +126,13 @@ var permutationgraph;
                 }
                 if (perm.indexOf(val) >= 0) {
                     // already found this edge, invalid permutation graph
-                    console.log("invalid permutation, number repeated", perm);
+                    // console.log("invalid permutation, number repeated", perm);
                     return null;
                 }
                 perm.push(val);
             }
             if (i_zero < 0) {
-                console.log("invalid permutation, no zero node");
+                // console.log("invalid permutation, no zero node");
                 return null; // should never happen
             }
             var perm_reordered = [];
