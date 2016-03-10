@@ -8,8 +8,8 @@ var permutationgraph;
             this.id = id;
             this.alias = [];
             this.alias_obj = [];
-            this.dist = 999999999;
-            this.built = false;
+            this.dist = Infinity;
+            this.built = Infinity;
             this.outbound_edges = [];
             this.inbound_edges = [];
         }
@@ -43,7 +43,7 @@ var permutationgraph;
     class permutationgraphedge {
         constructor(origin, destination) {
             this.alias = '';
-            this.built = false;
+            this.built = Infinity;
             this.backbone = false;
             this.destination = destination;
             this.origin = origin;

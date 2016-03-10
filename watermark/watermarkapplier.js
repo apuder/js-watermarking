@@ -8,8 +8,8 @@ var permutationgraph;
             this.id = id;
             this.alias = [];
             this.alias_obj = [];
-            this.dist = 999999999;
-            this.built = false;
+            this.dist = Infinity;
+            this.built = Infinity;
             this.outbound_edges = [];
             this.inbound_edges = [];
         }
@@ -43,7 +43,7 @@ var permutationgraph;
     class permutationgraphedge {
         constructor(origin, destination) {
             this.alias = '';
-            this.built = false;
+            this.built = Infinity;
             this.backbone = false;
             this.destination = destination;
             this.origin = origin;
@@ -242,7 +242,7 @@ var cyclicgraphinstructions;
                 var edges = nodes[i].outbound_edges;
                 for (var j in edges) {
                     var e = edges[j];
-                    if (!e.built) {
+                    if (e.built >= Infinity) {
                         fringe.push(e);
                     }
                 }
@@ -251,7 +251,7 @@ var cyclicgraphinstructions;
         }
         reset_dist() {
             for (var i in this.graph.nodes) {
-                this.graph.nodes[i].dist = 999999999;
+                this.graph.nodes[i].dist = Infinity;
             }
         }
         fringe_add_all(fringe) {
@@ -261,7 +261,7 @@ var cyclicgraphinstructions;
         }
         fringe_min(fringe) {
             var obj = undefined;
-            var d = 9999999999;
+            var d = Infinity;
             for (var v of fringe.values()) {
                 if (v.dist < d) {
                     d = v.dist;
@@ -270,7 +270,7 @@ var cyclicgraphinstructions;
             }
             return obj;
         }
-        shortest_path(node, context) {
+        shortest_path(node, context, instruction) {
             if (context.length == 0) {
                 return [];
             }
@@ -292,7 +292,7 @@ var cyclicgraphinstructions;
                 // update
                 for (var j in n.inbound_edges) {
                     var e = n.inbound_edges[j];
-                    if (e.built && e.origin.built && e.origin.dist > n.dist + 1) {
+                    if (e.built < instruction && e.origin.built < instruction && e.origin.dist > n.dist + 1) {
                         // add on first encounter
                         if (!fringe.has(e.origin))
                             fringe.add(e.origin);
@@ -325,19 +325,19 @@ var cyclicgraphinstructions;
             }
             return alias;
         }
-        get_alias(node, context) {
+        get_alias(node, context, instruction) {
             var ali = node.alias_string(context);
             if (ali) {
                 return ali;
             }
             else {
-                return this.path_to_alias(this.shortest_path(node, context));
+                return this.path_to_alias(this.shortest_path(node, context, instruction));
             }
         }
         add_edges_fringe(node) {
             for (var k in node.outbound_edges) {
                 var edge = node.outbound_edges[k];
-                if (!edge.built)
+                if (edge.built >= Infinity)
                     this.fringe_edge.add(edge);
             }
         }
@@ -357,14 +357,14 @@ var cyclicgraphinstructions;
                 i = node.alias_obj.indexOf(obj);
             }
         }
-        consume_node(node) {
-            if (!node.built) {
-                node.built = true;
+        consume_node(node, instruction) {
+            if (node.built >= Infinity) {
+                node.built = instruction;
                 this.add_edges_fringe(node);
             }
         }
-        consume_edge(edge, alias) {
-            edge.built = true;
+        consume_edge(edge, alias, instruction) {
+            edge.built = instruction;
             edge.alias = alias;
             this.remove_edge_fringe(edge);
         }
@@ -638,7 +638,7 @@ var cyclicgraphinserter;
             this.loc_code[location] = code;
             // TODO add context alias
         }
-        add_node(edge, trace, inst) {
+        add_node(edge, trace, inst, instruction) {
             var context = inst.context;
             var glob = cyclicgraphinserter.rand_from_obj(trace.global_context);
             var path_set;
@@ -646,12 +646,12 @@ var cyclicgraphinserter;
                 var node = edge.destination;
                 var alias = cyclicgraphinserter.get_edge_alias(edge);
                 // consume and alias edge and node, forcing edge to be used (only valid path to node)
-                this.instructions.consume_edge(edge, alias);
-                this.instructions.consume_node(node);
+                this.instructions.consume_edge(edge, alias, instruction);
+                this.instructions.consume_node(node, instruction);
                 // find path to node
-                path_set = this.instructions.shortest_path(node, [context]);
+                path_set = this.instructions.shortest_path(node, [context], instruction);
                 if (!path_set.first)
-                    path_set = this.instructions.shortest_path(node, [glob.value]);
+                    path_set = this.instructions.shortest_path(node, [glob.value], instruction);
             }
             else {
                 var node = this.instructions.graph.nodes[0];
@@ -660,56 +660,56 @@ var cyclicgraphinserter;
                 var alias = cyclicgraphinserter.get_obj_alias(glob.value);
                 // add alias before finding path
                 this.instructions.add_node_alias(node, glob.value, glob.key + alias);
-                this.instructions.consume_node(node);
+                this.instructions.consume_node(node, instruction);
                 // find path to node
-                path_set = this.instructions.shortest_path(node, [glob.value]);
+                path_set = this.instructions.shortest_path(node, [glob.value], instruction);
             }
             return {
                 path_get: null,
                 path_set: path_set
             };
         }
-        add_edge(edge, trace, inst) {
+        add_edge(edge, trace, inst, instruction) {
             var context = inst.context;
             var glob = cyclicgraphinserter.rand_from_obj(trace.global_context);
             var origin = edge.origin;
             var destination = edge.destination;
-            var path_get = this.instructions.shortest_path(destination, [inst.context]);
+            var path_get = this.instructions.shortest_path(destination, [inst.context], instruction);
             if (!path_get.first)
-                path_get = this.instructions.shortest_path(destination, [glob.value]);
-            var path_set = this.instructions.shortest_path(origin, [inst.context]);
+                path_get = this.instructions.shortest_path(destination, [glob.value], instruction);
+            var path_set = this.instructions.shortest_path(origin, [inst.context], instruction);
             if (!path_set.first)
-                path_set = this.instructions.shortest_path(origin, [glob.value]);
+                path_set = this.instructions.shortest_path(origin, [glob.value], instruction);
             // add edge to end of set path
             path_set.push(edge);
             // alias and consume after finding a path, path will never use edge
             var alias = cyclicgraphinserter.get_edge_alias(edge);
             // consume and alias edge
-            this.instructions.consume_edge(edge, alias);
+            this.instructions.consume_edge(edge, alias, instruction);
             return {
                 path_get: path_get,
                 path_set: path_set
             };
         }
-        handle_instance(trace, inst, i) {
-            var num_instruct = cyclicgraphinserter.num_instruct(i, this.instructions.size, this.chosen_contexts.size);
+        handle_instance(trace, inst, instruction) {
+            var num_instruct = cyclicgraphinserter.num_instruct(instruction, this.instructions.size, this.chosen_contexts.size);
             if (num_instruct <= 0)
                 return;
             var instructions = [];
             for (var num_done = 0; num_done < num_instruct; num_done++) {
-                if (i == 0 && num_done == 0) {
+                if (instruction == 0 && num_done == 0) {
                     // make first node
-                    instructions.push(this.add_node(null, trace, inst));
+                    instructions.push(this.add_node(null, trace, inst, instruction));
                 }
                 else {
                     var edge = cyclicgraphinserter.rand_from_set(this.instructions.fringe_edge);
-                    if (edge.destination.built) {
+                    if (edge.destination.built < instruction) {
                         // make edge only
-                        instructions.push(this.add_edge(edge, trace, inst));
+                        instructions.push(this.add_edge(edge, trace, inst, instruction));
                     }
                     else {
                         // make edge to new node
-                        instructions.push(this.add_node(edge, trace, inst));
+                        instructions.push(this.add_node(edge, trace, inst, instruction));
                     }
                 }
             }
@@ -731,9 +731,9 @@ var cyclicgraphinserter;
             });
             this.loc_code = [];
             // handle instances in order
-            for (var i = 0; i < this.chosen_instances.length; i++) {
-                var inst = this.chosen_instances[i];
-                this.handle_instance(trace, inst, i);
+            for (var instruction = 0; instruction < this.chosen_instances.length; instruction++) {
+                var inst = this.chosen_instances[instruction];
+                this.handle_instance(trace, inst, instruction);
             }
         }
         insert(trace) {

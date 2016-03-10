@@ -29,7 +29,7 @@ module cyclicgraphinstructions {
         var edges = nodes[i].outbound_edges;
         for (var j in edges) {
           var e = edges[j];
-          if (!e.built) {
+          if (e.built >= Infinity) {
             fringe.push(e);
           }
         }
@@ -39,7 +39,7 @@ module cyclicgraphinstructions {
 
     private reset_dist() {
       for (var i in this.graph.nodes) {
-        this.graph.nodes[i].dist = 999999999;
+        this.graph.nodes[i].dist = Infinity;
       }
     }
 
@@ -51,7 +51,7 @@ module cyclicgraphinstructions {
 
     private fringe_min(fringe: Set<cyclicgraphnode>): any {
       var obj: any = undefined;
-      var d: number = 9999999999;
+      var d: number = Infinity;
       for (var v of fringe.values()) {
         if (v.dist < d) {
           d = v.dist;
@@ -61,7 +61,7 @@ module cyclicgraphinstructions {
       return obj;
     }
 
-    shortest_path(node: cyclicgraphnode, context: Object[]): path_type {
+    shortest_path(node: cyclicgraphnode, context: Object[], instruction: number): path_type {
       if (context.length == 0) {
         return [];
       }
@@ -80,7 +80,7 @@ module cyclicgraphinstructions {
         var n: cyclicgraphnode = this.fringe_min(fringe);
         fringe.delete(n);
 
-        var obj = n.alias_object(context);
+        var obj = n.alias_object(context, instruction);
         if (obj) {
           path.first = n;
           path.first_obj = obj;
@@ -90,7 +90,7 @@ module cyclicgraphinstructions {
         // update
         for (var j in n.inbound_edges) {
           var e = n.inbound_edges[j]
-          if (e.built && e.origin.built && e.origin.dist > n.dist + 1) {
+          if (e.built < instruction && e.origin.built < instruction && e.origin.dist > n.dist + 1) {
             // add on first encounter
             if (!fringe.has(e.origin)) fringe.add(e.origin);
             e.origin.dist = n.dist + 1;
@@ -116,10 +116,10 @@ module cyclicgraphinstructions {
       return path;
     }
 
-    path_to_alias(path: path_type): string {
+    path_to_alias(path: path_type, instruction: number): string {
       var alias: string = '';
       if (path.first_obj) {
-        alias += path.first.alias_string([path.first_obj]);
+        alias += path.first.alias_string([path.first_obj], instruction);
       }
       for (var i = 0; i < path.length; i++) {
         alias += path[i].alias;
@@ -127,19 +127,19 @@ module cyclicgraphinstructions {
       return alias;
     }
 
-    get_alias(node: cyclicgraphnode, context: Object[]): string {
-      var ali = node.alias_string(context);
+    get_alias(node: cyclicgraphnode, context: Object[], instruction: number): string {
+      var ali = node.alias_string(context, instruction);
       if (ali) {
         return ali;
       } else {
-        return this.path_to_alias(this.shortest_path(node, context));
+        return this.path_to_alias(this.shortest_path(node, context, instruction), instruction);
       }
     }
 
     private add_edges_fringe(node: cyclicgraphnode) {
       for (var k in node.outbound_edges) {
         var edge = node.outbound_edges[k];
-        if (!edge.built) this.fringe_edge.add(edge);
+        if (edge.built >= Infinity) this.fringe_edge.add(edge);
       }
     }
 
@@ -147,29 +147,39 @@ module cyclicgraphinstructions {
       if (this.fringe_edge.has(edge)) this.fringe_edge.delete(edge);
     }
 
-    add_node_alias(node: cyclicgraphnode, obj: Object, alias: string) {
-      node.alias.push(alias);
-      node.alias_obj.push(obj);
-    }
-
-    remove_node_alias(node: cyclicgraphnode, obj: Object) {
-      var i: number = node.alias_obj.indexOf(obj);
-      while (i >= 0) {
-        node.alias_obj.splice(i, 1);
-        node.alias.splice(i, 1);
-        i = node.alias_obj.indexOf(obj);
+    add_node_alias(node: cyclicgraphnode, obj: Object, alias: string, instruction: number) {
+      var node_aliases = node.alias_obj.get(obj);
+      if (!node_aliases) {
+        node_aliases = [];
+        node.alias_obj.set(obj, node_aliases);
       }
+
+      node_aliases.push({
+        name: alias,
+        instruction_added: instruction,
+        instruction_removed: Infinity
+      })
     }
 
-    consume_node(node: cyclicgraphnode) {
-      if (!node.built) {
-        node.built = true;
+    remove_node_alias(node: cyclicgraphnode, alias: string, instruction: number) {
+      this.remove_node_alias_obj(node, node.alias[alias], instruction);
+    }
+
+    remove_node_alias_obj(node: cyclicgraphnode, obj: Object, instruction: number) {
+      var node_aliases = node.alias_obj.get(obj);
+      var node_alias_obj = node_aliases[node_aliases.length - 1];
+      node_alias_obj.instruction_removed = instruction;
+    }
+
+    consume_node(node: cyclicgraphnode, instruction: number) {
+      if (node.built >= Infinity) {
+        node.built = instruction;
         this.add_edges_fringe(node);
       }
     }
 
-    consume_edge(edge: cyclicgraphedge, alias: string) {
-      edge.built = true;
+    consume_edge(edge: cyclicgraphedge, alias: string, instruction: number) {
+      edge.built = instruction;
       edge.alias = alias;
       this.remove_edge_fringe(edge);
     }

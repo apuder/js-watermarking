@@ -1,23 +1,33 @@
 
+/// <reference path="./set_map.d.ts" />
+
 // declare module cyclicgraph {
+
+  interface node_alias {
+    [index: string]: Object;
+  }
+
+  interface node_alias_obj {
+    name: string;
+    instruction_added: number;
+    instruction_removed: number;
+  }
 
   interface cyclicgraphnode {
     id: number;
-    alias: string[]; // local identifiers of alias_obj concatenated with alias is this node (name of reference)
-    // ex "PDFJS", "this", "myobj.prop", "mylist[3]"
-    alias_obj: Object[]; // objects that contains a reference to this node
+    aliases: node_alias;
+    alias_obj: Map<Object, node_alias_obj[]>;
     dist: number;
-    built: boolean;
+    built: number; // instruction number when this was built
     outbound_edges: cyclicgraphedge[];
     inbound_edges: cyclicgraphedge[];
-    alias_index(context: Object[]): number;
-    alias_object(context: Object[]): Object
-    alias_string(context: Object[]): string;
+    alias_object(context: Object[], instruction: number): Object
+    alias_string(context: Object[], instruction: number): string;
   }
 
   interface cyclicgraphedge {
     alias: string; // ex ".next", "[2]" ...
-    built: boolean;
+    built: number; // instruction number when this was built
     backbone: boolean;
     destination: cyclicgraphnode;
     origin: cyclicgraphnode;

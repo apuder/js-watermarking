@@ -7,60 +7,58 @@ module permutationgraph {
 
   export class permutationgraphnode implements cyclicgraphnode {
     id: number;
-    alias: string[];
-    alias_obj: Object[];
+    aliases: node_alias;
+    alias_obj: Map<Object, node_alias_obj[]>;
     dist: number;
-    built: boolean;
+    built: number;
     outbound_edges: permutationgraphedge[];
     inbound_edges: permutationgraphedge[];
 
     constructor(id: number) {
       this.id = id;
-      this.alias = [];
-      this.alias_obj = [];
-      this.dist = 999999999;
-      this.built = false;
+      this.aliases = {};
+      this.alias_obj = new Map();
+      this.dist = Infinity;
+      this.built = Infinity;
       this.outbound_edges = [];
       this.inbound_edges = [];
     }
 
-    alias_index(context: Object[]): number {
-      var index: number = -1;
-
+    alias_object(context: Object[], instruction: number): Object {
       for (var k in context) {
         var v = context[k];
-        index = this.alias_obj.indexOf(v);
-        if (index >= 0) {
-          break;
+        var node_aliases = this.alias_obj.get(v);
+        for (var i = 0; i < node_aliases.length; i++) {
+          var interval = node_aliases[i];
+          if (instruction > interval.instruction_added && instruction <= interval.instruction_removed) return v;
         }
       }
-
-      return index;
+      return null;
     }
 
-    alias_object(context: Object[]): Object {
-      var i = this.alias_index(context);
-      if (i >= 0) return this.alias_obj[i];
-      else return null;
-    }
-
-    alias_string(context: Object[]): string {
-      var i = this.alias_index(context);
-      if (i >= 0) return this.alias[i];
-      else return '';
+    alias_string(context: Object[], instruction: number): string {
+      for (var k in context) {
+        var v = context[k];
+        var alias = this.alias_obj.get(v);
+        for (var i = 0; i < alias.length; i++) {
+          var interval = alias[i];
+          if (instruction > interval.instruction_added && instruction <= interval.instruction_removed) return interval.name;
+        }
+      }
+      return '';
     }
   }
 
   export class permutationgraphedge implements cyclicgraphedge {
     alias: string;
-    built: boolean;
+    built: number;
     backbone: boolean;
     destination: permutationgraphnode;
     origin: permutationgraphnode;
 
     constructor(origin: permutationgraphnode, destination: permutationgraphnode) {
       this.alias = '';
-      this.built = false;
+      this.built = Infinity;
       this.backbone = false;
       this.destination = destination;
       this.origin = origin;
