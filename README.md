@@ -70,7 +70,7 @@ Js-watermarking includes a Chrome extension to find watermarks.
 	1. Usage: Navigate to a website suspected to contain a watermark.
 		Click the jsw icon, input the size of the watermark, and click Find.
 		The jsw chrome extension will look for valid watermarks of size >= the size input.
-		The results will apear in the console (```ctrl + shift + I```), along with other logs.
+		The results will appear on the popup and in the console (```ctrl + shift + I```).
 	2. Installation: Open Chrome/Chromium and navigate to about:extensions.
 		Enable Developer Mode if not already enabled.
 		Then click load unpackaged extension and select the extension folder in js-watermarking.
@@ -78,6 +78,6 @@ Js-watermarking includes a Chrome extension to find watermarks.
 
 
 ####Notes:
-The find watermarks extension is under development.  It may fail to find some watermarks, or run indefinitely.
+The find watermarks extension is under development.  It may run indefinitely.
 In the future the Tracing and Watermarking insertion step may be implemented in a Chrome extension.
 To quickly change watermark number and size edit a .jsw.js file at the ///jsw_end annotation.
