@@ -18,11 +18,14 @@
 
   "permissions": [
     "tabs",
+    "webRequest",
+    "webRequestBlocking",
     "*://*/*"
   ],
 
   "web_accessible_resources": [
-    "content.js",
+    "insert_content.js",
+    "find_content.js",
     "find_watermark.js"
   ],
 
