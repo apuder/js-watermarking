@@ -1,11 +1,4 @@
 
-// code to check content script exists in this page
-chrome.runtime.onMessage.addListener(function (msg, sender, response) {
-  if (msg.from === 'jsw_popup' && msg.subject === 'check_contentjs_loaded') {
-    response(true);
-  }
-});
-
 var appended_script = false;
 
 window.addEventListener("message", function(event) {
@@ -15,7 +8,7 @@ window.addEventListener("message", function(event) {
 
   if (event.data.type && (event.data.type == "jsw_found_watermark")) {
     // console.log("Content script received: " + event.data.text);
-    chrome.runtime.sendMessage({method: "storeNums", arg: event.data.text});
+    chrome.runtime.sendMessage({from: "jsw_find_content", method: "storeNums", arg: event.data.text});
   }
 }, false);
 
@@ -51,14 +44,20 @@ function append_find_watermark_code() {
 }
 
 chrome.runtime.onMessage.addListener(function (msg, sender, response) {
-  if (msg.from === 'jsw_popup' && msg.subject === 'find_watermarks') {
-    input_size = msg.watermark_size;
+  if (msg.from === 'jsw_background') {
+  	if (msg.method === 'check_find_content_loaded') {
+  		// content script loaded in this page
+  		response(true);
+  	}
+  	else if (msg.method === 'find_watermarks') {
+	    input_size = msg.watermark_size;
 
-    if (!appended_script) {
-      append_find_watermark_code();
-    }
-    else {
-      find_watermark();
-    }
-  }
+	    if (!appended_script) {
+	      append_find_watermark_code();
+	    }
+	    else {
+	      find_watermark();
+	    }
+	  }
+	}
 });

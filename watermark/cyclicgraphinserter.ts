@@ -353,9 +353,9 @@ module cyclicgraphinserter {
 		private static code_new_node(path_set: cyclicgraphinstructions.path_type, checked: Map<Object, any>, instruction: number): check_and_set {
 			var code = '';
 
-			var check = cyclicgraphinserter.path_set_check(path_set, checked, instruction);
+			var check = cyclicgraphinserter.path_set_check(path_set, checked, instruction + 1);
 
-			var set = cyclicgraphinserter.path_code(path_set, instruction);
+			var set = cyclicgraphinserter.path_code(path_set, instruction + 1);
 
 			set += ' = {};\n'
 
@@ -429,23 +429,25 @@ module cyclicgraphinserter {
 
 			var path_set: cyclicgraphinstructions.path_type;
 			if (edge) {
+				var origin = edge.origin;
 				var node: cyclicgraphnode = edge.destination;
 
 				var alias = cyclicgraphinserter.get_edge_alias(edge);
 
-				// consume and alias edge and node, forcing edge to be used (only valid path to node)
+				// consume and alias edge and node
 				this.instructions.consume_edge(edge, alias, instruction);
 				this.instructions.consume_node(node, instruction);
 
-				// find path to node
-				path_set = this.instructions.shortest_path(node, [context], instruction);
+				// find path to origin
+				path_set = this.instructions.shortest_path(origin, [context], instruction);
 				if (!path_set.first)
-					path_set = this.instructions.shortest_path(node, [glob.value], instruction);
+					path_set = this.instructions.shortest_path(origin, [glob.value], instruction);
+
+				// add edge to end of path
+				path_set.push(edge);
 			}
 			else {
 				var node: cyclicgraphnode = this.instructions.graph.nodes[0];
-
-				var node = this.instructions.graph.nodes[0];
 
 				// generate alias for node
 				var alias = cyclicgraphinserter.get_obj_alias(glob.value);
@@ -454,8 +456,9 @@ module cyclicgraphinserter {
 				this.instructions.add_node_alias(node, glob.value, glob.key + alias, instruction);
 				this.instructions.consume_node(node, instruction);
 
-				// find path to node
-				path_set = this.instructions.shortest_path(node, [glob.value], instruction);
+				// find path to node using edge just added by adding 1 to instruction (only 1 path possible)
+				// avoid manually constructing path by doing this
+				path_set = this.instructions.shortest_path(node, [glob.value], instruction + 1);
 			}
 
 			return {
@@ -471,6 +474,13 @@ module cyclicgraphinserter {
 			var origin: cyclicgraphnode = edge.origin;
 			var destination: cyclicgraphnode = edge.destination;
 
+			// alias and consume after finding a path
+			var alias = cyclicgraphinserter.get_edge_alias(edge);
+
+			// consume and alias edge
+			this.instructions.consume_edge(edge, alias, instruction);
+
+			// find paths to destination and origin
 			var path_get = this.instructions.shortest_path(destination, [inst.context], instruction);
 			if (!path_get.first)
 				path_get = this.instructions.shortest_path(destination, [glob.value], instruction);
@@ -481,12 +491,6 @@ module cyclicgraphinserter {
 
 			// add edge to end of set path
 			path_set.push(edge);
-
-			// alias and consume after finding a path, path will never use edge
-			var alias = cyclicgraphinserter.get_edge_alias(edge);
-
-			// consume and alias edge
-			this.instructions.consume_edge(edge, alias, instruction);
 
 			return {
 				path_get: path_get,

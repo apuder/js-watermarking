@@ -2,37 +2,38 @@
 var root = {};
 
 function trivial() {
-	if (!root.other) {
-	root.other = {};
-root.other[0] = {};
-root.other[0].head = {};
-root.other[0].head[0] = root.other[0];
-root.other.car = {};
-root.other[0].head.wabi = {};
-root.other[0][0] = {};
-root.other.car[0] = {};
-root.other[0][0][0] = root.other[0].head.wabi;
-root.other.car.aware = {};
-root.other.car[0][0] = {};
-root.other.car.aware.tmp = {};
-root.other.car.aware.tmp.wabi = {};
-root.other.car.aware[0] = root.other.car.aware.tmp;
-root.other[0].head.wabi[0] = root.other.car.aware;
-root.other.car.aware.tmp.wabi[0] = root.other[0].head;
-root.other.car[0].last = {};
-root.other.car[0].last.last = root.other.car[0][0];
-root.other[0].head.wabi.tsukimi = root.other.car[0];
-root.other.car.aware.tmp.wabi.before = {};
-root.other.car[0].last[0] = root.other.car;
-root.other.car.aware.tmp.wabi.before.last = root.other[0][0];
-root.other.car[0][0].sabi = root.other;
-root.other.car.aware.tmp.wabi.before[0] = root.other.car.aware;
-root.other[0][0].status = {};
-root.other[0][0].status[0] = root.other;
-root.other.car.aware.tmp[0] = root.other.car[0].last;
-root.other[0][0].status.sabi = root.other[0];
+	if (!root.after) {
+	root.after = {};
+root.after.wabi = {};
+root.after.wabi[0] = {};
+root.after.wabi[0][0] = {};
+root.after.wabi[0][0][0] = {};
+root.after.wabi[0][0][0].cdr = {};
+root.after.wabi[0][0][0].cdr[0] = root.after.wabi[0][0];
+root.after.wabi[0][0][0][0] = {};
+root.after.wabi[0][0].self = {};
+root.after.wabi[0].miyabi = {};
+root.after.wabi.status = {};
+root.after.wabi[0][0].self[0] = root.after.wabi[0][0][0][0];
+root.after.wabi[0].miyabi[0] = root.after.wabi[0];
+root.after.wabi[0][0].self[0].rest = {};
+root.after.wabi.status.gry = root.after.wabi[0][0][0];
+root.after.wabi.status[0] = root.after.wabi.status.gry.cdr;
+root.after.wabi.status.gry[0].rest[0] = root.after.wabi[0];
+root.after.wabi[0][0].self.stack = root.after;
+root.after.wabi[0].miyabi.pos = {};
+root.after.wabi.status.gry[0][0] = root.after.wabi[0].miyabi;
+root.after.wabi.status.gry[0].rest.next = {};
+root.after.wabi.status[0].next = root.after.wabi[0];
+root.after.wabi[0].miyabi.pos.cdr = {};
+root.after.wabi.status.gry[0].rest.next.head = root.after.wabi[0][0];
+root.after.wabi[0].miyabi.pos.cdr[0] = root.after.wabi[0].miyabi;
+root.after.wabi[0].miyabi.pos.cdr.result = root.after.wabi.status.gry[0];
+root.after.wabi.status.gry[0].rest.next[0] = root.after;
+root.after.wabi[0].miyabi.pos[0] = root.after.wabi[0].miyabi.pos.cdr;
 
 }
+
 
 
 }

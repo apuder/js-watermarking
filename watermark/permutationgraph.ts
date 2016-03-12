@@ -27,7 +27,7 @@ module permutationgraph {
     alias_object(context: Object[], instruction: number): Object {
       for (var k in context) {
         var v = context[k];
-        var node_aliases = this.alias_obj.get(v);
+        var node_aliases = this.alias_obj.get(v) || [];
         for (var i = 0; i < node_aliases.length; i++) {
           var interval = node_aliases[i];
           if (instruction > interval.instruction_added && instruction <= interval.instruction_removed) return v;
@@ -39,7 +39,7 @@ module permutationgraph {
     alias_string(context: Object[], instruction: number): string {
       for (var k in context) {
         var v = context[k];
-        var alias = this.alias_obj.get(v);
+        var alias = this.alias_obj.get(v) || [];
         for (var i = 0; i < alias.length; i++) {
           var interval = alias[i];
           if (instruction > interval.instruction_added && instruction <= interval.instruction_removed) return interval.name;
@@ -150,8 +150,8 @@ module permutationgraph {
       }
 
       var perm_reordered = [];
-      for (i = 1; i <= size; ++i) {
-        perm_reordered.push(perm[(i + i_zero) % size]);
+      for (i = 0; i < size; ++i) {
+        perm_reordered[size - i - 1] = perm[(i + i_zero) % size];
       }
 
       return perm_reordered;
@@ -257,7 +257,7 @@ module permutationgraph {
         // make backbone edges
         this.add_edge(nodes[i], nodes[(i + 1) % size], true);
 
-        var dest: number = (i + perm[i]) % size;
+        var dest: number = (i + perm[size - i - 1]) % size;
         if (i != dest) {
           // edge is not representing zero
           this.add_edge(nodes[i], nodes[dest], false);

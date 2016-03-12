@@ -20,8 +20,17 @@
     "tabs",
     "webRequest",
     "webRequestBlocking",
-    "*://*/*"
+    "storage",
+    // "unlimitedStorage",
+    "<all_urls>"
   ],
+
+  // "content_scripts": [
+  //   {
+  //     "matches": ["*://*/*.jsw*"],
+  //     "js": ["insert_content.js"]
+  //   }
+  // ],
 
   "web_accessible_resources": [
     "insert_content.js",

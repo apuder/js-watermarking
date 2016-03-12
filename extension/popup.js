@@ -1,12 +1,42 @@
 
 var html_nums;
-var tabid;
-var input_number;
-var input_size;
-var scripts;
+var html_scripts;
+
+function clear_scripts_storage() {
+	chrome.runtime.sendMessage({ from: 'jsw_popup', method: 'clear_scripts' });
+	// remove previous data
+	while (html_scripts.firstChild) {
+	    html_scripts.removeChild(html_scripts.firstChild);
+	}
+}
+
+function setScripts(scripts) {
+	// remove previous data
+	while (html_scripts.firstChild) {
+	    html_scripts.removeChild(html_scripts.firstChild);
+	}
+	// add new data
+	for(var i = 0; i < scripts.length; i++) {
+		var script = scripts[i];
+		var script_item = document.createElement("li");
+
+		var a = document.createElement('a');
+		a.download = script.file_name;
+		a.href = script.url;
+		a.textContent = script.file_name;
+
+		var mime = "application/javascript";
+		a.dataset.downloadurl = [mime, a.download, a.href].join(':');
+		a.draggable = true;
+
+		script_item.appendChild(a);
+
+		html_scripts.appendChild(script_item);
+	}
+}
 
 function clear_nums_storage() {
-	localStorage.removeItem("nums");
+	chrome.runtime.sendMessage({ from: 'jsw_popup', method: 'clear_nums' });
 	// remove previous data
 	while (html_nums.firstChild) {
 	    html_nums.removeChild(html_nums.firstChild);
@@ -27,104 +57,34 @@ function setNums(nums) {
 	}
 }
 
-function preprocess_scripts(scripts) {
-	// find and preprocess scripts
-	// var xhr = new XMLHttpRequest();
-
-	// xhr.open("GET", "http://www.domain.com?par=0", false);
-	// xhr.send();
-
-	// var result = xhr.responseText;
-	// localStorage[url] = result;
-}
-
-function redirect_preprocessed_scripts(details) {
-	return {redirect: scripts[details.url]};
-}
-
-function insert_watermark() {
-
-
-
-	// remove listener when done
-	chrome.webRequest.onBeforeRequest.removeListener(
-        redirect_preprocessed_scripts);
-}
-
 function make_watermark() {
-	input_number = document.getElementById("number_input");
+	var input_number = document.getElementById("number_input");
 	if (!input_number) {
 		console.error("size input not found");
 		return;
 	}
-	input_size = document.getElementById("size_input");
+	var input_size = document.getElementById("size_input");
 	if (!input_size) {
 		console.error("size input not found");
 		return;
 	}
 
-	
-
 	chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-		tabid = tabs[0].id;
-
-
-
-		// add a listener to redirect http requests for .jsw.pp.js scripts
-		chrome.webRequest.onBeforeRequest.addListener(
-	        redirect_preprocessed_scripts,
-	        {urls: ["*://*/*.jsw.pp.js"],
-	    	 tabId: tabid},
-	        ["blocking"]);
-
-		// clear cache forcing sending of http requests
-		chrome.webRequest.handlerBehaviorChanged();
-
-		// reload the tab and insert scripts to insert the watermark
-		chrome.tabs.reload(tabid, function () {
-			chrome.tabs.executeScript(null,
-							{	file: "insert_content.js",
-								allFrames: true
-							},
-							insert_watermark);
-		});
-	}
+		// send message to background to insert watermark in current page
+		chrome.runtime.sendMessage({ from: 'jsw_popup', method: 'insert_watermark', tabid: tabs[0].id, number: input_number.value, size: input_size.value });
+	});
 }
 
 function find_watermark() {
-	// find the watermarks
-	console.log("trying to find watermarks");
-	chrome.tabs.sendMessage(tabid, { from: 'jsw_popup', subject: 'find_watermarks', watermark_size: input_size.value });
-}
-
-function insert_find_watermark_code() {
-	input_size = document.getElementById("size_input");
+	var input_size = document.getElementById("size_input");
 	if (!input_size) {
 		console.error("size input not found");
 		return;
 	}
 
-	// send message to start search
 	chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-		tabid = tabs[0].id;
-
-		// check if content script already loaded
-		chrome.tabs.sendMessage(tabid, { from: 'jsw_popup', subject: 'check_contentjs_loaded'},
-			function(response) {
-				if (response) {
-					// console.log("content script already added");
-					find_watermark();
-				} else {
-					// console.log("adding content script");
-					// execute content script in tab
-					chrome.tabs.executeScript(null,
-							{	file: "find_content.js",
-								allFrames: true
-							},
-							find_watermark);
-				}
-				
-			});
+		// send message to background to start search
+		chrome.runtime.sendMessage({ from: 'jsw_popup', method: 'find_watermark', tabid: tabs[0].id, size: input_size.value });
 	});
 }
 
@@ -134,9 +94,17 @@ document.addEventListener('DOMContentLoaded', function () {
 		insert.addEventListener('click', make_watermark);
 	}
 
-	var input = document.getElementById("find_button");
-	if (input.type === 'button' && input.name === 'find') {
-		input.addEventListener('click', insert_find_watermark_code);
+	html_scripts = document.getElementById("scriptList");
+
+	var clear_scripts = document.getElementById("clear_scripts_button");
+	if (clear_scripts.type === 'button' && clear_scripts.name === 'clear_scripts') {
+		clear_scripts.addEventListener('click', clear_scripts_storage);
+	}
+
+
+	var find = document.getElementById("find_button");
+	if (find.type === 'button' && find.name === 'find') {
+		find.addEventListener('click', find_watermark);
 	}
 
 	html_nums = document.getElementById("numList");
@@ -146,12 +114,39 @@ document.addEventListener('DOMContentLoaded', function () {
 		clear_nums.addEventListener('click', clear_nums_storage);
 	}
 
+	var html_num_input = document.getElementById("number_input");
+	console.log(html_num_input);
+	if (html_num_input.type === 'number' && html_num_input.name === 'number') {
+		console.log(html_num_input);
+		html_num_input.value = localStorage["number"] || 0;
+		html_num_input.oninput = function() {
+			console.log(html_num_input);
+			localStorage["number"] = html_num_input.value;
+		};
+	}
+
+	var html_size_input = document.getElementById("size_input");
+	console.log(html_size_input);
+	if (html_size_input.type === 'number' && html_size_input.name === 'size') {
+		console.log(html_size_input);
+		html_size_input.value = localStorage["size"] || 14;
+		html_size_input.oninput = function() {
+			console.log(html_size_input);
+			localStorage["size"] = html_size_input.value;
+		};
+	}
+
+	// set scripts initially
+    setScripts(JSON.parse(localStorage["scripts"] || '[]'));
+
 	// set nums initially
-	var stored_nums = JSON.parse(localStorage["nums"] || '[]');
-    setNums(stored_nums);
+    setNums(JSON.parse(localStorage["nums"] || '[]'));
 
     window.onstorage = function (e) {
-    	if (e.key == "nums") {
+    	if (e.key == "scripts") {
+    		setScripts(JSON.parse(e.newValue || '[]'));
+    	}
+    	else if (e.key == "nums") {
     		setNums(JSON.parse(e.newValue || '[]'));
     	}
     }

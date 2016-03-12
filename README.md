@@ -48,16 +48,14 @@ The nodejs script jswpp.js preprocesses javascript files to prepare then to be r
 Js-watermarking file naming conventions go as follows.
 .jsw.pp.js files are ///jsw annotated js files.
 .jsw.js files are preprocessed and ready to be run in Chrome.
-#####	Preprocess: ```node jswpp.js file.jsw.pp.js 4130453 14```
-		* The first argument is the name of the file to be preprocessed.
+#####	Preprocess: ```node jswpp.js file.jsw.pp.js```
+		* The only argument to jswpp.js is the name of the file to be preprocessed.
 			The output file will have .jsw.pp changed to .jsw if possible,
 			otherwise it will be named out.jsw.js.
-		* The second argument is the watermark data to insert encoded as a number 
-			(this number must be possible to represent in javascript).
-		* The third argument is the size of the watermark to insert.
-			The highest number representable with a given size is (size - 1)! - 1.
-#####	Trace/Insert: In Chrome, open the page with script file.jsw.js. 
-		A download link will appear when watermark insertion is complete.
+#####	Trace/Insert: In Chrome, open the page with script file.jsw.js.
+		Open the jsw chrome extension by clicking on the jsw icon, see installation.
+		Input the number and size desired, then click Insert.
+		A download link will in the extension popup when watermark insertion is complete.
 
 
 ##3. Minify watermarked code
@@ -66,18 +64,23 @@ minify or otherwise obfuscate the code before release.
 
 
 ##4. Find watermarks
-Js-watermarking includes a Chrome extension to find watermarks.
-	1. Usage: Navigate to a website suspected to contain a watermark.
-		Click the jsw icon, input the size of the watermark, and click Find.
-		The jsw chrome extension will look for valid watermarks of size >= the size input.
-		The results will appear on the popup and in the console (```ctrl + shift + I```).
-	2. Installation: Open Chrome/Chromium and navigate to about:extensions.
-		Enable Developer Mode if not already enabled.
-		Then click load unpackaged extension and select the extension folder in js-watermarking.
-		The letters jsw should appear on the extension bar next to the menu icon.
+Navigate to a website suspected to contain a watermark.
+Open the jsw chrome extension by clicking on the jsw icon, see installation.
+Input the minimum size of the watermark in the size field, and click Find.
+The jsw chrome extension will look for valid watermarks of size >= the size input.
+The results will appear in the extension popup and in the console (```ctrl + shift + I```).
+
+
+#Installation
+=======================
+
+Open Chrome/Chromium and navigate to about:extensions.
+Enable Developer Mode if not enabled.
+Then click load unpackaged extension and select the extension folder in js-watermarking.
+The letters jsw should appear on the extension bar next to the menu icon.
 
 
 ####Notes:
-The find watermarks extension is under development.  It may run indefinitely.
-In the future the Tracing and Watermarking insertion step may be implemented in a Chrome extension.
-To quickly change watermark number and size edit a .jsw.js file at the ///jsw_end annotation.
+The find watermarks extension is under development and may run indefinitely.
+Clicking Insert in the Trace/Insert step before the webpage has finidhed tracing will cause an error to print to console.
+In the future the Preprocessing may be implemented in the Chrome extension.

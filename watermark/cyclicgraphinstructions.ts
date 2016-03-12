@@ -162,7 +162,7 @@ module cyclicgraphinstructions {
     }
 
     remove_node_alias(node: cyclicgraphnode, alias: string, instruction: number) {
-      this.remove_node_alias_obj(node, node.alias[alias], instruction);
+      this.remove_node_alias_obj(node, node.aliases[alias], instruction);
     }
 
     remove_node_alias_obj(node: cyclicgraphnode, obj: Object, instruction: number) {

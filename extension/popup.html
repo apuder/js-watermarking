@@ -7,15 +7,19 @@
   <body>
     <div id="variables">
       Number:
-      <input type="number" id="number_input" name="size" min="0" max="9999999999" step="1" value="0">
+      <input type="number" id="number_input" name="number" min="0" max="9999999999" step="1" value="0">
       Size:
       <input type="number" id="size_input" name="size" min="2" max="100" step="1" value="14">
     </div>
-    <input type="button" id="insert_button" name="insert" value="Insert">
-    <input type="button" id="find_button" name="find" value="Find">
     <div>
+      <input type="button" id="insert_button" name="insert" value="Insert">
+      <input type="button" id="clear_scripts_button" name="clear_scripts" value="Clear Links">
+      <ul id="scriptList">Watermarked Scripts:</ul>
+    </div>
+    <div>
+      <input type="button" id="find_button" name="find" value="Find">
       <input type="button" id="clear_nums_button" name="clear_nums" value="Clear List">
-      <ul id="numList">Results:</ul>
+      <ul id="numList">Found Watermarks:</ul>
     </div>
   </body>
 </html>

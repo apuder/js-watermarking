@@ -15,26 +15,28 @@ module watermarkapplier {
 
 		console.log(code);
 
-		var mime = "application/javascript";
+		// var mime = "application/javascript";
 
-		var bb = new Blob([code], { type: mime });
+		// var bb = new Blob([code], { type: mime });
 
-		var url = window.URL.createObjectURL(bb);
+		// var url = window.URL.createObjectURL(bb);
 
-		// use any to avoid compile time errors over HTML5
-		var a: any = document.createElement('a');
-		a.download = trace.file_name;
-		a.href = url;
-		a.textContent = 'Watermark ready';
+		// // use any to avoid compile time errors over HTML5
+		// var a: any = document.createElement('a');
+		// a.download = trace.file_name;
+		// a.href = url;
+		// a.textContent = 'Watermark ready';
 
-		a.dataset.downloadurl = [mime, a.download, a.href].join(':');
-		a.draggable = true;
+		// a.dataset.downloadurl = [mime, a.download, a.href].join(':');
+		// a.draggable = true;
 
-		a.style.position = 'fixed';
-		a.style.left = '0px';
-		a.style.top = '0px';
+		// a.style.position = 'fixed';
+		// a.style.left = '0px';
+		// a.style.top = '0px';
 
-		document.body.appendChild(a);
+		// document.body.appendChild(a);
+
+		window.postMessage({ type: "jsw_inserted_watermark", text: code, file: trace.file_name }, "*");
 	}
 
 }

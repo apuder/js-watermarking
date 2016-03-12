@@ -1645,8 +1645,8 @@ function MessageHandler(sourceName, targetName, comObj) {
   this.postMessageTransfers = true;
   var callbacksCapabilities = this.callbacksCapabilities = {};
   var ah = this.actionHandler = {};
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && !PDFJS.previous.aware.last[0][0]) {
-	PDFJS.previous.aware.last[0][0] = {};
+if (PDFJS.tmp && PDFJS.tmp[0] && !PDFJS.tmp[0].check) {
+	PDFJS.tmp[0].check = {};
 
 }
 
@@ -2807,8 +2807,8 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
 
-if (PDFJS.previous && PDFJS.previous.aware && !PDFJS.previous.aware[0] && PDFJS.previous.aware.last) {
-	PDFJS.previous.aware[0] = PDFJS.previous.aware.last;
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0].check && !PDFJS.tmp[0].check[0]) {
+	PDFJS.tmp[0].check[0] = {};
 
 }
 
@@ -3036,8 +3036,8 @@ PDFJS.PDFDataRangeTransport = PDFDataRangeTransport;
 var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
 
   function PDFDocumentProxy(pdfInfo, transport, loadingTask) {
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && !PDFJS.previous.aware.last[0].gry.stack) {
-	PDFJS.previous.aware.last[0].gry.stack = {};
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0].check && !PDFJS.tmp[0].check.b && PDFJS.tmp[0].check[0] && PDFJS.tmp[0].check[0][0]) {
+	PDFJS.tmp[0].check.b = PDFJS.tmp[0].check[0][0];
 
 }
 
@@ -3359,8 +3359,8 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
       }
       var intentState = this.intentStates[renderingIntent];
 
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && !PDFJS.previous.aware.last.aware) {
-	PDFJS.previous.aware.last.aware = {};
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check[0] && PDFJS.tmp[0].check[0].stack && !PDFJS.tmp[0].check[0].stack.pos) {
+	PDFJS.tmp[0].check[0].stack.pos = {};
 
 }
 
@@ -3622,8 +3622,8 @@ var PDFWorker = (function PDFWorkerClosure() {
   }
 
   function PDFWorker(name) {
-if (PDFJS.previous && PDFJS.previous.aware && !PDFJS.previous.aware.last) {
-	PDFJS.previous.aware.last = {};
+if (PDFJS.tmp && PDFJS.tmp.mpx && !PDFJS.tmp.mpx[0]) {
+	PDFJS.tmp.mpx[0] = {};
 
 }
 
@@ -3663,8 +3663,8 @@ if (PDFJS.previous && PDFJS.previous.aware && !PDFJS.previous.aware.last) {
         if (!workerSrc) {
           error('No PDFJS.workerSrc specified');
         }
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && !PDFJS.previous.aware.last[0]) {
-	PDFJS.previous.aware.last[0] = {};
+if (PDFJS.tmp && !PDFJS.tmp[0] && PDFJS.tmp.mpx && PDFJS.tmp.mpx[0]) {
+	PDFJS.tmp[0] = PDFJS.tmp.mpx[0];
 
 }
 
@@ -3819,8 +3819,8 @@ var WorkerTransport = (function WorkerTransportClosure() {
     this.commonObjs = new PDFObjects();
     this.fontLoader = new FontLoader(loadingTask.docId);
 
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && !PDFJS.previous.aware.last[0].gry) {
-	PDFJS.previous.aware.last[0].gry = {};
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check[0] && !PDFJS.tmp[0].check[0].stack) {
+	PDFJS.tmp[0].check[0].stack = {};
 
 }
 
@@ -3919,8 +3919,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       }
 
       messageHandler.on('GetDoc', function transportDoc(data) {
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0][0] && !PDFJS.previous.aware.last[0][0].next) {
-	PDFJS.previous.aware.last[0][0].next = {};
+if (PDFJS.tmp && PDFJS.tmp.mpx && !PDFJS.tmp.mpx.pos) {
+	PDFJS.tmp.mpx.pos = {};
 
 }
 
@@ -3998,8 +3998,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       }, this);
 
       messageHandler.on('StartRenderPage', function transportRender(data) {
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry.stack && !PDFJS.previous.aware.last[0].gry.stack[0]) {
-	PDFJS.previous.aware.last[0].gry.stack[0] = {};
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check[0] && PDFJS.tmp[0].check[0].stack && PDFJS.tmp[0].check[0].stack[0] && !PDFJS.tmp[0].check[0].stack[0].stack) {
+	PDFJS.tmp[0].check[0].stack[0].stack = {};
 
 }
 
@@ -4024,8 +4024,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       }, this);
 
       messageHandler.on('commonobj', function transportObj(data) {
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry[0] && !PDFJS.previous.aware.last[0].gry[0].next) {
-	PDFJS.previous.aware.last[0].gry[0].next = {};
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0][0] && !PDFJS.tmp[0][0].result) {
+	PDFJS.tmp[0][0].result = {};
 
 }
 
@@ -4367,8 +4367,8 @@ var PDFObjects = (function PDFObjectsClosure() {
       // directly.
       var obj = this.objs[objId];
 
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry[0] && PDFJS.previous.aware.last[0].gry[0].next && !PDFJS.previous.aware.last[0].gry[0].next.after && PDFJS.previous.aware.last.aware && PDFJS.previous.aware.last.aware[0] && PDFJS.previous.aware.last.aware[0][0]) {
-	PDFJS.previous.aware.last[0].gry[0].next.after = PDFJS.previous.aware.last.aware[0][0];
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check.b && !PDFJS.tmp[0].check.b.c && PDFJS.tmp[0].check[0]) {
+	PDFJS.tmp[0].check.b.c = PDFJS.tmp[0].check[0];
 
 }
 
@@ -4507,8 +4507,8 @@ var InternalRenderTask = (function InternalRenderTaskClosure() {
     this.cancelled = false;
     this.capability = createPromiseCapability();
     this.task = new RenderTask(this);
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0][0] && PDFJS.previous.aware.last[0][0].next && !PDFJS.previous.aware.last[0][0].next[0]) {
-	PDFJS.previous.aware.last[0][0].next[0] = PDFJS.previous.aware.last[0];
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check[0] && PDFJS.tmp[0].check[0].stack && !PDFJS.tmp[0].check[0].stack[0]) {
+	PDFJS.tmp[0].check[0].stack[0] = {};
 
 }
 
@@ -4533,8 +4533,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
         this.stepper.init(this.operatorList);
         this.stepper.nextBreakPoint = this.stepper.getNextBreakPoint();
       }
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry.stack && PDFJS.previous.aware.last[0].gry.stack[0] && !PDFJS.previous.aware.last[0].gry.stack[0].status) {
-	PDFJS.previous.aware.last[0].gry.stack[0].status = {};
+if (PDFJS.tmp && PDFJS.tmp.mpx && PDFJS.tmp.mpx.pos && !PDFJS.tmp.mpx.pos) {
+	PDFJS.tmp.mpx.pos = {};
 
 }
 
@@ -4566,8 +4566,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
         }
         return;
       }
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last.aware && PDFJS.previous.aware.last.aware[0] && PDFJS.previous.aware.last.aware[0][0] && !PDFJS.previous.aware.last.aware[0][0][0] && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry[0]) {
-	PDFJS.previous.aware.last.aware[0][0][0] = PDFJS.previous.aware.last[0].gry[0];
+if (PDFJS.tmp && PDFJS.tmp[0] && !PDFJS.tmp[0][0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check[0] && PDFJS.tmp[0].check[0].stack && PDFJS.tmp[0].check[0].stack.pos) {
+	PDFJS.tmp[0][0] = PDFJS.tmp[0].check[0].stack.pos;
 
 }
 
@@ -4814,8 +4814,8 @@ function addContextCurrentTransform(ctx) {
     });
 
     ctx.save = function ctxSave() {
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry.stack && !PDFJS.previous.aware.last[0].gry.stack.cdr) {
-	PDFJS.previous.aware.last[0].gry.stack.cdr = {};
+if (PDFJS.tmp && PDFJS.tmp.mpx && PDFJS.tmp.mpx.pos && PDFJS.tmp.mpx.pos.tree && !PDFJS.tmp.mpx.pos.tree[0]) {
+	PDFJS.tmp.mpx.pos.tree[0] = PDFJS.tmp;
 
 }
 
@@ -4828,8 +4828,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
     };
 
     ctx.restore = function ctxRestore() {
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last.aware && !PDFJS.previous.aware.last.aware[0] && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry.stack) {
-	PDFJS.previous.aware.last.aware[0] = PDFJS.previous.aware.last[0].gry.stack;
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check[0] && PDFJS.tmp[0].check[0].stack && PDFJS.tmp[0].check[0].stack.pos && !PDFJS.tmp[0].check[0].stack.pos[0] && PDFJS.tmp.mpx) {
+	PDFJS.tmp[0].check[0].stack.pos[0] = PDFJS.tmp.mpx;
 
 }
 
@@ -5134,8 +5134,8 @@ var CanvasExtraState = (function CanvasExtraStateClosure() {
     this.textHScale = 1;
     this.textRenderingMode = TextRenderingMode.FILL;
     this.textRise = 0;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last.aware && !PDFJS.previous.aware.last.aware.before && PDFJS.previous.aware.last[0]) {
-	PDFJS.previous.aware.last.aware.before = PDFJS.previous.aware.last[0];
+if (PDFJS.tmp && PDFJS.tmp.mpx && PDFJS.tmp.mpx.pos && !PDFJS.tmp.mpx.pos.tree) {
+	PDFJS.tmp.mpx.pos.tree = PDFJS.tmp.mpx.pos.tree;
 
 }
 
@@ -5188,8 +5188,8 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     this.imageLayer = imageLayer;
     this.groupStack = [];
     this.processingType3 = null;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry.stack && PDFJS.previous.aware.last[0].gry.stack[0] && PDFJS.previous.aware.last[0].gry.stack[0].status && !PDFJS.previous.aware.last[0].gry.stack[0].status[0]) {
-	PDFJS.previous.aware.last[0].gry.stack[0].status[0] = PDFJS.previous.aware.last[0].gry.stack[0];
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check[0] && PDFJS.tmp[0].check[0].stack && PDFJS.tmp[0].check[0].stack[0] && PDFJS.tmp[0].check[0].stack[0].stack && !PDFJS.tmp[0].check[0].stack[0].stack[0]) {
+	PDFJS.tmp[0].check[0].stack[0].stack[0] = {};
 
 }
 
@@ -5238,8 +5238,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
     var src = imgData.data;
     var dest = chunkImgData.data;
     var i, j, thisChunkHeight, elemsInThisChunk;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last.aware && PDFJS.previous.aware.last.aware[0] && PDFJS.previous.aware.last.aware[0][0] && PDFJS.previous.aware.last.aware[0][0].status && !PDFJS.previous.aware.last.aware[0][0].status.next) {
-	PDFJS.previous.aware.last.aware[0][0].status.next = PDFJS.previous;
+if (PDFJS.tmp && PDFJS.tmp.mpx && PDFJS.tmp.mpx.pos && PDFJS.tmp.mpx.pos.tree && PDFJS.tmp.mpx.pos.tree.current && PDFJS.tmp.mpx.pos.tree.current.c && PDFJS.tmp.mpx.pos.tree.current.c.stack && !PDFJS.tmp.mpx.pos.tree.current.c.stack.pos && PDFJS.tmp[0]) {
+	PDFJS.tmp.mpx.pos.tree.current.c.stack.pos = PDFJS.tmp[0];
 
 }
 
@@ -5513,8 +5513,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       this.ctx.fillRect(0, 0, width, height);
       this.ctx.restore();
 
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && !PDFJS.previous.aware.last[0].gry[0]) {
-	PDFJS.previous.aware.last[0].gry[0] = {};
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check[0] && PDFJS.tmp[0].check[0].stack && PDFJS.tmp[0].check[0].stack[0] && !PDFJS.tmp[0].check[0].stack[0][0]) {
+	PDFJS.tmp[0].check[0].stack[0][0] = PDFJS.tmp;
 
 }
 
@@ -5568,8 +5568,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       var commonObjs = this.commonObjs;
       var objs = this.objs;
       var fnId;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last.aware && PDFJS.previous.aware.last.aware[0] && PDFJS.previous.aware.last.aware[0].cdr && !PDFJS.previous.aware.last.aware[0].cdr[0]) {
-	PDFJS.previous.aware.last.aware[0].cdr[0] = PDFJS.previous;
+if (PDFJS.tmp && PDFJS.tmp.mpx && PDFJS.tmp.mpx.pos && PDFJS.tmp.mpx.pos.tree && PDFJS.tmp.mpx.pos.tree.current && !PDFJS.tmp.mpx.pos.tree.current[0]) {
+	PDFJS.tmp.mpx.pos.tree.current[0] = PDFJS.tmp;
 
 }
 
@@ -6082,8 +6082,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       } else {
         current.fontDirection = 1;
       }
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last.aware && PDFJS.previous.aware.last.aware[0] && PDFJS.previous.aware.last.aware[0].cdr && !PDFJS.previous.aware.last.aware[0].cdr.next && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0][0]) {
-	PDFJS.previous.aware.last.aware[0].cdr.next = PDFJS.previous.aware.last[0][0];
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0][0] && PDFJS.tmp[0][0].result && !PDFJS.tmp[0][0].result.next) {
+	PDFJS.tmp[0][0].result.next = PDFJS.tmp;
 
 }
 
@@ -6109,8 +6109,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       var browserFontSize = size < MIN_FONT_SIZE ? MIN_FONT_SIZE :
                             size > MAX_FONT_SIZE ? MAX_FONT_SIZE : size;
       this.current.fontSizeScale = size / browserFontSize;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry[0] && !PDFJS.previous.aware.last[0].gry[0][0] && PDFJS.previous.aware.last.aware && PDFJS.previous.aware.last.aware[0]) {
-	PDFJS.previous.aware.last[0].gry[0][0] = PDFJS.previous.aware.last.aware[0];
+if (PDFJS.tmp && PDFJS.tmp.mpx && PDFJS.tmp.mpx.pos && PDFJS.tmp.mpx.pos.tree && PDFJS.tmp.mpx.pos.tree.current && !PDFJS.tmp.mpx.pos.tree.current.c && PDFJS.tmp[0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check[0] && PDFJS.tmp[0].check[0].stack && PDFJS.tmp[0].check[0].stack[0]) {
+	PDFJS.tmp.mpx.pos.tree.current.c = PDFJS.tmp[0].check[0].stack[0];
 
 }
 
@@ -7978,8 +7978,8 @@ function FontLoader(docId) {
   this.styleElement = null;
   this.nativeFontFaces = [];
   this.loadTestFontId = 0;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0][0] && !PDFJS.previous.aware.last[0][0][0]) {
-	PDFJS.previous.aware.last[0][0][0] = PDFJS.previous.aware.last;
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check[0] && !PDFJS.tmp[0].check[0][0]) {
+	PDFJS.tmp[0].check[0][0] = {};
 
 }
 
@@ -8081,8 +8081,8 @@ FontLoader.prototype = {
         continue;
       }
       font.attached = true;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry[0] && PDFJS.previous.aware.last[0].gry[0].next && !PDFJS.previous.aware.last[0].gry[0].next[0] && PDFJS.previous.aware.last[0][0]) {
-	PDFJS.previous.aware.last[0].gry[0].next[0] = PDFJS.previous.aware.last[0][0];
+if (PDFJS.tmp && PDFJS.tmp.mpx && PDFJS.tmp.mpx.pos && PDFJS.tmp.mpx.pos.tree && !PDFJS.tmp.mpx.pos.tree.current && PDFJS.tmp[0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check[0] && PDFJS.tmp[0].check[0].stack && PDFJS.tmp[0].check[0].stack[0] && PDFJS.tmp[0].check[0].stack[0].stack && PDFJS.tmp[0].check[0].stack[0].stack[0]) {
+	PDFJS.tmp.mpx.pos.tree.current = PDFJS.tmp[0].check[0].stack[0].stack[0];
 
 }
 
@@ -8315,8 +8315,8 @@ var FontFaceObject = (function FontFaceObjectClosure() {
       }
 
       var nativeFontFace = new FontFace(this.loadedName, this.data, {});
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0][0] && PDFJS.previous.aware.last[0][0].next && !PDFJS.previous.aware.last[0][0].next.gry && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry[0]) {
-	PDFJS.previous.aware.last[0][0].next.gry = PDFJS.previous.aware.last[0].gry[0];
+if (PDFJS.tmp && PDFJS.tmp[0] && PDFJS.tmp[0].check && PDFJS.tmp[0].check.b && !PDFJS.tmp[0].check.b[0] && PDFJS.tmp[0][0] && PDFJS.tmp[0][0].result) {
+	PDFJS.tmp[0].check.b[0] = PDFJS.tmp[0][0].result;
 
 }
 
@@ -8409,8 +8409,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
  * @class
  */
 var CustomStyle = (function CustomStyleClosure() {
-if (!PDFJS.previous) {
-	PDFJS.previous = {};
+if (!PDFJS.tmp) {
+	PDFJS.tmp = {};
 
 }
 
@@ -9076,8 +9076,8 @@ var SVG_DEFAULTS = {
 };
 
 var convertImgDataToPng = (function convertImgDataToPngClosure() {
-if (PDFJS.previous && !PDFJS.previous.aware) {
-	PDFJS.previous.aware = {};
+if (PDFJS.tmp && !PDFJS.tmp.mpx) {
+	PDFJS.tmp.mpx = {};
 
 }
 
@@ -10344,5 +10344,3 @@ if (!PDFJS.workerSrc && typeof document !== 'undefined') {
     return pdfJsSrc && pdfJsSrc.replace(/\.js$/i, '.worker.js');
   })();
 }
-
-

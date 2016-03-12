@@ -6,37 +6,36 @@ var permutationgraph;
     class permutationgraphnode {
         constructor(id) {
             this.id = id;
-            this.alias = [];
-            this.alias_obj = [];
+            this.aliases = {};
+            this.alias_obj = new Map();
             this.dist = Infinity;
             this.built = Infinity;
             this.outbound_edges = [];
             this.inbound_edges = [];
         }
-        alias_index(context) {
-            var index = -1;
+        alias_object(context, instruction) {
             for (var k in context) {
                 var v = context[k];
-                index = this.alias_obj.indexOf(v);
-                if (index >= 0) {
-                    break;
+                var node_aliases = this.alias_obj.get(v) || [];
+                for (var i = 0; i < node_aliases.length; i++) {
+                    var interval = node_aliases[i];
+                    if (instruction > interval.instruction_added && instruction <= interval.instruction_removed)
+                        return v;
                 }
             }
-            return index;
+            return null;
         }
-        alias_object(context) {
-            var i = this.alias_index(context);
-            if (i >= 0)
-                return this.alias_obj[i];
-            else
-                return null;
-        }
-        alias_string(context) {
-            var i = this.alias_index(context);
-            if (i >= 0)
-                return this.alias[i];
-            else
-                return '';
+        alias_string(context, instruction) {
+            for (var k in context) {
+                var v = context[k];
+                var alias = this.alias_obj.get(v) || [];
+                for (var i = 0; i < alias.length; i++) {
+                    var interval = alias[i];
+                    if (instruction > interval.instruction_added && instruction <= interval.instruction_removed)
+                        return interval.name;
+                }
+            }
+            return '';
         }
     }
     permutationgraph_1.permutationgraphnode = permutationgraphnode;
@@ -136,8 +135,8 @@ var permutationgraph;
                 return null; // should never happen
             }
             var perm_reordered = [];
-            for (i = 1; i <= size; ++i) {
-                perm_reordered.push(perm[(i + i_zero) % size]);
+            for (i = 0; i < size; ++i) {
+                perm_reordered[size - i - 1] = perm[(i + i_zero) % size];
             }
             return perm_reordered;
         }
@@ -211,7 +210,7 @@ var permutationgraph;
             for (var i = 0; i < size; i++) {
                 // make backbone edges
                 this.add_edge(nodes[i], nodes[(i + 1) % size], true);
-                var dest = (i + perm[i]) % size;
+                var dest = (i + perm[size - i - 1]) % size;
                 if (i != dest) {
                     // edge is not representing zero
                     this.add_edge(nodes[i], nodes[dest], false);
@@ -250,7 +249,13 @@ var cycles;
         for (var k in obj) {
             // skip non objects, numeric keys, and null
             // (numeric keys are not allowed in the backbone)
-            var v = obj[k];
+            var v;
+            try {
+                v = obj[k];
+            }
+            catch (e) {
+                v = undefined;
+            }
             if (!v
                 || begin_digit.test(k)
                 || typeof (v) !== 'object')
@@ -287,7 +292,13 @@ var cycles;
         for (var k in root) {
             // skip non objects, numeric keys, null and blacklisted keys
             // (numeric keys are not allowed in the backbone)
-            var v = root[k];
+            var v;
+            try {
+                v = root[k];
+            }
+            catch (e) {
+                v = undefined;
+            }
             if (!v
                 || begin_digit.test(k)
                 || typeof (v) !== 'object'
@@ -321,7 +332,13 @@ var cycles;
             // ignore edges whose keys start with digits
             if (begin_digit.test(k))
                 continue;
-            var v = obj[k];
+            var v;
+            try {
+                v = obj[k];
+            }
+            catch (e) {
+                v = undefined;
+            }
             var v_info = map.get(v);
             // skip edges not part of this connected component
             if (!v_info)
@@ -347,7 +364,13 @@ var cycles;
                 // ignore edges whose keys start with digits
                 if (begin_digit.test(k))
                     continue;
-                var v = obj[k];
+                var v;
+                try {
+                    v = obj[k];
+                }
+                catch (e) {
+                    v = undefined;
+                }
                 var v_info = map.get(v);
                 // skip edges not part of this connected component
                 if (!v_info)

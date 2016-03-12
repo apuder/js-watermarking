@@ -36,7 +36,12 @@ module cycles {
         for (var k in obj) {
             // skip non objects, numeric keys, and null
             // (numeric keys are not allowed in the backbone)
-            var v: Object = obj[k];
+            var v: Object;
+            try {
+                v = obj[k];
+            } catch (e) {
+                v = undefined;
+            }
             if (!v
                 || begin_digit.test(k)
                 || typeof (v) !== 'object') continue;
@@ -79,7 +84,12 @@ module cycles {
         for (var k in root) {
             // skip non objects, numeric keys, null and blacklisted keys
             // (numeric keys are not allowed in the backbone)
-            var v: Object = root[k];
+            var v: Object;
+            try { 
+                v = root[k];
+            } catch (e) { 
+                v = undefined;
+            }
             if (!v
                 || begin_digit.test(k)
                 || typeof (v) !== 'object'
@@ -121,7 +131,12 @@ module cycles {
         for (var k in obj) {
             // ignore edges whose keys start with digits
             if (begin_digit.test(k)) continue;
-            var v: Object = obj[k];
+            var v: Object;
+            try {
+                v = obj[k];
+            } catch (e) {
+                v = undefined;
+            }
             var v_info = map.get(v);
             // skip edges not part of this connected component
             if (!v_info) continue;
@@ -146,7 +161,12 @@ module cycles {
             for (var k in obj) {
                 // ignore edges whose keys start with digits
                 if (begin_digit.test(k)) continue;
-                var v: Object = obj[k];
+                var v: Object;
+                try {
+                    v = obj[k];
+                } catch (e) {
+                    v = undefined;
+                }
                 var v_info = map.get(v);
                 // skip edges not part of this connected component
                 if (!v_info) continue;
