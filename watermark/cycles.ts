@@ -29,7 +29,7 @@ module cycles {
         return obj_node;
     }
 
-    function tarjan_recurse(obj: Object, stk: Object[], map: Map<Object, tarjanNode>, components: Object[][]) {
+    function tarjan_recurse(obj: Object, stk: Object[], map: Map<Object, tarjanNode>, components: Object[][], size: number) {
 
         var obj_node = make_tarjanNode(obj, stk, map);
 
@@ -49,7 +49,7 @@ module cycles {
             var v_node = map.get(v);
             if (!v_node) {
                 // visit v
-                tarjan_recurse(v, stk, map, components);
+                tarjan_recurse(v, stk, map, components, size);
                 // v_node will be in the map now
                 v_node = map.get(v);
                 obj_node.component_id = (obj_node.component_id > v_node.component_id) ? v_node.component_id : obj_node.component_id;
@@ -69,12 +69,14 @@ module cycles {
 
                 v_node.on_stack = false;
             }
-            components.push(component);
+            if (component.length >= size) {
+                components.push(component);
+            }
             // console.log('found strongly connected component');
         }
     }
 
-    function tarjan(root: Object, blacklist: string[]): Object[][] {
+    function tarjan(root: Object, blacklist: string[], size: number): Object[][] {
         // finds strongly connected components of the graph starting from root
         var stk: Object[] = [];
         var map = new Map<Object, tarjanNode>();
@@ -97,7 +99,7 @@ module cycles {
 
             if (!map.get(v)) {
                 // visit v
-                tarjan_recurse(v, stk, map, components);
+                tarjan_recurse(v, stk, map, components, size);
             }
         }
 
@@ -232,10 +234,13 @@ module cycles {
         blacklist = blacklist || [];
 
         var found: Object[][];
+
         // find strongly connected components
-        found = tarjan(root, blacklist);
+        found = tarjan(root, blacklist, size);
+
         // find circuits in strongly connected components
-        found = johnson(found, size);
+        // takes size of graph * number of simple cycles time, potentially exponential
+        // found = johnson(found, size);
 
         return found;
     }

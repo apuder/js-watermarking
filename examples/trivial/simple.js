@@ -2,39 +2,37 @@
 var root = {};
 
 function trivial() {
-	if (!root.after) {
-	root.after = {};
-root.after.wabi = {};
-root.after.wabi[0] = {};
-root.after.wabi[0][0] = {};
-root.after.wabi[0][0][0] = {};
-root.after.wabi[0][0][0].cdr = {};
-root.after.wabi[0][0][0].cdr[0] = root.after.wabi[0][0];
-root.after.wabi[0][0][0][0] = {};
-root.after.wabi[0][0].self = {};
-root.after.wabi[0].miyabi = {};
-root.after.wabi.status = {};
-root.after.wabi[0][0].self[0] = root.after.wabi[0][0][0][0];
-root.after.wabi[0].miyabi[0] = root.after.wabi[0];
-root.after.wabi[0][0].self[0].rest = {};
-root.after.wabi.status.gry = root.after.wabi[0][0][0];
-root.after.wabi.status[0] = root.after.wabi.status.gry.cdr;
-root.after.wabi.status.gry[0].rest[0] = root.after.wabi[0];
-root.after.wabi[0][0].self.stack = root.after;
-root.after.wabi[0].miyabi.pos = {};
-root.after.wabi.status.gry[0][0] = root.after.wabi[0].miyabi;
-root.after.wabi.status.gry[0].rest.next = {};
-root.after.wabi.status[0].next = root.after.wabi[0];
-root.after.wabi[0].miyabi.pos.cdr = {};
-root.after.wabi.status.gry[0].rest.next.head = root.after.wabi[0][0];
-root.after.wabi[0].miyabi.pos.cdr[0] = root.after.wabi[0].miyabi;
-root.after.wabi[0].miyabi.pos.cdr.result = root.after.wabi.status.gry[0];
-root.after.wabi.status.gry[0].rest.next[0] = root.after;
-root.after.wabi[0].miyabi.pos[0] = root.after.wabi[0].miyabi.pos.cdr;
+	if (!root.cdr) {
+	root.cdr = {};
+root.cdr.after = {};
+root.cdr.after.heap = {};
+root.cdr.after.heap.value = {};
+root.cdr.after[0] = root.cdr.after.heap;
+root.cdr.after.heap[0] = {};
+root.cdr.after.heap.value.yugen = root.cdr.after.heap[0];
+root.cdr.after.heap[0].cdr = {};
+root.cdr.after.heap.value[0] = {};
+root.cdr.after.heap.value[0][0] = {};
+root.cdr.after.heap.value[0][0][0] = root.cdr.after.heap[0];
+root.cdr.after.heap.value[0].current = {};
+root.cdr.after.heap[0].cdr.before = root.cdr.after.heap.value[0];
+root.cdr.after.heap.value[0][0].last = {};
+root.cdr.after.heap.value[0][0].last.yugen = {};
+root.cdr.after.heap[0][0] = {};
+root.cdr.after.heap[0][0].car = root.cdr.after.heap.value[0][0];
+root.cdr.after.heap.value[0][0].last.yugen.miyabi = {};
+root.cdr.after.heap[0][0][0] = root.cdr.after.heap.value[0];
+root.cdr.after.heap.value[0][0].last[0] = root.cdr.after.heap.value[0].current;
+root.cdr.after.heap.value[0].current[0] = root.cdr;
+root.cdr.after.heap.value[0][0].last.yugen.miyabi.tsukimi = root.cdr;
+root.cdr.after.heap.value[0][0].last.yugen[0] = root.cdr.after.heap[0];
+root.cdr.after.heap[0].cdr[0] = root.cdr.after.heap.value;
+root.cdr.after.heap.value[0].current.car = {};
+root.cdr.after.heap.value[0].current.car.prev = root.cdr.after.heap[0][0];
+root.cdr.after.heap.value[0].current.car[0] = root.cdr.after.heap.value[0].current;
+root.cdr.after.heap.value[0][0].last.yugen.miyabi[0] = root.cdr.after.heap.value[0].current.car;
 
 }
-
-
 
 }
 

@@ -45,6 +45,10 @@ chrome.runtime.onMessage.addListener(function (msg, sender, response) {
 	else if (msg.method === 'insert_watermark') {
   		var num = msg.number;
   		var size = msg.size;
+  		// check if already inserted code
+  		var jws = document.getElementById("jsw_watermark_script");
+		if (jws) jws.parentNode.removeChild(jws);
+		//insert code
 		var script = document.createElement("script");
 		script.id = "jsw_watermark_script";
 		script.text = "final_stack.watermark_num = " + num + ";\n"

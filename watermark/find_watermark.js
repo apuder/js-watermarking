@@ -244,7 +244,7 @@ var cycles;
         }
         return obj_node;
     }
-    function tarjan_recurse(obj, stk, map, components) {
+    function tarjan_recurse(obj, stk, map, components, size) {
         var obj_node = make_tarjanNode(obj, stk, map);
         for (var k in obj) {
             // skip non objects, numeric keys, and null
@@ -263,7 +263,7 @@ var cycles;
             var v_node = map.get(v);
             if (!v_node) {
                 // visit v
-                tarjan_recurse(v, stk, map, components);
+                tarjan_recurse(v, stk, map, components, size);
                 // v_node will be in the map now
                 v_node = map.get(v);
                 obj_node.component_id = (obj_node.component_id > v_node.component_id) ? v_node.component_id : obj_node.component_id;
@@ -280,10 +280,12 @@ var cycles;
                 var v_node = map.get(v);
                 v_node.on_stack = false;
             }
-            components.push(component);
+            if (component.length >= size) {
+                components.push(component);
+            }
         }
     }
-    function tarjan(root, blacklist) {
+    function tarjan(root, blacklist, size) {
         // finds strongly connected components of the graph starting from root
         var stk = [];
         var map = new Map();
@@ -306,7 +308,7 @@ var cycles;
                 continue;
             if (!map.get(v)) {
                 // visit v
-                tarjan_recurse(v, stk, map, components);
+                tarjan_recurse(v, stk, map, components, size);
             }
         }
         return components;
@@ -430,9 +432,10 @@ var cycles;
         blacklist = blacklist || [];
         var found;
         // find strongly connected components
-        found = tarjan(root, blacklist);
+        found = tarjan(root, blacklist, size);
         // find circuits in strongly connected components
-        found = johnson(found, size);
+        // takes size of graph * number of simple cycles time, potentially exponential
+        // found = johnson(found, size);
         return found;
     }
     cycles.find_cycles = find_cycles;
