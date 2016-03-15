@@ -3,26 +3,23 @@
 
 // declare module cyclicgraph {
 
-  interface node_alias {
-    [index: string]: Object;
-  }
-
   interface node_alias_obj {
     name: string;
+    obj: Object;
     instruction_added: number;
     instruction_removed: number;
   }
 
   interface cyclicgraphnode {
     id: number;
-    aliases: node_alias;
+    aliases: Map<string, node_alias_obj[]>;
     alias_obj: Map<Object, node_alias_obj[]>;
     dist: number;
     built: number; // instruction number when this was built
     outbound_edges: cyclicgraphedge[];
     inbound_edges: cyclicgraphedge[];
-    alias_object(context: Object[], instruction: number): Object
-    alias_string(context: Object[], instruction: number): string;
+    alias_object(context: Object, instruction: number, building_now: boolean): node_alias_obj;
+    // alias_string(str: string, instruction: number): node_alias_obj;
   }
 
   interface cyclicgraphedge {

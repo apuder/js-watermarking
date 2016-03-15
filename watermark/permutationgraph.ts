@@ -7,7 +7,7 @@ module permutationgraph {
 
   export class permutationgraphnode implements cyclicgraphnode {
     id: number;
-    aliases: node_alias;
+    aliases: Map<string, node_alias_obj[]>;
     alias_obj: Map<Object, node_alias_obj[]>;
     dist: number;
     built: number;
@@ -16,7 +16,7 @@ module permutationgraph {
 
     constructor(id: number) {
       this.id = id;
-      this.aliases = {};
+      this.aliases = new Map();
       this.alias_obj = new Map();
       this.dist = Infinity;
       this.built = Infinity;
@@ -24,29 +24,50 @@ module permutationgraph {
       this.inbound_edges = [];
     }
 
-    alias_object(context: Object[], instruction: number): Object {
-      for (var k in context) {
-        var v = context[k];
-        var node_aliases = this.alias_obj.get(v) || [];
-        for (var i = 0; i < node_aliases.length; i++) {
-          var interval = node_aliases[i];
-          if (instruction > interval.instruction_added && instruction <= interval.instruction_removed) return v;
+    alias_object(context: Object, instruction: number, building_now: boolean): node_alias_obj {
+      if (building_now) {
+        for (var k in context) {
+          var v = context[k];
+          var node_aliases = this.alias_obj.get(v) || [];
+          for (var i = 0; i < node_aliases.length; i++) {
+            var interval = node_aliases[i];
+            if (instruction >= interval.instruction_added && instruction < interval.instruction_removed) return interval;
+          }
+        }
+      }
+      else {
+        for (var k in context) {
+          var v = context[k];
+          var node_aliases = this.alias_obj.get(v) || [];
+          for (var i = 0; i < node_aliases.length; i++) {
+            var interval = node_aliases[i];
+            if (instruction > interval.instruction_added && instruction <= interval.instruction_removed) return interval;
+          }
         }
       }
       return null;
     }
 
-    alias_string(context: Object[], instruction: number): string {
+    alias_object_building(context: Object, instruction: number): node_alias_obj {
       for (var k in context) {
         var v = context[k];
-        var alias = this.alias_obj.get(v) || [];
-        for (var i = 0; i < alias.length; i++) {
-          var interval = alias[i];
-          if (instruction > interval.instruction_added && instruction <= interval.instruction_removed) return interval.name;
+        var node_aliases = this.alias_obj.get(v) || [];
+        for (var i = 0; i < node_aliases.length; i++) {
+          var interval = node_aliases[i];
+          if (instruction >= interval.instruction_added && instruction < interval.instruction_removed) return interval;
         }
       }
-      return '';
+      return null;
     }
+
+    // alias_string(str: string, instruction: number): node_alias_obj {
+    //   var node_aliases = this.aliases.get(str) || [];
+    //   for (var i = 0; i < node_aliases.length; i++) {
+    //     var interval = node_aliases[i];
+    //     if (instruction > interval.instruction_added && instruction <= interval.instruction_removed) return interval;
+    //   }
+    //   return null;
+    // }
   }
 
   export class permutationgraphedge implements cyclicgraphedge {

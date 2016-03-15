@@ -6,36 +6,49 @@ var permutationgraph;
     class permutationgraphnode {
         constructor(id) {
             this.id = id;
-            this.aliases = {};
+            this.aliases = new Map();
             this.alias_obj = new Map();
             this.dist = Infinity;
             this.built = Infinity;
             this.outbound_edges = [];
             this.inbound_edges = [];
         }
-        alias_object(context, instruction) {
+        alias_object(context, instruction, building_now) {
+            if (building_now) {
+                for (var k in context) {
+                    var v = context[k];
+                    var node_aliases = this.alias_obj.get(v) || [];
+                    for (var i = 0; i < node_aliases.length; i++) {
+                        var interval = node_aliases[i];
+                        if (instruction >= interval.instruction_added && instruction < interval.instruction_removed)
+                            return interval;
+                    }
+                }
+            }
+            else {
+                for (var k in context) {
+                    var v = context[k];
+                    var node_aliases = this.alias_obj.get(v) || [];
+                    for (var i = 0; i < node_aliases.length; i++) {
+                        var interval = node_aliases[i];
+                        if (instruction > interval.instruction_added && instruction <= interval.instruction_removed)
+                            return interval;
+                    }
+                }
+            }
+            return null;
+        }
+        alias_object_building(context, instruction) {
             for (var k in context) {
                 var v = context[k];
                 var node_aliases = this.alias_obj.get(v) || [];
                 for (var i = 0; i < node_aliases.length; i++) {
                     var interval = node_aliases[i];
-                    if (instruction > interval.instruction_added && instruction <= interval.instruction_removed)
-                        return v;
+                    if (instruction >= interval.instruction_added && instruction < interval.instruction_removed)
+                        return interval;
                 }
             }
             return null;
-        }
-        alias_string(context, instruction) {
-            for (var k in context) {
-                var v = context[k];
-                var alias = this.alias_obj.get(v) || [];
-                for (var i = 0; i < alias.length; i++) {
-                    var interval = alias[i];
-                    if (instruction > interval.instruction_added && instruction <= interval.instruction_removed)
-                        return interval.name;
-                }
-            }
-            return '';
         }
     }
     permutationgraph_1.permutationgraphnode = permutationgraphnode;
