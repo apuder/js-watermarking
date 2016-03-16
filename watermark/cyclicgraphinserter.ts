@@ -767,9 +767,9 @@ module cyclicgraphinserter {
 
 			this.count = 0;
 			return trace.orig_code.replace(/\/\/\/jsw.*/g, function replace(code: string): string {
-				if (code.indexOf("///jsw_end") == 0) {
+				if (code.indexOf("\/\/\/jsw_end") == 0) {
 					return '';
-				} else if (code.indexOf("///jsw_global") == 0) {
+				} else if (code.indexOf("\/\/\/jsw_global") == 0) {
 					return '';
 				} else {
 					return this_.loc_code[this_.count++] || '';

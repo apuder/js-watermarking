@@ -1,4 +1,5 @@
 
+var messages_area;
 var html_nums;
 var html_scripts;
 
@@ -70,6 +71,7 @@ function make_watermark() {
 	}
 
 	chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+		// console.log("Tab: "+tabs[0].id+" Number: "+input_number.value+" Size: "+input_size.value);
 		// send message to background to insert watermark in current page
 		chrome.runtime.sendMessage({ from: 'jsw_popup', method: 'insert_watermark', tabid: tabs[0].id, number: input_number.value, size: input_size.value });
 	});
@@ -88,7 +90,25 @@ function find_watermark() {
 	});
 }
 
+// handle messages
+chrome.runtime.onMessage.addListener(function(msg, sender, response) {
+	if (msg.from === 'jsw_background') {
+		// messages from background
+		if (msg.method === 'jswpp_server_found') {
+			messages_area.innerHTML = "";
+			messages_area.style.color = "black";
+		}
+		else if (msg.method === 'jswpp_server_not_found') {
+			messages_area.innerHTML = "Error: jswpp.js server not found.";
+			messages_area.style.color = "red";
+		}
+	}
+});
+
+
 document.addEventListener('DOMContentLoaded', function () {
+	messages_area = document.getElementById("messages_area");
+
 	var insert = document.getElementById("insert_button");
 	if (insert.type === 'button' && insert.name === 'insert') {
 		insert.addEventListener('click', make_watermark);

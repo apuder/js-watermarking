@@ -925,10 +925,10 @@ var cyclicgraphinserter;
             this.construct_site_code(trace);
             this.count = 0;
             return trace.orig_code.replace(/\/\/\/jsw.*/g, function replace(code) {
-                if (code.indexOf("///jsw_end") == 0) {
+                if (code.indexOf("\/\/\/jsw_end") == 0) {
                     return '';
                 }
-                else if (code.indexOf("///jsw_global") == 0) {
+                else if (code.indexOf("\/\/\/jsw_global") == 0) {
                     return '';
                 }
                 else {

@@ -2,51 +2,51 @@
 var root = {};
 
 function simple1(east) {
-	if (!root.tmp) {
-	east.rest = root.tmp = {};
-east.rest.car = {};
-east.rest.car[0] = {};
-east.aware = east.rest.car[0][0] = {};
-east.current = east.rest.car[0].value = {};
-east.aware[0] = {};
-east.aware.value = east.rest;
-east.aware[0][0] = {};
-east.current.tsukimi = east.aware[0][0];
-east.current[0] = {};
+    if (!root.mpx) {
+	east.yugen = root.mpx = {};
+east.yugen.current = {};
+east.yugen.current.yugen = {};
+east.before = east.yugen.current.yugen.status = {};
+east.before[0] = {};
+east.yugen.current[0] = east.yugen.current.yugen;
+east.before[0].other = {};
+east.head = east.before[0].other.rest = {};
+east.car = east.before[0].other[0] = east.yugen.current.yugen;
+east.head.value = {};
 
 }
 
 }
 
 function simple2(sneaky) {
-	var south = {};
-	if (sneaky.tmp && sneaky.tmp.car && !sneaky.tmp.car.heap && sneaky.tmp.car[0] && sneaky.tmp.car[0].value && sneaky.tmp.car[0].value[0] && !sneaky.tmp.car[0].value[0].before && sneaky.tmp.car[0].value.tsukimi && !sneaky.tmp.car[0].value.tsukimi[0] && sneaky.tmp.car[0][0] && sneaky.tmp.car[0][0][0] && !sneaky.tmp.car[0][0][0].value && !sneaky.tmp.car[0].value[0][0]) {
-	sneaky.tree = sneaky.tmp.car.heap = {};
-sneaky.result = sneaky.tmp.car[0].value[0].before = {};
-sneaky.tmp.car[0].value.tsukimi[0] = sneaky.tree;
-south.tmp = sneaky.tmp.car[0][0][0].value = {};
-sneaky.result[0] = sneaky.tmp.car[0].value[0];
-south.tmp[0] = sneaky.tmp.car[0];
-sneaky.result[0][0] = south.tmp[0];
-sneaky.tree.car = {};
-sneaky.tree[0] = south.tmp[0].value.tsukimi;
+    var south = {};
+    if (sneaky.mpx && sneaky.mpx.current && sneaky.mpx.current.yugen && sneaky.mpx.current.yugen.status && sneaky.mpx.current.yugen.status[0] && !sneaky.mpx.current.yugen.status[0][0] && !sneaky.mpx.current.yugen.status.sabi && sneaky.mpx.current.yugen.status[0].other && sneaky.mpx.current.yugen.status[0].other.rest && sneaky.mpx.current.yugen.status[0].other.rest.value && !sneaky.mpx.current.yugen.status[0].other.rest.value.aware && !sneaky.mpx.current.yugen.status[0].other.rest.value[0] && !sneaky.mpx.current.yugen[0]) {
+	south.tmp = sneaky.mpx.current.yugen.status[0][0] = {};
+sneaky.mpx.current.yugen.status.sabi = south.tmp;
+south.status = sneaky.mpx.current.yugen.status[0].other.rest.value.aware = {};
+sneaky.prev = sneaky.mpx.current.yugen.status[0].other.rest.value[0] = sneaky.mpx.current.yugen.status[0];
+south.status[0] = sneaky.prev.other.rest.value;
+sneaky.mpx.current.yugen[0] = south.tmp;
+south.tmp[0] = {};
+south.status.after = {};
+south.tmp[0][0] = sneaky.mpx.current.yugen;
 
 }
 
 }
 
 function simple3(south) {
-	var north = {};
-	if (root.tree && root.tree.car && !root.tree.car.after && root.tmp && root.tmp.car && root.tmp.car[0] && root.tmp.car[0].value && !root.tree.car[0] && root.tmp.car[0][0] && root.tmp.car[0][0][0] && root.tmp.car[0][0][0].value && !root.tmp.car[0][0][0].value.aware && root.tmp.car[0].value[0] && root.tmp.car[0][0][0][0] && !root.tmp.car[0][0][0][0].aware && root.result && root.result[0] && root.result[0].before && !root.result[0].before.value) {
-	south.sabi = root.tree.car.after = {};
-root.tree.car[0] = root.tmp.car[0].value;
-south.sabi.tree = root.tmp.car[0];
-north.sabi = south.sabi.tree[0][0].value.aware = south.sabi.tree[0];
-south.sabi[0] = {};
-south.sabi[0].gry = north.sabi[0];
-south.miyabi = north.sabi[0][0].aware = south.sabi.tree.value[0];
-south.miyabi.before.value = south.sabi[0];
-south.sabi[0][0] = north.sabi[0];
+    var north = {};
+    if (root.prev && root.prev[0] && !root.prev[0].pos && root.prev.other && root.prev.other.rest && root.prev.other.rest.value && root.prev.other.rest.value.aware && root.prev.other.rest.value.aware.after && !root.prev.other.rest.value.aware.after[0] && root.prev.other[0] && root.prev.other[0][0] && root.prev.other[0][0][0] && !root.prev.other[0][0][0].stack && !root.prev.other.rest.value.aware.after.self && root.mpx && root.mpx.current && !root.prev.other.rest[0] && root.prev.other.rest.value[0]) {
+	south.rest = root.prev[0].pos = {};
+north.self = root.prev.other.rest.value.aware.after[0] = root.prev.other;
+south.tsukimi = north.self[0][0][0].stack = {};
+north.tree = north.self.rest.value.aware.after.self = north.self[0][0][0];
+south.tsukimi.self = root.mpx;
+north.self.rest[0] = south.tsukimi.self.current;
+south.rest[0] = north.self.rest.value.aware.after;
+south.tsukimi[0] = north.self[0][0];
+south.rest.miyabi = north.self.rest.value[0];
 
 }
 

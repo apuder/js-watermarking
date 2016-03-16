@@ -11,6 +11,7 @@ applications.
 
 ##1. Code Annotation
 To watermark javascript code, insert annotations into the source code.
+These files must be named *.jsw.js for step 2 to work.
 These annotations begin with ///jsw.  These annotations will be replaced by
 code that traces the execution of the application.  Annotating the code only 
 needs to be done once.
@@ -43,19 +44,15 @@ in the case a non-watermarked version of the code is released.
 
 
 ##2. Tracing and Watermark insertion
-To generete the watermark code, the application code must be preprocessed and run.
-The nodejs script jswpp.js preprocesses javascript files to prepare then to be run in chrome.
-Js-watermarking file naming conventions go as follows.
-.jsw.pp.js files are ///jsw annotated js files.
-.jsw.js files are preprocessed and ready to be run in Chrome.
-#####	Preprocess: ```node jswpp.js file.jsw.pp.js```
-		* The only argument to jswpp.js is the name of the file to be preprocessed.
-			The output file will have .jsw.pp changed to .jsw if possible,
-			otherwise it will be named out.jsw.js.
-#####	Trace/Insert: In Chrome, open the page with script file.jsw.js.
+```node jswpp.js```
+Run the nodejs script jswpp.js before attempting to watermark code.
+```jswpp.js``` is a small server that processes javascript files whose url ends in .jsw.js on the fly.
+#####	Trace/Insert: On the command line, ```node jswpp.js```
+		In Chrome, open the page with script.jsw.js.
 		Open the jsw chrome extension by clicking on the jsw icon, see installation.
 		Input the number and size desired, then click Insert.
-		A download link will in the extension popup when watermark insertion is complete.
+		A download link will appear in the extension popup when watermark insertion is complete.
+		Change the number or size of the watermark and repeat as desired.
 
 
 ##3. Minify watermarked code
@@ -76,11 +73,9 @@ The results will appear in the extension popup and in the console (```ctrl + shi
 
 Open Chrome/Chromium and navigate to about:extensions.
 Enable Developer Mode if not enabled.
-Then click load unpackaged extension and select the extension folder in js-watermarking.
+Then click load unpackaged extension and select the ```extension``` folder in js-watermarking.
 The letters jsw should appear on the extension bar next to the menu icon.
 
 
 ####Notes:
-The find watermarks extension is under development and may run indefinitely.
-Clicking Insert in the Trace/Insert step before the webpage has finidhed tracing will cause an error to print to console.
-In the future the Preprocessing may be implemented in the Chrome extension.
+Clicking Insert in the Trace/Insert step before the webpage has finished tracing will cause an error to print to console.
