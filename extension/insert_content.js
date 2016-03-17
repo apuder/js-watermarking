@@ -17,7 +17,7 @@ window.addEventListener("message", function(event) {
 }, false);
 
 function insert_watermark(num, size) {
-	console.log("inserting watermark number - " + num + ", size - " + size);
+	console.log("inserting watermark: number " + num + ", size " + size);
 	// check if already inserted code
 	var jws = document.getElementById("jsw_watermark_script");
 	if (jws) { jws.parentNode.removeChild(jws);
@@ -45,6 +45,9 @@ function find_jswpp_scripts() {
 			console.log("Found " + script.src);
 			jswpp_scripts.push(script.src);
 		}
+	}
+	if (scripts.length == 0) {
+		console.error("No .jsw.js scripts found");
 	}
 
 	// send script urls to background script for storage

@@ -3,6 +3,7 @@ var jsw_serv_url = 'http://localhost';
 var PORT = 3560;
 
 var jsw_scripts_redirect_table = {};
+var num_scripts_stored = 0;
 var jsw_stored_scripts = [];
 // var jsw_blobs = [];
 var watermarked_blobs = [];
@@ -11,10 +12,21 @@ var tabid;
 var input_number;
 var input_size;
 
+function load_content_script_to_tab(script, onload) {
+	console.log("loading script: "+script);
+		// execute content script in tab
+		chrome.tabs.executeScript(null,
+					{	file: script,
+						allFrames: true
+					},
+					onload
+					);
+}
+
 function redirect_preprocessed_scripts(details) {
 	var new_url = jsw_scripts_redirect_table[details.url] || details.url;
 
-	// console.log(details.url + " => " + new_url);
+	console.log("Rediecting: "+details.url + " => " + new_url);
 
 	return {redirectUrl: new_url};
 }
@@ -33,9 +45,19 @@ function remove_stored_scripts() {
 	jsw_stored_scripts = [];
 }
 
+function stop_jsw_redirect() {
+	console.log("Stopping .jsw.js script redirection");
+	// remove webRequest listener when done
+	chrome.webRequest.onBeforeRequest.removeListener(
+        redirect_preprocessed_scripts);
+
+	remove_stored_scripts();
+}
+
 // localStorage scripts is an array of {url, file_name}
 function store_script(script, file) {
-	console.log(file);
+	console.log("Storing watermarked file: "+file);
+	num_scripts_stored++;
 	// store script into a blob
 	var mime = "application/javascript";
 	var script_blob = new Blob([script], { type: mime });
@@ -46,16 +68,14 @@ function store_script(script, file) {
 	stored_scripts.push({url: blob_url, file_name: file});
 	localStorage["scripts"] = JSON.stringify(stored_scripts);
 
-	if (watermarked_blobs.length == Object.keys(jsw_scripts_redirect_table).length) {
-		// remove webRequest listener when done
-		chrome.webRequest.onBeforeRequest.removeListener(
-	        redirect_preprocessed_scripts);
-
-		remove_stored_scripts();
+	if (num_scripts_stored == Object.keys(jsw_scripts_redirect_table).length) {
+		stop_jsw_redirect();
 	}
 }
 
 function do_insert_watermark() {
+	num_scripts_stored = 0;
+	console.log("Inserting watermark: number "+input_number+", size "+input_size);
 	chrome.tabs.sendMessage(tabid, 
 			{ from: 'jsw_background', 
 			  method: 'insert_watermark',
@@ -63,8 +83,6 @@ function do_insert_watermark() {
 			  size: input_size
 			});
 }
-
-
 
 function check_trace_complete() {
 	chrome.tabs.sendMessage(tabid, 
@@ -79,22 +97,17 @@ function check_trace_complete() {
 			}
 			else if (typeof(response) === "undefined") {
 				// content script not fully loaded yet
-				console.log("content script failed to load, wait 1 second and try again");
-				setTimeout(function(){ 
-					chrome.tabs.executeScript(null,
-						{	file: "insert_content.js",
-							allFrames: true
-						}
-						, check_trace_complete
-						); 
-					}, 1000);
+				console.log("content script failed to load, waiting 1 second and trying again");
+				setTimeout(function() {
+					load_content_script_to_tab("insert_content.js", check_trace_complete);
+				}, 1000);
 			}
-		});
+	});
 }
 
-
-
 function rediect_jswpp_scripts() {
+	num_scripts_stored = 0;
+	console.log("Starting .jsw.js script redirection");
 	// add a listener to redirect http requests for .jsw.pp.js scripts
 	chrome.webRequest.onBeforeRequest.addListener(
         redirect_preprocessed_scripts,
@@ -107,19 +120,18 @@ function rediect_jswpp_scripts() {
 
 	// reload the tab and insert scripts to insert the watermark
 	chrome.tabs.reload(tabid, function () {
-		chrome.tabs.executeScript(null,
-						{	file: "insert_content.js",
-							allFrames: true
-						}
-						, check_trace_complete
-					);
+		load_content_script_to_tab("insert_content.js", check_trace_complete);
 	});
 }
 
 function send_to_jsw_serv(jsw_url, script_text) {
-	
+	console.log("Sending script "+jsw_url+" to jswpp");
 	// send scripts to be  preprocessed
 	var xhr = new XMLHttpRequest();
+
+	xhr.onerror = function() { 
+		console.error("Error "+xhr.status+" Failed to send script "+script_url+"to jswpp");
+	}
 
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == 4) {
@@ -131,6 +143,7 @@ function send_to_jsw_serv(jsw_url, script_text) {
 			}
 			else {
 				// TODO handle error
+				console.error("Error "+xhr.status+" Failed to send script "+jsw_url+"to jswpp");
 			}
 		}
 	};
@@ -140,8 +153,13 @@ function send_to_jsw_serv(jsw_url, script_text) {
 }
 
 function get_script(script_url, jsw_url) {
+	console.log("Downloading script "+script_url);
 	// find and preprocess scripts
 	var xhr = new XMLHttpRequest();
+
+	xhr.onerror = function() { 
+		console.error("Error "+xhr.status+" Failed to download script "+script_url);
+	}
 
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == 4) {
@@ -151,6 +169,7 @@ function get_script(script_url, jsw_url) {
 			}
 			else {
 				// TODO handle error
+				console.error("Error "+xhr.status+" Failed to download script "+script_url);
 			}
 		}
 	};
@@ -200,19 +219,19 @@ function check_jswpp_server() {
 	var xhr = new XMLHttpRequest();
 
 	xhr.onerror = function() { 
-		console.log("didn't find jswpp server");
+		console.error("jswpp server not found");
 		chrome.runtime.sendMessage( { from: 'jsw_background', method: 'jswpp_server_not_found'} );
 	}
 
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == 4) {
 			if (xhr.status == 200) {
-				console.log("found jswpp server");
+				console.log("jswpp server found");
 				chrome.runtime.sendMessage( { from: 'jsw_background', method: 'jswpp_server_found'} );
 				find_jswpp_scripts();
 			}
 			else {
-				console.log("didn't find jswpp server");
+				console.error("jswpp server not found");
 				chrome.runtime.sendMessage( { from: 'jsw_background', method: 'jswpp_server_not_found'} );
 			}
 		}
@@ -238,20 +257,35 @@ function check_insert_ready() {
 		});
 }
 
+function keep_trying_check_insert_content() {
+	// check if content script already loaded
+	chrome.tabs.sendMessage(tabid, { from: 'jsw_background', method: 'check_insert_content_loaded'},
+		function(response) {
+			console.log(response);
+			if (response) {
+				check_insert_ready();
+			}
+			else if (typeof(response) === "undefined") {
+				// content script not fully loaded yet
+				console.log("content script failed to load, waiting 1 second and trying again");
+				setTimeout(function() {
+					load_content_script_to_tab("insert_content.js", check_code_watermark_ready);
+				}, 1000);
+			}
+		});
+}
+
 function check_code_watermark_ready() {
 	// check if content script already loaded
 	chrome.tabs.sendMessage(tabid, { from: 'jsw_background', method: 'check_insert_content_loaded'},
 		function(response) {
+			console.log(response);
 			if (response) {
 				check_insert_ready();
-			} else {
-				// execute content script in tab
-				chrome.tabs.executeScript(null,
-							{	file: "insert_content.js",
-								allFrames: true
-							},
-							check_insert_ready
-							);
+			}
+			else if (typeof(response) === "undefined") {
+				// content script not yet loaded
+				load_content_script_to_tab("insert_content.js", keep_trying_check_insert_content);
 			}
 		});
 }
@@ -268,17 +302,13 @@ function insert_find_watermark_code() {
 	// check if content script already loaded
 	chrome.tabs.sendMessage(tabid, { from: 'jsw_background', method: 'check_find_content_loaded'},
 		function(response) {
+			console.log(response);
 			if (response) {
 				// console.log("content script already added");
 				find_watermark();
-			} else {
-				// console.log("adding content script");
-				// execute content script in tab
-				chrome.tabs.executeScript(null,
-						{	file: "find_content.js",
-							allFrames: true
-						},
-						find_watermark);
+			} 
+			else if (typeof(response) === "undefined") {
+				load_content_script_to_tab("find_content.js", find_watermark);
 			}
 		});
 }
@@ -304,6 +334,7 @@ chrome.runtime.onMessage.addListener(function(msg, sender, response) {
 			localStorage.removeItem("nums");
 		}
 		else if (msg.method === 'clear_scripts') {
+			console.log("clearing local variables and script storage");
 			// remove watermarked scripts
 			var scripts = JSON.parse(localStorage["scripts"] || '[]');
 			for (var i = 0; i < scripts.length; i++) {
@@ -319,6 +350,7 @@ chrome.runtime.onMessage.addListener(function(msg, sender, response) {
 			}
 			localStorage.removeItem("jsw_scripts");
 			remove_stored_scripts();
+			stop_jsw_redirect();
 			// reset local vars
 			jsw_scripts_redirect_table = {};
 			jsw_stored_scripts = [];
