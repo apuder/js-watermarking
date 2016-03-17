@@ -36,7 +36,7 @@ module watermarkapplier {
 
 		// document.body.appendChild(a);
 
-		window.postMessage({ type: "jsw_inserted_watermark", text: code, file: trace.file_name }, "*");
+		window.postMessage({ type: "jsw_inserted_watermark", text: code, file: trace.file_name, number: trace.watermark_num, size: trace.watermark_size }, "*");
 	}
 
 }

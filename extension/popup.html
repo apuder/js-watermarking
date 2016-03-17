@@ -5,25 +5,83 @@
     <script src="popup.js"></script>
   </head>
   <body>
+
+    <div>
+      <h2>js-watermarking</h2>
+    </div>
+
+    <hr>
+
     <div>
       <b id="messages_area">
       </b>
     </div>
+
     <div id="variables">
-      Number:
-      <input type="number" id="number_input" name="number" min="0" max="9999999999" step="1" value="0">
-      Size:
-      <input type="number" id="size_input" name="size" min="2" max="100" step="1" value="14">
+    <table style="width:100%">
+      <thead>
+      <tr>
+        <th>Number:</th>
+        <th>Size:</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td><input type="number" id="number_input" name="number" min="0" max="9999999999" step="1" value="0"></td>
+        <td><input type="number" id="size_input" name="size" min="2" max="100" step="1" value="14"></td> 
+      </tr>
+      <tr>
+        <td><input type="button" id="insert_button" name="insert" value="Insert"></td>
+        <td><input type="button" id="find_button" name="find" value="Find"></td> 
+      </tr>
+      </tbody>
+    </table>
     </div>
+
+    <hr>
+
     <div>
-      <input type="button" id="insert_button" name="insert" value="Insert">
-      <input type="button" id="clear_scripts_button" name="clear_scripts" value="Clear Links">
-      <ul id="scriptList">Watermarked Scripts:</ul>
+      <h3>Watermarked Scripts:</h3>
+      <table style="width:100%">
+        <thead>
+        <tr>
+          <th>Number:</th>
+          <th>Size:</th>
+          <th>File:</th>
+        </tr>
+        </thead>
+        <tbody id="scriptList">
+        </tbody>
+        <tfoot>
+          <tr>
+            <td></td>
+            <td></td>
+            <td><input type="button" id="clear_scripts_button" name="clear_scripts" value="clear" style="float:right;"></td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
+
+    <hr>
+
     <div>
-      <input type="button" id="find_button" name="find" value="Find">
-      <input type="button" id="clear_nums_button" name="clear_nums" value="Clear List">
-      <ul id="numList">Found Watermarks:</ul>
+      <h3>Watermarks Found:</h3>
+      <table style="width:100%">
+        <thead>
+        <tr>
+          <th>Number:</th>
+          <th>Size:</th>
+        </tr>
+        </thead>
+        <tbody id="numList">
+        </tbody>
+        <tfoot>
+          <tr>
+            <td></td>
+            <td><input type="button" id="clear_nums_button" name="clear_nums" value="clear" style="float:right;"></td>
+          </tr>
+        </tfoot>
+      </table>
     </div>
   </body>
 </html>

@@ -4,15 +4,14 @@ var PORT = 3560;
 
 var jsw_scripts_redirect_table = {};
 var num_scripts_stored = 0;
-var jsw_stored_scripts = [];
-// var jsw_blobs = [];
+var num_scripts_watermarked = 0;
 var watermarked_blobs = [];
 
 var tabid;
 var input_number;
 var input_size;
 
-function load_content_script_to_tab(script, onload) {
+function load_content_script(script, onload) {
 	console.log("loading script: "+script);
 		// execute content script in tab
 		chrome.tabs.executeScript(null,
@@ -42,7 +41,6 @@ function remove_stored_scripts() {
 	}
 
 	jsw_scripts_redirect_table = {};
-	jsw_stored_scripts = [];
 }
 
 function stop_jsw_redirect() {
@@ -55,9 +53,8 @@ function stop_jsw_redirect() {
 }
 
 // localStorage scripts is an array of {url, file_name}
-function store_script(script, file) {
+function store_script(script, file, num, size) {
 	console.log("Storing watermarked file: "+file);
-	num_scripts_stored++;
 	// store script into a blob
 	var mime = "application/javascript";
 	var script_blob = new Blob([script], { type: mime });
@@ -65,16 +62,16 @@ function store_script(script, file) {
 	var blob_url = window.URL.createObjectURL(script_blob);
 	// store reference to blob in localStorage
 	var stored_scripts = JSON.parse(localStorage["scripts"] || '[]');
-	stored_scripts.push({url: blob_url, file_name: file});
+	stored_scripts.push({url: blob_url, file_name: file, num: num, size: size});
 	localStorage["scripts"] = JSON.stringify(stored_scripts);
 
-	if (num_scripts_stored == Object.keys(jsw_scripts_redirect_table).length) {
+	if (++num_scripts_watermarked == Object.keys(jsw_scripts_redirect_table).length) {
 		stop_jsw_redirect();
 	}
 }
 
 function do_insert_watermark() {
-	num_scripts_stored = 0;
+	num_scripts_watermarked = 0;
 	console.log("Inserting watermark: number "+input_number+", size "+input_size);
 	chrome.tabs.sendMessage(tabid, 
 			{ from: 'jsw_background', 
@@ -88,11 +85,11 @@ function check_missed_trace_complete() {
 	console.log("Checking trace complete");
 	chrome.tabs.sendMessage(tabid, 
 		{ from: 'jsw_background', 
-		  method: 'check_missed_trace_complete'
+		  method: 'set_insert_status',
+		  status: 1
 		}
 		, function(response) {
-			console.log(response);
-			if (response) {
+			if (response == 3) {
 				// missed message, insert watermark
 				do_insert_watermark();
 			}
@@ -100,17 +97,16 @@ function check_missed_trace_complete() {
 				// content script not loaded yet
 				console.log("content script failed to load, waiting 1 second and trying again");
 				setTimeout(function() {
-					load_content_script_to_tab("insert_content.js", check_missed_trace_complete);
+					load_content_script("insert_content.js", check_missed_trace_complete);
 				}, 1000);
 			}
 			else {
-				// didn't miss the message already done, or wait till done
+				console.log("check_missed_trace_complete response code: " + response);
 			}
 	});
 }
 
-function rediect_jswpp_scripts() {
-	num_scripts_stored = 0;
+function redirect_jswpp_scripts() {
 	console.log("Starting .jsw.js script redirection and reloading page");
 	// add a listener to redirect http requests for .jsw.pp.js scripts
 	chrome.webRequest.onBeforeRequest.addListener(
@@ -124,7 +120,7 @@ function rediect_jswpp_scripts() {
 
 	// reload the tab and insert scripts to insert the watermark
 	chrome.tabs.reload(tabid, function () {
-		load_content_script_to_tab("insert_content.js", check_missed_trace_complete);
+		load_content_script("insert_content.js", check_missed_trace_complete);
 	});
 }
 
@@ -140,9 +136,8 @@ function send_to_jsw_serv(jsw_url, script_text) {
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == 4) {
 			if (xhr.status == 200) {
-				jsw_stored_scripts.push(xhr.responseURL);
-				if (jsw_stored_scripts.length == Object.keys(jsw_scripts_redirect_table).length) {
-					rediect_jswpp_scripts();
+				if (++num_scripts_stored == Object.keys(jsw_scripts_redirect_table).length) {
+					redirect_jswpp_scripts();
 				}
 			}
 			else {
@@ -184,8 +179,7 @@ function get_script(script_url, jsw_url) {
 
 function preprocess_scripts(scripts) {
 	jsw_scripts_redirect_table = {};
-	jsw_stored_scripts = [];
-	// jsw_blobs = [];
+	num_scripts_stored = 0;
 	for (var i = 0; i < scripts.length; i++) {
 		var script_url = scripts[i];
 
@@ -203,8 +197,6 @@ function preprocess_scripts(scripts) {
 		// get and preprocess the script
 		get_script(script_url, jsw_url);
 	}
-	
-	localStorage["jsw_scripts"] = JSON.stringify(jsw_scripts_redirect_table);
 }
 
 function find_jswpp_scripts() {
@@ -231,12 +223,12 @@ function check_jswpp_server() {
 		if (xhr.readyState == 4) {
 			if (xhr.status == 200) {
 				console.log("jswpp server found");
-				chrome.runtime.sendMessage( { from: 'jsw_background', method: 'jswpp_server_found'} );
+				localStorage["error"] = "";
 				find_jswpp_scripts();
 			}
 			else {
 				console.error("jswpp server not found");
-				chrome.runtime.sendMessage( { from: 'jsw_background', method: 'jswpp_server_not_found'} );
+				localStorage["error"] = "jswpp.js server not found";
 			}
 		}
 	};
@@ -245,78 +237,81 @@ function check_jswpp_server() {
 	xhr.send();
 }
 
-function check_insert_ready() {
-	chrome.tabs.sendMessage(tabid, 
-		{ from: 'jsw_background', 
-		  method: 'check_insert_ready'
-		}
-		, function(response) {
-			if (response) {
-				// insert watermark
-				do_insert_watermark();
-			} else {
+function keep_trying_check_insert_content() {
+	// check if content script already loaded
+	chrome.tabs.sendMessage(tabid, { from: 'jsw_background', method: 'get_insert_status'},
+		function(response) {
+			if (response == 0) {
 				// find watermarkable code
 				check_jswpp_server();
 			}
-		});
-}
-
-function keep_trying_check_insert_content() {
-	// check if content script already loaded
-	chrome.tabs.sendMessage(tabid, { from: 'jsw_background', method: 'check_insert_content_loaded'},
-		function(response) {
-			console.log(response);
-			if (response) {
-				check_insert_ready();
+			else if (response == 3) {
+				// insert watermark
+				do_insert_watermark();
 			}
 			else if (typeof(response) === "undefined") {
 				// content script not fully loaded yet
 				console.log("content script failed to load, waiting 1 second and trying again");
 				setTimeout(function() {
-					load_content_script_to_tab("insert_content.js", check_code_watermark_ready);
+					load_content_script("insert_content.js", keep_trying_check_insert_content);
 				}, 1000);
+			}
+			else {
+				console.log("keep_trying_check_insert_content response code: " + response);
 			}
 		});
 }
 
 function check_code_watermark_ready() {
 	// check if content script already loaded
-	chrome.tabs.sendMessage(tabid, { from: 'jsw_background', method: 'check_insert_content_loaded'},
+	chrome.tabs.sendMessage(tabid, { from: 'jsw_background', method: 'get_insert_status'},
 		function(response) {
-			console.log(response);
-			if (response) {
-				check_insert_ready();
+			if (response == 0) {
+				// find watermarkable code
+				check_jswpp_server();
+			}
+			else if (response == 3) {
+				// insert watermark
+				do_insert_watermark();
 			}
 			else if (typeof(response) === "undefined") {
 				// content script not yet loaded
-				load_content_script_to_tab("insert_content.js", keep_trying_check_insert_content);
+				load_content_script("insert_content.js", keep_trying_check_insert_content);
+			}
+			else {
+				console.log("check_code_watermark_ready response code: " + response);
 			}
 		});
 }
 
 
 function find_watermark() {
-	// find the watermarks
-	// console.log("trying to find watermarks");
+	console.log("Trying to find watermarks");
 	chrome.tabs.sendMessage(tabid, { from: 'jsw_background', method: 'find_watermarks', watermark_size: input_size });
 }
 
-function insert_find_watermark_code() {
+function try_find_watermark() {
 	
 	// check if content script already loaded
-	chrome.tabs.sendMessage(tabid, { from: 'jsw_background', method: 'check_find_content_loaded'},
+	chrome.tabs.sendMessage(tabid, { from: 'jsw_background', method: 'get_find_status'},
 		function(response) {
-			console.log(response);
-			if (response) {
-				// console.log("content script already added");
+			if (response == 0) {
 				find_watermark();
-			} 
+			}
 			else if (typeof(response) === "undefined") {
-				load_content_script_to_tab("find_content.js", find_watermark);
+				load_content_script("find_content.js", find_watermark);
+			}
+			else {
+				console.log("try_find_watermark response code: " + response);
 			}
 		});
 }
 
+
+// reset localStorage on start
+localStorage.removeItem("error");
+localStorage.removeItem("nums");
+localStorage.removeItem("scripts");
 
 
 // handle messages
@@ -326,7 +321,7 @@ chrome.runtime.onMessage.addListener(function(msg, sender, response) {
 		if (msg.method === 'find_watermark') {
 			tabid = msg.tabid;
 			input_size = msg.size;
-			insert_find_watermark_code();
+			try_find_watermark();
 		}
 		else if (msg.method === 'insert_watermark') {
 			tabid = msg.tabid;
@@ -346,18 +341,10 @@ chrome.runtime.onMessage.addListener(function(msg, sender, response) {
 				window.URL.revokeObjectURL(script.url);
 			}
 			localStorage.removeItem("scripts");
-			// remove preprocessed scripts
-			var jsw_script_blob_urls = JSON.parse(localStorage["jsw_scripts"] || '[]');
-			for (var i = 0; i < jsw_script_blob_urls.length; i++) {
-				var blob_url = jsw_script_blob_urls[i];
-				window.URL.revokeObjectURL(blob_url);
-			}
-			localStorage.removeItem("jsw_scripts");
 			remove_stored_scripts();
 			stop_jsw_redirect();
 			// reset local vars
 			jsw_scripts_redirect_table = {};
-			jsw_stored_scripts = [];
 			watermarked_blobs = [];
 		}
 	}
@@ -376,7 +363,7 @@ chrome.runtime.onMessage.addListener(function(msg, sender, response) {
 	    	preprocess_scripts(jswpp_scripts);
 	    }
 	    else if (msg.method === "storeScript") {
-	    	store_script(msg.arg, msg.file);
+	    	store_script(msg.arg, msg.file, msg.number, msg.size);
 	    }
 	    else if (msg.method === "open_popup") {
 	    	chrome.tabs.create({url: "popup.html"});

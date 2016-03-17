@@ -105,17 +105,17 @@ module permutationgraph {
       return permutationgraph.fact[n];
     }
 
-    static findnums(cycles: Object[][]): number[] {
+    static findnums(cycles: Object[][]): num_size[] {
       // find all numbers represented by permutation graphs in cycles
       
-      var nums: number[] = [];
+      var nums: num_size[] = [];
 
       for (var i = 0; i < cycles.length; i++) {
         var backbone = cycles[i];
         var perm = permutationgraph.backbone_to_perm(backbone);
         if (perm) {
-          nums.push(permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm)));
-          console.log('found watermark number: ' + nums[nums.length-1] + ' (size: ' + perm.length + ')');
+          nums.push({ num: permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm)), size: perm.length });
+          console.log('found watermark number: ' + nums[nums.length - 1].num + ' (size: ' + nums[nums.length - 1].size + ')');
         }
       }
 

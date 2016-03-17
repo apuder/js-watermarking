@@ -6,7 +6,7 @@ function find_watermark(root: Object, size: number, blacklist: string[]) {
 	
 	var cy: Object[][] = cycles.find_cycles(root, size, blacklist);
 
-	var nums: number[] = permutationgraph.permutationgraph.findnums(cy);
+	var nums: num_size[] = permutationgraph.permutationgraph.findnums(cy);
 
 	console.log("Found " + nums.length + " watermarks");
 

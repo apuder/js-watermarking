@@ -3,6 +3,11 @@
 
 // declare module cyclicgraph {
 
+  interface num_size {
+    num: number;
+    size: number;
+  }
+
   interface node_alias_obj {
     name: string;
     obj: Object;
@@ -35,7 +40,7 @@
   }
 
   declare class cyclicgraph {
-    static findnums(cycles: Object[][]): number[];
+    static findnums(cycles: Object[][]): num_size[];
     nodes: cyclicgraphnode[];
     num: number;
     size: number;

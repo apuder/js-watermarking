@@ -1,5 +1,5 @@
 
-var trace_complete = false;
+var status = 0;
 
 window.addEventListener("message", function(event) {
   // We only accept messages from ourselves
@@ -8,11 +8,12 @@ window.addEventListener("message", function(event) {
 
   if (event.data.type && (event.data.type == "jsw_inserted_watermark")) {
   	console.log("Recieved inserted watermark message from page");
-    chrome.runtime.sendMessage({from: "jsw_insert_content", method: "storeScript", arg: event.data.text, file: event.data.file});
+  	status = 3;
+    chrome.runtime.sendMessage({from: "jsw_insert_content", method: "storeScript", arg: event.data.text, file: event.data.file, number: event.data.number, size: event.data.size});
   }
   else if (event.data.type && (event.data.type == "jsw_trace_complete")) {
   	console.log("Recieved trace complete message from page");
-  	trace_complete = true;
+  	status = 3;
   	chrome.runtime.sendMessage({from: "jsw_insert_content", method: "insert_watermark"});
   }
 }, false);
@@ -21,7 +22,8 @@ function insert_watermark(num, size) {
 	console.log("inserting watermark: number " + num + ", size " + size);
 	// check if already inserted code
 	var jws = document.getElementById("jsw_watermark_script");
-	if (jws) { jws.parentNode.removeChild(jws);
+	if (jws) {
+		jws.parentNode.removeChild(jws);
 		//insert code
 		var script = document.createElement("script");
 		script.id = "jsw_watermark_script";
@@ -29,6 +31,8 @@ function insert_watermark(num, size) {
 					+ "final_stack.watermark_size = " + size + ";\n"
 					+ "final_stack.watermark(final_stack);";
 		document.body.appendChild(script);
+
+		status = 2;
 	}
 }
 
@@ -59,28 +63,35 @@ function check_insert_ready() {
 	return !!document.getElementById("jsw_watermark_script");
 }
 
+if (check_insert_ready()) {
+	// missed trace complete signal or already reveived it
+	// eithe way status should be 3
+	status = 3;
+}
+
 chrome.runtime.onMessage.addListener(function (msg, sender, response) {
   if (msg.from === 'jsw_background') {
-  	if (msg.method === 'check_insert_content_loaded') {
-  		// content script loaded in this page
-  		response(true);
-  	}
-  	else if (msg.method === 'find_jswpp_scripts') {
+  	if (msg.method === 'find_jswpp_scripts') {
 	    find_jswpp_scripts();
-	}
-	else if (msg.method === 'check_insert_ready') {
-		response(check_insert_ready());
 	}
 	else if (msg.method === 'insert_watermark') {
   		var num = msg.number;
   		var size = msg.size;
   		insert_watermark(num, size);
 	}
-	else if (msg.method === 'check_trace_complete') {
-		response( trace_complete );
+	else if (msg.method === 'get_insert_status') {
+		// 0 default
+		// 1 tracing code
+		// 2 inserting watermark
+		// 3 ready to insert watermark
+		response( status );
 	}
-	else if (msg.method === 'check_missed_trace_complete') {
-		response( !trace_complete && check_insert_ready() );
+	else if (msg.method === 'set_insert_status') {
+		// can only set a higher status than the current status
+		if (msg.status > status) {
+			status = msg.status;
+		}
+		response( status );
 	}
   }
 });

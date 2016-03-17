@@ -19,7 +19,13 @@ function setScripts(scripts) {
 	// add new data
 	for(var i = 0; i < scripts.length; i++) {
 		var script = scripts[i];
-		var script_item = document.createElement("li");
+		var script_row = document.createElement("tr");
+
+		var num_data = document.createElement("td");
+		num_data.innerHTML = script.num.toString();
+		var size_data = document.createElement("td");
+		size_data.innerHTML = script.size.toString();
+		var link_data = document.createElement("td");
 
 		var a = document.createElement('a');
 		a.download = script.file_name;
@@ -30,9 +36,13 @@ function setScripts(scripts) {
 		a.dataset.downloadurl = [mime, a.download, a.href].join(':');
 		a.draggable = true;
 
-		script_item.appendChild(a);
+		link_data.appendChild(a);
 
-		html_scripts.appendChild(script_item);
+		script_row.appendChild(num_data);
+		script_row.appendChild(size_data);
+		script_row.appendChild(link_data);
+
+		html_scripts.appendChild(script_row);
 	}
 }
 
@@ -52,9 +62,17 @@ function setNums(nums) {
 	}
 	// add new data
 	for(var i = 0; i < nums.length; i++) {
-		var num_item = document.createElement("li");
-		num_item.innerHTML = nums[i].toString();
-		html_nums.appendChild(num_item);
+		var num_row = document.createElement("tr");
+
+		var num_data = document.createElement("td");
+		num_data.innerHTML = nums[i].num.toString();
+		var size_data = document.createElement("td");
+		size_data.innerHTML = nums[i].size.toString();
+
+		num_row.appendChild(num_data);
+		num_row.appendChild(size_data);
+
+		html_nums.appendChild(num_row);
 	}
 }
 
@@ -90,21 +108,16 @@ function find_watermark() {
 	});
 }
 
-// handle messages
-chrome.runtime.onMessage.addListener(function(msg, sender, response) {
-	if (msg.from === 'jsw_background') {
-		// messages from background
-		if (msg.method === 'jswpp_server_found') {
-			messages_area.innerHTML = "";
-			messages_area.style.color = "black";
-		}
-		else if (msg.method === 'jswpp_server_not_found') {
-			messages_area.innerHTML = "Error: jswpp.js server not found.";
-			messages_area.style.color = "red";
-		}
+function setError(error_text) {
+	if (error_text) {
+		messages_area.innerHTML = "Error: " + error_text + "\n<hr>";
+		messages_area.style.color = "red";
 	}
-});
-
+	else {
+		messages_area.innerHTML = "";
+		messages_area.style.color = "black";
+	}
+}
 
 document.addEventListener('DOMContentLoaded', function () {
 	messages_area = document.getElementById("messages_area");
@@ -162,12 +175,17 @@ document.addEventListener('DOMContentLoaded', function () {
 	// set nums initially
     setNums(JSON.parse(localStorage["nums"] || '[]'));
 
+    // set error initially
+    setError(localStorage["error"] || '');
+
     window.onstorage = function (e) {
     	if (e.key == "scripts") {
     		setScripts(JSON.parse(e.newValue || '[]'));
     	}
     	else if (e.key == "nums") {
     		setNums(JSON.parse(e.newValue || '[]'));
+    	} else if (e.key == "error") {
+    		setError(e.newValue || '');
     	}
     }
 });

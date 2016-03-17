@@ -94,8 +94,8 @@ var permutationgraph;
                 var backbone = cycles[i];
                 var perm = permutationgraph.backbone_to_perm(backbone);
                 if (perm) {
-                    nums.push(permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm)));
-                    console.log('found watermark number: ' + nums[nums.length - 1] + ' (size: ' + perm.length + ')');
+                    nums.push({ num: permutationgraph.fact_to_num(permutationgraph.perm_to_fact(perm)), size: perm.length });
+                    console.log('found watermark number: ' + nums[nums.length - 1].num + ' (size: ' + nums[nums.length - 1].size + ')');
                 }
             }
             return nums;
@@ -999,7 +999,7 @@ var watermarkapplier;
         // a.style.left = '0px';
         // a.style.top = '0px';
         // document.body.appendChild(a);
-        window.postMessage({ type: "jsw_inserted_watermark", text: code, file: trace.file_name }, "*");
+        window.postMessage({ type: "jsw_inserted_watermark", text: code, file: trace.file_name, number: trace.watermark_num, size: trace.watermark_size }, "*");
     }
     watermarkapplier.apply_watermark = apply_watermark;
 })(watermarkapplier || (watermarkapplier = {}));
