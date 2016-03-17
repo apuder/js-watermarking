@@ -7,10 +7,11 @@ window.addEventListener("message", function(event) {
     return;
 
   if (event.data.type && (event.data.type == "jsw_inserted_watermark")) {
-    // console.log("Content script received: " + event.data.file);
+  	console.log("Recieved inserted watermark message from page");
     chrome.runtime.sendMessage({from: "jsw_insert_content", method: "storeScript", arg: event.data.text, file: event.data.file});
   }
   else if (event.data.type && (event.data.type == "jsw_trace_complete")) {
+  	console.log("Recieved trace complete message from page");
   	trace_complete = true;
   	chrome.runtime.sendMessage({from: "jsw_insert_content", method: "insert_watermark"});
   }
@@ -76,7 +77,10 @@ chrome.runtime.onMessage.addListener(function (msg, sender, response) {
   		insert_watermark(num, size);
 	}
 	else if (msg.method === 'check_trace_complete') {
-		response( trace_complete || check_insert_ready() );
+		response( trace_complete );
+	}
+	else if (msg.method === 'check_missed_trace_complete') {
+		response( !trace_complete && check_insert_ready() );
 	}
   }
 });

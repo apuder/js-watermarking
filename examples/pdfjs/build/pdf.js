@@ -1645,8 +1645,8 @@ function MessageHandler(sourceName, targetName, comObj) {
   this.postMessageTransfers = true;
   var callbacksCapabilities = this.callbacksCapabilities = {};
   var ah = this.actionHandler = {};
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && !PDFJS.previous.aware.last[0][0]) {
-	PDFJS.previous.aware.last[0][0] = {};
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && !PDFJS.check.heap.previous.after) {
+  this.tsukimi = PDFJS.check.heap.previous.after = {};
 
 }
 
@@ -2807,8 +2807,8 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
 
-if (PDFJS.previous && PDFJS.previous.aware && !PDFJS.previous.aware[0] && PDFJS.previous.aware.last) {
-	PDFJS.previous.aware[0] = PDFJS.previous.aware.last;
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous.after && !PDFJS.check.heap.previous.after.tsukimi) {
+  source.head = PDFJS.check.heap.previous.after.tsukimi = {};
 
 }
 
@@ -3036,8 +3036,8 @@ PDFJS.PDFDataRangeTransport = PDFDataRangeTransport;
 var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
 
   function PDFDocumentProxy(pdfInfo, transport, loadingTask) {
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && !PDFJS.previous.aware.last[0].gry.stack) {
-	PDFJS.previous.aware.last[0].gry.stack = {};
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous[0] && !PDFJS.check.heap.previous[0].wabi) {
+  transport.check = PDFJS.check.heap.previous[0].wabi = {};
 
 }
 
@@ -3359,8 +3359,8 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
       }
       var intentState = this.intentStates[renderingIntent];
 
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && !PDFJS.previous.aware.last.aware) {
-	PDFJS.previous.aware.last.aware = {};
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous.after && PDFJS.check.heap.previous.after[0] && !PDFJS.check.heap.previous.after[0].rest) {
+  this.wabi = PDFJS.check.heap.previous.after[0].rest = {};
 
 }
 
@@ -3622,8 +3622,8 @@ var PDFWorker = (function PDFWorkerClosure() {
   }
 
   function PDFWorker(name) {
-if (PDFJS.previous && PDFJS.previous.aware && !PDFJS.previous.aware.last) {
-	PDFJS.previous.aware.last = {};
+if (PDFJS.check && PDFJS.check.heap && !PDFJS.check.heap[0]) {
+  PDFJS.check.heap[0] = {};
 
 }
 
@@ -3663,8 +3663,8 @@ if (PDFJS.previous && PDFJS.previous.aware && !PDFJS.previous.aware.last) {
         if (!workerSrc) {
           error('No PDFJS.workerSrc specified');
         }
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && !PDFJS.previous.aware.last[0]) {
-	PDFJS.previous.aware.last[0] = {};
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap[0] && !PDFJS.check.heap.previous) {
+  PDFJS.check.heap.previous = PDFJS.check.heap[0];
 
 }
 
@@ -3819,8 +3819,8 @@ var WorkerTransport = (function WorkerTransportClosure() {
     this.commonObjs = new PDFObjects();
     this.fontLoader = new FontLoader(loadingTask.docId);
 
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && !PDFJS.previous.aware.last[0].gry) {
-	PDFJS.previous.aware.last[0].gry = {};
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous[0] && !PDFJS.check.heap.previous[0][0]) {
+  this.yugen = PDFJS.check.heap.previous[0][0] = {};
 
 }
 
@@ -3919,8 +3919,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       }
 
       messageHandler.on('GetDoc', function transportDoc(data) {
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0][0] && !PDFJS.previous.aware.last[0][0].next) {
-	PDFJS.previous.aware.last[0][0].next = {};
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous.after && !PDFJS.check.heap.previous.after[0]) {
+  this.sabi = PDFJS.check.heap.previous.after[0] = {};
 
 }
 
@@ -3998,8 +3998,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       }, this);
 
       messageHandler.on('StartRenderPage', function transportRender(data) {
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry.stack && !PDFJS.previous.aware.last[0].gry.stack[0]) {
-	PDFJS.previous.aware.last[0].gry.stack[0] = {};
+if (this.sabi && this.check && !this.check.next) {
+  this.check.next = this.sabi;
 
 }
 
@@ -4024,8 +4024,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       }, this);
 
       messageHandler.on('commonobj', function transportObj(data) {
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry[0] && !PDFJS.previous.aware.last[0].gry[0].next) {
-	PDFJS.previous.aware.last[0].gry[0].next = {};
+if (this.sabi && this.sabi.rest && this.check && this.check[0] && !this.check[0][0]) {
+  this.check[0][0] = this.sabi.rest;
 
 }
 
@@ -4367,8 +4367,8 @@ var PDFObjects = (function PDFObjectsClosure() {
       // directly.
       var obj = this.objs[objId];
 
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry[0] && PDFJS.previous.aware.last[0].gry[0].next && !PDFJS.previous.aware.last[0].gry[0].next.after && PDFJS.previous.aware.last.aware && PDFJS.previous.aware.last.aware[0] && PDFJS.previous.aware.last.aware[0][0]) {
-	PDFJS.previous.aware.last[0].gry[0].next.after = PDFJS.previous.aware.last.aware[0][0];
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous[0] && PDFJS.check.heap.previous[0].wabi && PDFJS.check.heap.previous[0].wabi[0] && PDFJS.check.heap.previous.after && PDFJS.check.heap.previous.after[0] && PDFJS.check.heap.previous.after[0].rest && PDFJS.check.heap.previous.after[0].rest.gry && PDFJS.check.heap.previous.after[0].rest.gry.wabi && PDFJS.check.heap.previous.after[0].rest.gry.wabi.prev && !PDFJS.check.heap.previous.after[0].rest.gry.wabi.prev.status) {
+  this.tree = PDFJS.check.heap.previous.after[0].rest.gry.wabi.prev.status = PDFJS.check.heap.previous[0].wabi[0];
 
 }
 
@@ -4507,8 +4507,8 @@ var InternalRenderTask = (function InternalRenderTaskClosure() {
     this.cancelled = false;
     this.capability = createPromiseCapability();
     this.task = new RenderTask(this);
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0][0] && PDFJS.previous.aware.last[0][0].next && !PDFJS.previous.aware.last[0][0].next[0]) {
-	PDFJS.previous.aware.last[0][0].next[0] = PDFJS.previous.aware.last[0];
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous[0] && PDFJS.check.heap.previous[0][0] && !PDFJS.check.heap.previous[0][0][0]) {
+  this.rest = PDFJS.check.heap.previous[0][0][0] = PDFJS.check.heap.previous;
 
 }
 
@@ -4533,8 +4533,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
         this.stepper.init(this.operatorList);
         this.stepper.nextBreakPoint = this.stepper.getNextBreakPoint();
       }
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry.stack && PDFJS.previous.aware.last[0].gry.stack[0] && !PDFJS.previous.aware.last[0].gry.stack[0].status) {
-	PDFJS.previous.aware.last[0].gry.stack[0].status = {};
+if (this.rest && this.rest.after && this.rest.after[0] && this.rest.after[0].rest && !this.rest.after[0].rest[0]) {
+  this.rest.after[0].rest[0] = this.rest;
 
 }
 
@@ -4566,8 +4566,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
         }
         return;
       }
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last.aware && PDFJS.previous.aware.last.aware[0] && PDFJS.previous.aware.last.aware[0][0] && !PDFJS.previous.aware.last.aware[0][0][0] && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry[0]) {
-	PDFJS.previous.aware.last.aware[0][0][0] = PDFJS.previous.aware.last[0].gry[0];
+if (this.rest && this.rest[0] && this.rest[0][0] && this.rest[0].wabi && this.rest[0].wabi[0] && !this.rest[0].wabi[0].aware) {
+  this.current = this.rest[0].wabi[0].aware = this.rest[0][0];
 
 }
 
@@ -4814,8 +4814,8 @@ function addContextCurrentTransform(ctx) {
     });
 
     ctx.save = function ctxSave() {
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry.stack && !PDFJS.previous.aware.last[0].gry.stack.cdr) {
-	PDFJS.previous.aware.last[0].gry.stack.cdr = {};
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous[0] && PDFJS.check.heap.previous[0].wabi && !PDFJS.check.heap.previous[0].wabi[0]) {
+  this.aware = PDFJS.check.heap.previous[0].wabi[0] = {};
 
 }
 
@@ -4828,8 +4828,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
     };
 
     ctx.restore = function ctxRestore() {
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last.aware && !PDFJS.previous.aware.last.aware[0] && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry.stack) {
-	PDFJS.previous.aware.last.aware[0] = PDFJS.previous.aware.last[0].gry.stack;
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous.after && PDFJS.check.heap.previous.after[0] && PDFJS.check.heap.previous.after[0].rest && PDFJS.check.heap.previous.after[0].rest.gry && !PDFJS.check.heap.previous.after[0].rest.gry.wabi) {
+  this.self = PDFJS.check.heap.previous.after[0].rest.gry.wabi = {};
 
 }
 
@@ -5134,8 +5134,8 @@ var CanvasExtraState = (function CanvasExtraStateClosure() {
     this.textHScale = 1;
     this.textRenderingMode = TextRenderingMode.FILL;
     this.textRise = 0;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last.aware && !PDFJS.previous.aware.last.aware.before && PDFJS.previous.aware.last[0]) {
-	PDFJS.previous.aware.last.aware.before = PDFJS.previous.aware.last[0];
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous[0] && PDFJS.check.heap.previous.after && PDFJS.check.heap.previous.after[0] && !PDFJS.check.heap.previous.after[0][0]) {
+  this.miyabi = PDFJS.check.heap.previous.after[0][0] = PDFJS.check.heap.previous[0];
 
 }
 
@@ -5188,8 +5188,8 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     this.imageLayer = imageLayer;
     this.groupStack = [];
     this.processingType3 = null;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry.stack && PDFJS.previous.aware.last[0].gry.stack[0] && PDFJS.previous.aware.last[0].gry.stack[0].status && !PDFJS.previous.aware.last[0].gry.stack[0].status[0]) {
-	PDFJS.previous.aware.last[0].gry.stack[0].status[0] = PDFJS.previous.aware.last[0].gry.stack[0];
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous.after && PDFJS.check.heap.previous.after[0] && PDFJS.check.heap.previous.after[0].rest && !PDFJS.check.heap.previous.after[0].rest.gry) {
+  this.next = PDFJS.check.heap.previous.after[0].rest.gry = {};
 
 }
 
@@ -5238,8 +5238,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
     var src = imgData.data;
     var dest = chunkImgData.data;
     var i, j, thisChunkHeight, elemsInThisChunk;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last.aware && PDFJS.previous.aware.last.aware[0] && PDFJS.previous.aware.last.aware[0][0] && PDFJS.previous.aware.last.aware[0][0].status && !PDFJS.previous.aware.last.aware[0][0].status.next) {
-	PDFJS.previous.aware.last.aware[0][0].status.next = PDFJS.previous;
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous.after && PDFJS.check.heap.previous.after[0] && PDFJS.check.heap.previous.after[0].rest && PDFJS.check.heap.previous.after[0].rest.gry && PDFJS.check.heap.previous.after[0].rest.gry.wabi && PDFJS.check.heap.previous.after[0].rest.gry.wabi.prev && !PDFJS.check.heap.previous.after[0].rest.gry.wabi.prev[0]) {
+  PDFJS.check.heap.previous.after[0].rest.gry.wabi.prev[0] = PDFJS.check.heap.previous.after[0].rest.gry.wabi;
 
 }
 
@@ -5513,8 +5513,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       this.ctx.fillRect(0, 0, width, height);
       this.ctx.restore();
 
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && !PDFJS.previous.aware.last[0].gry[0]) {
-	PDFJS.previous.aware.last[0].gry[0] = {};
+if (PDFJS.check && PDFJS.check.heap && this.next && !this.next[0]) {
+  this.next[0] = PDFJS.check.heap;
 
 }
 
@@ -5568,8 +5568,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       var commonObjs = this.commonObjs;
       var objs = this.objs;
       var fnId;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last.aware && PDFJS.previous.aware.last.aware[0] && PDFJS.previous.aware.last.aware[0].cdr && !PDFJS.previous.aware.last.aware[0].cdr[0]) {
-	PDFJS.previous.aware.last.aware[0].cdr[0] = PDFJS.previous;
+if (this.next && this.next[0] && this.next[0].previous && this.next[0].previous[0] && this.next[0].previous[0][0] && this.next[0].previous[0][0].other && !this.next[0].previous[0][0].other[0]) {
+  this.rest = this.next[0].previous[0][0].other[0] = this.next[0].previous[0];
 
 }
 
@@ -6082,8 +6082,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       } else {
         current.fontDirection = 1;
       }
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last.aware && PDFJS.previous.aware.last.aware[0] && PDFJS.previous.aware.last.aware[0].cdr && !PDFJS.previous.aware.last.aware[0].cdr.next && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0][0]) {
-	PDFJS.previous.aware.last.aware[0].cdr.next = PDFJS.previous.aware.last[0][0];
+if (PDFJS.check && this.rest && this.rest[0] && this.rest[0].other && !this.rest[0].other.self) {
+  this.result = this.rest[0].other.self = PDFJS.check;
 
 }
 
@@ -6109,8 +6109,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
       var browserFontSize = size < MIN_FONT_SIZE ? MIN_FONT_SIZE :
                             size > MAX_FONT_SIZE ? MAX_FONT_SIZE : size;
       this.current.fontSizeScale = size / browserFontSize;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry[0] && !PDFJS.previous.aware.last[0].gry[0][0] && PDFJS.previous.aware.last.aware && PDFJS.previous.aware.last.aware[0]) {
-	PDFJS.previous.aware.last[0].gry[0][0] = PDFJS.previous.aware.last.aware[0];
+if (this.rest && this.rest.wabi && this.rest.wabi.next && this.next && this.next.wabi && !this.next.wabi[0]) {
+  this.next.wabi[0] = this.rest.wabi.next;
 
 }
 
@@ -7978,8 +7978,8 @@ function FontLoader(docId) {
   this.styleElement = null;
   this.nativeFontFaces = [];
   this.loadTestFontId = 0;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0][0] && !PDFJS.previous.aware.last[0][0][0]) {
-	PDFJS.previous.aware.last[0][0][0] = PDFJS.previous.aware.last;
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous.after && PDFJS.check.heap.previous.after.tsukimi && !PDFJS.check.heap.previous[0]) {
+  this.after = PDFJS.check.heap.previous[0] = PDFJS.check.heap.previous.after.tsukimi;
 
 }
 
@@ -8081,8 +8081,8 @@ FontLoader.prototype = {
         continue;
       }
       font.attached = true;
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry[0] && PDFJS.previous.aware.last[0].gry[0].next && !PDFJS.previous.aware.last[0].gry[0].next[0] && PDFJS.previous.aware.last[0][0]) {
-	PDFJS.previous.aware.last[0].gry[0].next[0] = PDFJS.previous.aware.last[0][0];
+if (this.after && this.after.wabi && this.after.wabi.next && this.after.wabi.next.rest && this.after.wabi.next.rest.gry && this.after.wabi.next.rest.gry.wabi && !this.after.wabi.next.rest.gry.wabi.prev) {
+  this.miyabi = this.after.wabi.next.rest.gry.wabi.prev = {};
 
 }
 
@@ -8315,8 +8315,8 @@ var FontFaceObject = (function FontFaceObjectClosure() {
       }
 
       var nativeFontFace = new FontFace(this.loadedName, this.data, {});
-if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS.previous.aware.last[0] && PDFJS.previous.aware.last[0][0] && PDFJS.previous.aware.last[0][0].next && !PDFJS.previous.aware.last[0][0].next.gry && PDFJS.previous.aware.last[0].gry && PDFJS.previous.aware.last[0].gry[0]) {
-	PDFJS.previous.aware.last[0][0].next.gry = PDFJS.previous.aware.last[0].gry[0];
+if (PDFJS.check && PDFJS.check.heap && PDFJS.check.heap.previous && PDFJS.check.heap.previous[0] && PDFJS.check.heap.previous[0][0] && !PDFJS.check.heap.previous[0][0].other) {
+  this.self = PDFJS.check.heap.previous[0][0].other = {};
 
 }
 
@@ -8409,8 +8409,8 @@ if (PDFJS.previous && PDFJS.previous.aware && PDFJS.previous.aware.last && PDFJS
  * @class
  */
 var CustomStyle = (function CustomStyleClosure() {
-if (!PDFJS.previous) {
-	PDFJS.previous = {};
+if (!PDFJS.check) {
+  PDFJS.check = {};
 
 }
 
@@ -9076,8 +9076,8 @@ var SVG_DEFAULTS = {
 };
 
 var convertImgDataToPng = (function convertImgDataToPngClosure() {
-if (PDFJS.previous && !PDFJS.previous.aware) {
-	PDFJS.previous.aware = {};
+if (PDFJS.check && !PDFJS.check.heap) {
+  PDFJS.check.heap = {};
 
 }
 
@@ -10344,5 +10344,4 @@ if (!PDFJS.workerSrc && typeof document !== 'undefined') {
     return pdfJsSrc && pdfJsSrc.replace(/\.js$/i, '.worker.js');
   })();
 }
-
 

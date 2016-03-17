@@ -84,10 +84,11 @@ function do_insert_watermark() {
 			});
 }
 
-function check_trace_complete() {
+function check_missed_trace_complete() {
+	console.log("Checking trace complete");
 	chrome.tabs.sendMessage(tabid, 
 		{ from: 'jsw_background', 
-		  method: 'check_trace_complete'
+		  method: 'check_missed_trace_complete'
 		}
 		, function(response) {
 			console.log(response);
@@ -96,18 +97,21 @@ function check_trace_complete() {
 				do_insert_watermark();
 			}
 			else if (typeof(response) === "undefined") {
-				// content script not fully loaded yet
+				// content script not loaded yet
 				console.log("content script failed to load, waiting 1 second and trying again");
 				setTimeout(function() {
-					load_content_script_to_tab("insert_content.js", check_trace_complete);
+					load_content_script_to_tab("insert_content.js", check_missed_trace_complete);
 				}, 1000);
+			}
+			else {
+				// didn't miss the message already done, or wait till done
 			}
 	});
 }
 
 function rediect_jswpp_scripts() {
 	num_scripts_stored = 0;
-	console.log("Starting .jsw.js script redirection");
+	console.log("Starting .jsw.js script redirection and reloading page");
 	// add a listener to redirect http requests for .jsw.pp.js scripts
 	chrome.webRequest.onBeforeRequest.addListener(
         redirect_preprocessed_scripts,
@@ -120,7 +124,7 @@ function rediect_jswpp_scripts() {
 
 	// reload the tab and insert scripts to insert the watermark
 	chrome.tabs.reload(tabid, function () {
-		load_content_script_to_tab("insert_content.js", check_trace_complete);
+		load_content_script_to_tab("insert_content.js", check_missed_trace_complete);
 	});
 }
 
