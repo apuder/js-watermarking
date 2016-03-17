@@ -48,7 +48,7 @@ in the case a non-watermarked version of the code is released.
 Run the nodejs script jswpp.js before attempting to watermark code.
 ```jswpp.js``` is a small server that processes javascript files whose url ends in .jsw.js on the fly.
 #####	Trace/Insert: On the command line, ```node jswpp.js```
-		In Chrome, open the page with script.jsw.js.
+		In Chrome, open the page with script.jsw.js.  This page must be loaded through http, file and https are not supported at this time.
 		Open the jsw chrome extension by clicking on the jsw icon, see installation.
 		Input the number and size desired, then click Insert.
 		A download link will appear in the extension popup when watermark insertion is complete.
@@ -78,4 +78,4 @@ The letters jsw should appear on the extension bar next to the menu icon.
 
 
 ####Notes:
-Clicking Insert in the Trace/Insert step before the webpage has finished tracing will cause an error to print to console.
+Clicking Insert in the Trace/Insert step before the webpage has finished tracing will cause the page to reload and tracing to begin again.
