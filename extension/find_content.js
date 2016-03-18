@@ -1,6 +1,7 @@
 
 var status = 0;
 var appended_script = false;
+var num_responses = 0;
 
 window.addEventListener("message", function(event) {
 	// We only accept messages from ourselves
@@ -13,13 +14,17 @@ window.addEventListener("message", function(event) {
 		// respond to page to stop trying to send numbers
 		window.postMessage({ type: "jsw_found_watermark_acknowledgement" }, "*");
 
-		chrome.runtime.sendMessage({from: "jsw_find_content", method: "storeNums", arg: event.data.text});
+		if (num_responses++ < num_tries) {
+			chrome.runtime.sendMessage({from: "jsw_find_content", method: "storeNums", arg: event.data.text});
+		}
 	}
 }, false);
 
+var num_tries = 0;
 var input_size;
 
 function find_watermark() {
+	num_tries++;
 	// remove script node if present
 	var cdw = document.getElementById("jsw_call_do_find_watermark");
 	if (cdw) cdw.parentNode.removeChild(cdw);

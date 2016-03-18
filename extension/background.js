@@ -89,19 +89,12 @@ function check_missed_trace_complete() {
 		  status: 1
 		}
 		, function(response) {
-			if (response == 3) {
-				// missed message, insert watermark
-				do_insert_watermark();
-			}
-			else if (typeof(response) === "undefined") {
+			if (typeof(response) === "undefined") {
 				// content script not loaded yet
 				console.log("content script failed to load, waiting 1 second and trying again");
 				setTimeout(function() {
 					load_content_script("insert_content.js", check_missed_trace_complete);
 				}, 1000);
-			}
-			else {
-				console.log("check_missed_trace_complete response code: " + response);
 			}
 	});
 }

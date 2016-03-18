@@ -1,6 +1,8 @@
 
 var status = 0;
 
+var trace_completed = {};
+
 window.addEventListener("message", function(event) {
   // We only accept messages from ourselves
   if (event.source != window)
@@ -15,9 +17,15 @@ window.addEventListener("message", function(event) {
   	console.log("Recieved trace complete message from page");
   	status = 3;
   	// respond to page to stop trying to tell trace complete
-  	window.postMessage({ type: 'jsw_trace_complete_acknowledgement' }, '*');
+  	window.postMessage({ type: 'jsw_trace_complete_acknowledgement', file: event.data.file }, '*');
 
-  	chrome.runtime.sendMessage({from: "jsw_insert_content", method: "insert_watermark"});
+  	if (!trace_completed[event.data.file]) {
+  		console.log(event.data.file);
+  		
+		chrome.runtime.sendMessage({from: "jsw_insert_content", method: "insert_watermark"});
+
+		trace_completed[event.data.file] = true;
+	}
   }
 }, false);
 

@@ -13,18 +13,18 @@ function find_watermark(root: Object, size: number, blacklist: string[]) {
 	var json_nums = JSON.stringify(nums);
 
 	// sending trace complete message until acknowledged
-	var tint = setInterval(function(){ signal_found_complete() }, 200);
+	var tint = setInterval(function(){ signal_found_complete() }, 100);
 
 	window.addEventListener('message', function(event) {
 		// We only accept messages from ourselves
 		if (event.source != window)
 		return;
-		if (event.data.type && (event.data.type == 'jsw_found_watermark_acknowledgement')) {
+		if (event.data.type && (event.data.type === 'jsw_found_watermark_acknowledgement')) {
 			if (tint) { clearInterval(tint); tint = null; }
 		}
 	}, false);
 
-	function signal_found_complete() { window.postMessage({ type: "jsw_found_watermark", text: json_nums }, "*"); };
+	function signal_found_complete() { console.log('Signaling watermark found'); window.postMessage({ type: "jsw_found_watermark", text: json_nums }, "*"); };
 
 	signal_found_complete();
 
