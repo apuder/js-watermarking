@@ -30,14 +30,27 @@ module preprocess {
 	}
 
 	function replace_jsw_end(code: string): string {
-		return "final_stack = trace_stack;\n"
-			 + "trace_stack = [];\n"
-			 + "trace_stack.jsw_watermark_script = document.createElement('script');\n"
-			 + "trace_stack.jsw_watermark_script.id = 'jsw_watermark_script';\n"
-			 + "trace_stack.jsw_watermark_script.text = \"window.postMessage({ type: 'jsw_trace_complete' }, '*');\";\n"
-			 + "document.head.appendChild(trace_stack.jsw_watermark_script);\n"
-			 + "console.log('trace complete');"
-			 ;
+		return 	  "final_stack = trace_stack;\n"
+				+ "trace_stack = [];\n"
+				+ "trace_stack.jsw_watermark_script = document.createElement('script');\n"
+				+ "trace_stack.jsw_watermark_script.id = 'jsw_watermark_script';\n"
+				+ "trace_stack.jsw_watermark_script.text = \""
+					+ "// sending trace complete message until acknowledged\\n"
+					+ "var tint = setInterval(function(){ signal_trace_complete() }, 1000);\\n"
+					+ "window.addEventListener('message', function(event) {\\n"
+					+ "	// We only accept messages from ourselves\\n"
+					+ "	if (event.source != window)\\n"
+					+ "	return;\\n"
+					+ "	if (event.data.type && (event.data.type == 'jsw_trace_complete_acknowledgement')) {\\n"
+					+ "		console.log('Content script acknowledged recieving inserted watermark');\\n"
+					+ "		if (tint) { clearInterval(tint); tint = null; }\\n"
+					+ "	}\\n"
+					+ "}, false);\\n"
+					+ "function signal_trace_complete() { window.postMessage({ type: 'jsw_trace_complete' }, '*'); };\\n"
+					+ "signal_trace_complete();\";\n"
+				+ "document.head.appendChild(trace_stack.jsw_watermark_script);\n"
+				+ "console.log('trace complete');"
+				;
 	}
 
 	function replace_jsw(code: string): string {

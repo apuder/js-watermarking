@@ -8,8 +8,11 @@ window.addEventListener("message", function(event) {
 		return;
 
 	if (event.data.type && (event.data.type == "jsw_found_watermark")) {
-		// console.log("Content script received: " + event.data.text);
+		console.log("Recieved found watermark message from page");
 		status = 0;
+		// respond to page to stop trying to send numbers
+		window.postMessage({ type: "jsw_found_watermark_acknowledgement" }, "*");
+
 		chrome.runtime.sendMessage({from: "jsw_find_content", method: "storeNums", arg: event.data.text});
 	}
 }, false);

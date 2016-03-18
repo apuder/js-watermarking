@@ -1,5 +1,6 @@
 
 var messages_area;
+var messages_hr;
 var html_nums;
 var html_scripts;
 
@@ -22,9 +23,9 @@ function setScripts(scripts) {
 		var script_row = document.createElement("tr");
 
 		var num_data = document.createElement("td");
-		num_data.innerHTML = script.num.toString();
+		num_data.textContent = script.num.toString();
 		var size_data = document.createElement("td");
-		size_data.innerHTML = script.size.toString();
+		size_data.textContent = script.size.toString();
 		var link_data = document.createElement("td");
 
 		var a = document.createElement('a');
@@ -65,9 +66,9 @@ function setNums(nums) {
 		var num_row = document.createElement("tr");
 
 		var num_data = document.createElement("td");
-		num_data.innerHTML = nums[i].num.toString();
+		num_data.textContent = nums[i].num.toString();
 		var size_data = document.createElement("td");
-		size_data.innerHTML = nums[i].size.toString();
+		size_data.textContent = nums[i].size.toString();
 
 		num_row.appendChild(num_data);
 		num_row.appendChild(size_data);
@@ -110,17 +111,20 @@ function find_watermark() {
 
 function setError(error_text) {
 	if (error_text) {
-		messages_area.innerHTML = "Error: " + error_text + "\n<hr>";
+		messages_area.textContent = "Error: " + error_text;
 		messages_area.style.color = "red";
+		messages_hr.style.visibility = "visible";
 	}
 	else {
-		messages_area.innerHTML = "";
+		messages_area.textContent = "";
 		messages_area.style.color = "black";
+		messages_hr.style.visibility = "hidden";
 	}
 }
 
 document.addEventListener('DOMContentLoaded', function () {
 	messages_area = document.getElementById("messages_area");
+	messages_hr = document.getElementById("messages_hr");
 
 	var insert = document.getElementById("insert_button");
 	if (insert.type === 'button' && insert.name === 'insert') {

@@ -14,6 +14,9 @@ window.addEventListener("message", function(event) {
   else if (event.data.type && (event.data.type == "jsw_trace_complete")) {
   	console.log("Recieved trace complete message from page");
   	status = 3;
+  	// respond to page to stop trying to tell trace complete
+  	window.postMessage({ type: 'jsw_trace_complete_acknowledgement' }, '*');
+
   	chrome.runtime.sendMessage({from: "jsw_insert_content", method: "insert_watermark"});
   }
 }, false);
@@ -63,11 +66,11 @@ function check_insert_ready() {
 	return !!document.getElementById("jsw_watermark_script");
 }
 
-if (check_insert_ready()) {
-	// missed trace complete signal or already reveived it
-	// eithe way status should be 3
-	status = 3;
-}
+// if (check_insert_ready()) {
+// 	// missed trace complete signal or already received it
+// 	// eithe way status should be 3
+// 	status = 3;
+// }
 
 chrome.runtime.onMessage.addListener(function (msg, sender, response) {
   if (msg.from === 'jsw_background') {
