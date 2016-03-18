@@ -72,7 +72,7 @@ var permutationgraph;
             this.size = size || min_size;
             // must have at least size one greater than necessary, to ensure permutation begins with 0
             if (this.size < min_size)
-                throw "Size " + this.size + " Too small for number " + this.num;
+                throw "Number " + this.num + " too large for size " + this.size;
             this.makenodes();
             // make nodes before edges
             this.makeedges();

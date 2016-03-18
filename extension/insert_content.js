@@ -1,5 +1,5 @@
 
-console.log("insert content script loading");
+// console.log("insert content script loading");
 
 var status = 0;
 
@@ -10,13 +10,13 @@ window.addEventListener("message", function(event) {
   if (event.source != window)
     return;
 
-  if (event.data.type && (event.data.type == "jsw_inserted_watermark")) {
-  	console.log("Recieved inserted watermark message from page");
+  if (event.data.type && (event.data.type === "jsw_inserted_watermark")) {
+  	// console.log("Recieved inserted watermark message from page");
   	status = 3;
     chrome.runtime.sendMessage({from: "jsw_insert_content", method: "storeScript", arg: event.data.text, file: event.data.file, number: event.data.number, size: event.data.size});
   }
-  else if (event.data.type && (event.data.type == "jsw_trace_complete")) {
-  	console.log("Recieved trace complete message from page");
+  else if (event.data.type && (event.data.type === "jsw_trace_complete")) {
+  	// console.log("Recieved trace complete message from page");
   	status = 3;
   	// respond to page to stop trying to tell trace complete
   	window.postMessage({ type: 'jsw_trace_complete_acknowledgement', file: event.data.file }, '*');
@@ -29,10 +29,16 @@ window.addEventListener("message", function(event) {
 		trace_completed[event.data.file] = true;
 	}
   }
+  else if (event.data.type && (event.data.type === "jsw_insertion_error")) {
+  	status = 3;
+  	
+  	chrome.runtime.sendMessage({from: "jsw_insert_content", method: "print_message", text: "Error in file "+event.data.file+": "+event.data.text });
+  }
 }, false);
 
 function insert_watermark(num, size) {
-	console.log("inserting watermark: number " + num + ", size " + size);
+	// console.log("inserting watermark: number " + num + ", size " + size);
+	chrome.runtime.sendMessage({from: "jsw_insert_content", method: "print_message", text: "inserting watermark: number " + num + ", size " + size });
 	// check if already inserted code
 	var jws = document.getElementById("jsw_watermark_script");
 	if (jws) {
@@ -52,7 +58,7 @@ function insert_watermark(num, size) {
 var url_validator = /.*\.jsw\.js/;
 
 function find_jswpp_scripts() {
-	console.log("Finding .jsw.js scripts");
+	// console.log("Finding .jsw.js scripts");
 
 	var scripts = document.getElementsByTagName("script");
 	var jswpp_scripts = [];
@@ -60,12 +66,14 @@ function find_jswpp_scripts() {
 	for(var i = 0; i < scripts.length; i++) {
 		var script = scripts[i];
 		if (url_validator.test(script.src)) {
-			console.log("Found " + script.src);
+			// console.log("Found " + script.src);
+			chrome.runtime.sendMessage({from: "jsw_insert_content", method: "print_message", text: "Found script " + script.src });
 			jswpp_scripts.push(script.src);
 		}
 	}
 	if (scripts.length == 0) {
-		console.error("No .jsw.js scripts found");
+		// console.error("No .jsw.js scripts found");
+		chrome.runtime.sendMessage({from: "jsw_insert_content", method: "print_message", text: "No .jsw.js scripts found" });
 	}
 
 	// send script urls to background script for storage

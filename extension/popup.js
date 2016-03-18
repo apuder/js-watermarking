@@ -1,8 +1,10 @@
 
 var messages_area;
 var messages_hr;
-var html_nums;
+var insert_message_area;
 var html_scripts;
+var find_message_area;
+var html_nums;
 
 function clear_scripts_storage() {
 	chrome.runtime.sendMessage({ from: 'jsw_popup', method: 'clear_scripts' });
@@ -122,6 +124,28 @@ function setError(error_text) {
 	}
 }
 
+function set_insert_message(msg_txt) {
+	if (msg_txt) {
+		insert_message_area.textContent = msg_txt;
+		insert_message_area.style.color = "DarkGoldenRod";
+	}
+	else {
+		insert_message_area.textContent = "";
+		insert_message_area.style.color = "black";
+	}
+}
+
+function set_find_message(msg_txt) {
+	if (msg_txt) {
+		find_message_area.textContent = msg_txt;
+		find_message_area.style.color = "DarkGoldenRod";
+	}
+	else {
+		find_message_area.textContent = "";
+		find_message_area.style.color = "black";
+	}
+}
+
 document.addEventListener('DOMContentLoaded', function () {
 	messages_area = document.getElementById("messages_area");
 	messages_hr = document.getElementById("messages_hr");
@@ -130,6 +154,9 @@ document.addEventListener('DOMContentLoaded', function () {
 	if (insert.type === 'button' && insert.name === 'insert') {
 		insert.addEventListener('click', make_watermark);
 	}
+
+	insert_message_area = document.getElementById("insert_message_area");
+	find_message_area = document.getElementById("find_message_area");
 
 	html_scripts = document.getElementById("scriptList");
 
@@ -152,23 +179,19 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 
 	var html_num_input = document.getElementById("number_input");
-	console.log(html_num_input);
+
 	if (html_num_input.type === 'number' && html_num_input.name === 'number') {
-		console.log(html_num_input);
 		html_num_input.value = localStorage["number"] || 0;
 		html_num_input.oninput = function() {
-			console.log(html_num_input);
 			localStorage["number"] = html_num_input.value;
 		};
 	}
 
 	var html_size_input = document.getElementById("size_input");
-	console.log(html_size_input);
+
 	if (html_size_input.type === 'number' && html_size_input.name === 'size') {
-		console.log(html_size_input);
 		html_size_input.value = localStorage["size"] || 14;
 		html_size_input.oninput = function() {
-			console.log(html_size_input);
 			localStorage["size"] = html_size_input.value;
 		};
 	}
@@ -182,14 +205,25 @@ document.addEventListener('DOMContentLoaded', function () {
     // set error initially
     setError(localStorage["error"] || '');
 
+    set_insert_message(localStorage["insert_message"] || '');
+
+    set_find_message(localStorage["find_message"] || '');
+
     window.onstorage = function (e) {
     	if (e.key == "scripts") {
     		setScripts(JSON.parse(e.newValue || '[]'));
     	}
     	else if (e.key == "nums") {
     		setNums(JSON.parse(e.newValue || '[]'));
-    	} else if (e.key == "error") {
+    	}
+    	else if (e.key == "error") {
     		setError(e.newValue || '');
+    	}
+    	else if (e.key == "insert_message") {
+    		set_insert_message(e.newValue || '');
+    	}
+    	else if (e.key == "find_message") {
+    		set_find_message(e.newValue || '');
     	}
     }
 });

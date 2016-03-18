@@ -7,21 +7,32 @@ module watermarkapplier {
 	"use strict";
 
 	export function apply_watermark(trace: cyclicgraphinserter.trace_stack) {
-		var graph = new permutationgraph.permutationgraph(trace.watermark_num, trace.watermark_size);
-		var inst = new cyclicgraphinstructions.cyclicgraphinstructions(graph)
-		var inserter = new cyclicgraphinserter.cyclicgraphinserter(inst);
+		try {
+			var graph = new permutationgraph.permutationgraph(trace.watermark_num, trace.watermark_size);
+			var inst = new cyclicgraphinstructions.cyclicgraphinstructions(graph)
+			var inserter = new cyclicgraphinserter.cyclicgraphinserter(inst);
 
-		var code = inserter.insert(trace);
+			var code = inserter.insert(trace);
 
-		// console.log(code);
+			// console.log(code);
 
-		window.postMessage({ 
-			type: "jsw_inserted_watermark", 
-			text: code, 
-			file: trace.file_name, 
-			number: trace.watermark_num, 
-			size: trace.watermark_size 
-		}, "*");
+			window.postMessage({ 
+				type: "jsw_inserted_watermark", 
+				text: code, 
+				file: trace.file_name, 
+				number: trace.watermark_num, 
+				size: trace.watermark_size 
+			}, "*");
+		}
+		catch (e) {
+			window.postMessage({
+				type: "jsw_insertion_error",
+				text: e.toString(),
+				file: trace.file_name,
+				number: trace.watermark_num,
+				size: trace.watermark_size
+			}, "*");
+		}
 	}
 }
 

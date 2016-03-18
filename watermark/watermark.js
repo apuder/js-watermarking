@@ -164,7 +164,7 @@ try {
                         });
                         request.on('end', function () {
                             body = Buffer.concat(body_arr).toString();
-                            console.log(body);
+                            // console.log(body);
                             var trace_code = apply_preprocessor(request_file, body);
                             file_text[request_file] = trace_code;
                             response.statusCode = 200;

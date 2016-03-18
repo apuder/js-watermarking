@@ -72,7 +72,7 @@ var permutationgraph;
             this.size = size || min_size;
             // must have at least size one greater than necessary, to ensure permutation begins with 0
             if (this.size < min_size)
-                throw "Size " + this.size + " Too small for number " + this.num;
+                throw "Number " + this.num + " too large for size " + this.size;
             this.makenodes();
             // make nodes before edges
             this.makeedges();
@@ -980,18 +980,29 @@ var watermarkapplier;
 (function (watermarkapplier) {
     "use strict";
     function apply_watermark(trace) {
-        var graph = new permutationgraph.permutationgraph(trace.watermark_num, trace.watermark_size);
-        var inst = new cyclicgraphinstructions.cyclicgraphinstructions(graph);
-        var inserter = new cyclicgraphinserter.cyclicgraphinserter(inst);
-        var code = inserter.insert(trace);
-        // console.log(code);
-        window.postMessage({
-            type: "jsw_inserted_watermark",
-            text: code,
-            file: trace.file_name,
-            number: trace.watermark_num,
-            size: trace.watermark_size
-        }, "*");
+        try {
+            var graph = new permutationgraph.permutationgraph(trace.watermark_num, trace.watermark_size);
+            var inst = new cyclicgraphinstructions.cyclicgraphinstructions(graph);
+            var inserter = new cyclicgraphinserter.cyclicgraphinserter(inst);
+            var code = inserter.insert(trace);
+            // console.log(code);
+            window.postMessage({
+                type: "jsw_inserted_watermark",
+                text: code,
+                file: trace.file_name,
+                number: trace.watermark_num,
+                size: trace.watermark_size
+            }, "*");
+        }
+        catch (e) {
+            window.postMessage({
+                type: "jsw_insertion_error",
+                text: e.toString(),
+                file: trace.file_name,
+                number: trace.watermark_num,
+                size: trace.watermark_size
+            }, "*");
+        }
     }
     watermarkapplier.apply_watermark = apply_watermark;
 })(watermarkapplier || (watermarkapplier = {}));

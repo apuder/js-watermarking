@@ -16,16 +16,16 @@ window.addEventListener("message", function(event) {
 		// respond to page to stop trying to send numbers
 		window.postMessage({ type: "jsw_found_watermark_acknowledgement" }, "*");
 
-		if (num_responses++ < num_tries) {
+		// if (num_responses++ < num_tries) {
 			chrome.runtime.sendMessage({from: "jsw_find_content", method: "storeNums", arg: event.data.text});
-		}
+		// }
 	}
 }, false);
 
 var num_tries = 0;
 var input_size;
 
-function find_watermark() {
+function do_find_watermark() {
 	num_tries++;
 	// remove script node if present
 	var cdw = document.getElementById("jsw_call_do_find_watermark");
@@ -50,7 +50,7 @@ function append_find_watermark_code() {
 		var script = document.createElement("script");
 		script.id = "jsw_find_watermark";
 		script.src = jsurl;
-		script.onload = find_watermark;
+		script.onload = do_find_watermark;
 		document.head.appendChild(script);
 
 		status = 1;
@@ -72,8 +72,9 @@ chrome.runtime.onMessage.addListener(function (msg, sender, response) {
 	      append_find_watermark_code();
 	    }
 	    else {
-	      find_watermark();
+	      do_find_watermark();
 	    }
+	    response( status );
 	  }
 	}
 });
