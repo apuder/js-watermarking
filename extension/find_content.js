@@ -1,4 +1,6 @@
 
+console.log("find content script loading");
+
 var status = 0;
 var appended_script = false;
 var num_responses = 0;

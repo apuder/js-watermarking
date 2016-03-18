@@ -1,4 +1,6 @@
 
+console.log("insert content script loading");
+
 var status = 0;
 
 var trace_completed = {};

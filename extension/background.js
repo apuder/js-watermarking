@@ -82,7 +82,6 @@ function do_insert_watermark() {
 }
 
 function check_missed_trace_complete() {
-	console.log("Checking trace complete");
 	chrome.tabs.sendMessage(tabid, 
 		{ from: 'jsw_background', 
 		  method: 'set_insert_status',
@@ -111,10 +110,18 @@ function redirect_jswpp_scripts() {
 	// clear cache forcing sending of http requests
 	chrome.webRequest.handlerBehaviorChanged();
 
-	// reload the tab and insert scripts to insert the watermark
-	chrome.tabs.reload(tabid, function () {
-		load_content_script("insert_content.js", check_missed_trace_complete);
+	// add a listener for the upcoming tab reload
+	chrome.tabs.onUpdated.addListener( function update_listener(updated_tabId, changeInfo, tab) {
+		if ( tabid == updated_tabId && changeInfo.url === undefined) {
+			// on reload tab, stop listening
+			chrome.tabs.onUpdated.removeListener(update_listener);
+			// load insert content
+			load_content_script("insert_content.js", check_missed_trace_complete);
+		}
 	});
+
+	// reload the tab and insert scripts to insert the watermark
+	chrome.tabs.reload(tabid);
 }
 
 function send_to_jsw_serv(jsw_url, script_text) {
@@ -246,7 +253,8 @@ function keep_trying_check_insert_content() {
 				// content script not fully loaded yet
 				console.log("content script failed to load, waiting 1 second and trying again");
 				setTimeout(function() {
-					load_content_script("insert_content.js", keep_trying_check_insert_content);
+					keep_trying_check_insert_content();
+					// load_content_script("insert_content.js", keep_trying_check_insert_content);
 				}, 1000);
 			}
 			else {
