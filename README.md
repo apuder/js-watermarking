@@ -69,3 +69,9 @@ Installation
 * The Find watermarks button may fail the first time, press again.
 * The Insert watermarks button may fail the first time, press again.
 * Find and Insert do not work on the same page at the same time.
+
+
+License
+=======================
+Distributed under the BSD 2 license.
+https://opensource.org/licenses/BSD-2-Clause
