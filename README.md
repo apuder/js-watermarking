@@ -45,12 +45,12 @@ Run the nodejs script jswpp.js before attempting to watermark code. ```jswpp.js`
 #### nodejs
 **```node jsw.js```**
 
-Run the nodejs script jsw.js traces your code and inserts a watermark in nodejs.
+Run the nodejs script jsw.js traces your code and inserts a watermark using nodejs.
 
 ##### Trace/Insert: 
 
   1. Run ```node jsw.js file.jsw.js number [-s watermark_size -o outfile.js -e 'code to execute as part of trace']``` on the command line.
-  2. The outut file will be saved in the current directory.
+  2. The output file will be saved in the current directory.
 
 
 ##3. Minify watermarked code
@@ -70,8 +70,8 @@ To increase the difficulty of detecting the watermark code minify or otherwise o
 
 #### nodejs
 
-  1. Run ```node jsw.js suspicious_code.js -f [-s watermark_size]``` on the commandline.
-  5. Results will appear in the extension popup and in the console (```ctrl + shift + I```). If nothing is found, remember watermark construction will take as long as the insertion step, until the code original code reached ///jsw_end.
+  1. Run ```node jsw.js suspicious_code.js -f [-s watermark_size -e 'code to execute as part of trace']``` on the commandline.
+  5. Results will be printed to the console.
 
 
 Installation
