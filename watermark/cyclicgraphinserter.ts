@@ -100,13 +100,24 @@ module cyclicgraphinserter {
 			var m = Math.floor(Math.random() * set.size);
 			var i = 0;
 			var thing;
-			for(let item of set) {
+			// iterate manually because of es5 compilation requirement
+			var si = set.values();
+			var sn: IteratorResult<T>;
+			while (!(sn = si.next()).done) {
+				var item = sn.value;
 				if (i == m) {
 					thing = item;
 					break;
 				}
 				i++;
 			}
+			// workaround as node --harmony doesn't always have .values
+			// set.forEach(function (value, index, set){
+			// 	if (i++ == m) {
+			// 		thing = value;
+			// 	}
+			// });
+
 			return thing;
 		}
 
@@ -154,9 +165,17 @@ module cyclicgraphinserter {
 		private assign_code_sites(trace: trace_stack) {
 			var ordered_contexts: Array<context_obj> = [];
 
-			for (var val of this.common_context.values()) {
-				ordered_contexts.push(val);
-			}
+			// iterate manually because of es5 compilation requirement
+			// var cci = this.common_context.values();
+			// var ccn: IteratorResult<context_obj>;
+			// while (!(ccn = cci.next()).done) {
+			// 	var val = ccn.value;
+			// 	ordered_contexts.push(val);
+			// }
+			// workaround as node --harmony doesn't always have .values
+			this.common_context.forEach(function (value, index, map) {
+				ordered_contexts.push(value);
+			});
 
 			// sort decreasing order by length
 			// with lonely contexts at the end (contexts without any objects ///jsw (blank))

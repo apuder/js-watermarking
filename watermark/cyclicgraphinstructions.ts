@@ -53,12 +53,24 @@ module cyclicgraphinstructions {
     private fringe_min(fringe: Set<cyclicgraphnode>): any {
       var obj: any = undefined;
       var d: number = Infinity;
-      for (var v of fringe.values()) {
-        if (v.dist < d) {
-          d = v.dist;
-          obj = v;
+      // iterate manually because of es5 compilation requirement
+      // var vi = fringe.values();
+      // var vn: IteratorResult<cyclicgraphnode>;
+      // while (!(vn = vi.next()).done) {
+      //   var v = vn.value;
+      //   if (v.dist < d) {
+      //     d = v.dist;
+      //     obj = v;
+      //   }
+      // }
+      // workaround as node --harmony doesn't always have .values
+      fringe.forEach(function(value, index, set) {
+        if (value.dist < d) {
+          d = value.dist;
+          obj = value;
         }
-      }
+      });
+
       return obj;
     }
 

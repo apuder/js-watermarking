@@ -3,8 +3,8 @@
 var permutationgraph;
 (function (permutationgraph_1) {
     "use strict";
-    class permutationgraphnode {
-        constructor(id) {
+    var permutationgraphnode = (function () {
+        function permutationgraphnode(id) {
             this.id = id;
             this.aliases = new Map();
             this.alias_obj = new Map();
@@ -13,7 +13,7 @@ var permutationgraph;
             this.outbound_edges = [];
             this.inbound_edges = [];
         }
-        alias_object(context, instruction, building_now) {
+        permutationgraphnode.prototype.alias_object = function (context, instruction, building_now) {
             if (building_now) {
                 for (var k in context) {
                     var v = context[k];
@@ -37,8 +37,8 @@ var permutationgraph;
                 }
             }
             return null;
-        }
-        alias_object_building(context, instruction) {
+        };
+        permutationgraphnode.prototype.alias_object_building = function (context, instruction) {
             for (var k in context) {
                 var v = context[k];
                 var node_aliases = this.alias_obj.get(v) || [];
@@ -49,21 +49,23 @@ var permutationgraph;
                 }
             }
             return null;
-        }
-    }
+        };
+        return permutationgraphnode;
+    }());
     permutationgraph_1.permutationgraphnode = permutationgraphnode;
-    class permutationgraphedge {
-        constructor(origin, destination) {
+    var permutationgraphedge = (function () {
+        function permutationgraphedge(origin, destination) {
             this.alias = '';
             this.built = Infinity;
             this.backbone = false;
             this.destination = destination;
             this.origin = origin;
         }
-    }
+        return permutationgraphedge;
+    }());
     permutationgraph_1.permutationgraphedge = permutationgraphedge;
-    class permutationgraph {
-        constructor(num, size) {
+    var permutationgraph = (function () {
+        function permutationgraph(num, size) {
             if (num < 0)
                 throw ("Invalid number");
             this.num = num;
@@ -78,7 +80,7 @@ var permutationgraph;
             this.makeedges();
         }
         // calculates factorial and stores intermediate results in fact
-        static factorial(n) {
+        permutationgraph.factorial = function (n) {
             if (!permutationgraph.fact) {
                 permutationgraph.fact = [1];
             }
@@ -86,8 +88,8 @@ var permutationgraph;
                 permutationgraph.fact[i] = i * permutationgraph.fact[i - 1];
             }
             return permutationgraph.fact[n];
-        }
-        static findnums(cycles) {
+        };
+        permutationgraph.findnums = function (cycles) {
             // find all numbers represented by permutation graphs in cycles
             var nums = [];
             for (var i = 0; i < cycles.length; i++) {
@@ -99,8 +101,8 @@ var permutationgraph;
                 }
             }
             return nums;
-        }
-        static backbone_to_perm(backbone) {
+        };
+        permutationgraph.backbone_to_perm = function (backbone) {
             // check backbone valid if so return permutation represented
             // else null
             var begin_digit = /^\d/;
@@ -152,32 +154,32 @@ var permutationgraph;
                 perm_reordered[size - i - 1] = perm[(i + i_zero) % size];
             }
             return perm_reordered;
-        }
-        static num_size(num) {
+        };
+        permutationgraph.num_size = function (num) {
             var size = 1;
             while (num >= permutationgraph.factorial(size)) {
                 size += 1;
             }
             return size;
-        }
-        static num_to_fact(num, size) {
+        };
+        permutationgraph.num_to_fact = function (num, size) {
             var fact = [];
             for (var i = (size || permutationgraph.num_size(num)) - 1; i >= 0; i--) {
                 fact[i] = Math.floor(num / permutationgraph.factorial(i));
                 num -= fact[i] * permutationgraph.factorial(i);
             }
             return fact;
-        }
-        static fact_to_num(fact) {
+        };
+        permutationgraph.fact_to_num = function (fact) {
             var num = 0;
             for (var i = 0; i < fact.length; i++) {
                 num += fact[i] * permutationgraph.factorial(i);
             }
             return num;
-        }
+        };
         // takes an array representing a fact and turns it into the
         // permutation representation of the factorial number
-        static fact_to_perm(fact) {
+        permutationgraph.fact_to_perm = function (fact) {
             var perm = fact.slice();
             for (var i = 1; i < perm.length; i++) {
                 for (var j = 0; j < i; j++) {
@@ -187,10 +189,10 @@ var permutationgraph;
                 }
             }
             return perm;
-        }
+        };
         // takes an array representing a permutation and turns it into the
         // factorial representation of the permutation
-        static perm_to_fact(perm) {
+        permutationgraph.perm_to_fact = function (perm) {
             var fact = perm.slice();
             for (var i = fact.length - 1; i > 0; i--) {
                 for (var j = 0; j < i; j++) {
@@ -200,22 +202,22 @@ var permutationgraph;
                 }
             }
             return fact;
-        }
-        makenodes() {
+        };
+        permutationgraph.prototype.makenodes = function () {
             this.nodes = [];
             // make nodes
             for (var i = 0; i < this.size; ++i) {
                 this.nodes.push(new permutationgraphnode(i));
             }
-        }
-        add_edge(source, destination, backbone) {
+        };
+        permutationgraph.prototype.add_edge = function (source, destination, backbone) {
             var edge = new permutationgraphedge(source, destination);
             edge.backbone = backbone;
             source.outbound_edges.push(edge);
             destination.inbound_edges.push(edge);
             this.num_edges++;
-        }
-        makeedges() {
+        };
+        permutationgraph.prototype.makeedges = function () {
             this.num_edges = 0;
             var size = this.size;
             var nodes = this.nodes;
@@ -229,11 +231,12 @@ var permutationgraph;
                     this.add_edge(nodes[i], nodes[dest], false);
                 }
             }
-        }
-        get_node(id) {
+        };
+        permutationgraph.prototype.get_node = function (id) {
             return this.nodes[id];
-        }
-    }
+        };
+        return permutationgraph;
+    }());
     permutationgraph_1.permutationgraph = permutationgraph;
 })(permutationgraph || (permutationgraph = {}));
 /// <reference path="./set_map.d.ts" />
@@ -241,14 +244,14 @@ var permutationgraph;
 var cyclicgraphinstructions;
 (function (cyclicgraphinstructions_1) {
     "use strict";
-    class cyclicgraphinstructions {
-        constructor(graph) {
+    var cyclicgraphinstructions = (function () {
+        function cyclicgraphinstructions(graph) {
             this.graph = graph;
             this.size = graph.num_edges + 1;
             this.fringe_edge = new Set();
         }
         // breadth randomely
-        possible(nodes) {
+        cyclicgraphinstructions.prototype.possible = function (nodes) {
             var fringe = [];
             for (var i in nodes) {
                 var edges = nodes[i].outbound_edges;
@@ -260,18 +263,18 @@ var cyclicgraphinstructions;
                 }
             }
             return fringe;
-        }
-        reset_dist() {
+        };
+        cyclicgraphinstructions.prototype.reset_dist = function () {
             for (var i in this.graph.nodes) {
                 this.graph.nodes[i].dist = Infinity;
             }
-        }
-        fringe_add_all(fringe) {
+        };
+        cyclicgraphinstructions.prototype.fringe_add_all = function (fringe) {
             for (var i in this.graph.nodes) {
                 fringe.add(this.graph.nodes[i]);
             }
-        }
-        fringe_min(fringe) {
+        };
+        cyclicgraphinstructions.prototype.fringe_min = function (fringe) {
             var obj = undefined;
             var d = Infinity;
             // iterate manually because of es5 compilation requirement
@@ -292,8 +295,8 @@ var cyclicgraphinstructions;
                 }
             });
             return obj;
-        }
-        shortest_path(node, context, instruction, building_now) {
+        };
+        cyclicgraphinstructions.prototype.shortest_path = function (node, context, instruction, building_now) {
             if (Object.keys(context).length == 0) {
                 return [];
             }
@@ -338,19 +341,19 @@ var cyclicgraphinstructions;
                 }
             }
             return path;
-        }
-        add_edges_fringe(node) {
+        };
+        cyclicgraphinstructions.prototype.add_edges_fringe = function (node) {
             for (var k in node.outbound_edges) {
                 var edge = node.outbound_edges[k];
                 if (edge.built >= Infinity)
                     this.fringe_edge.add(edge);
             }
-        }
-        remove_edge_fringe(edge) {
+        };
+        cyclicgraphinstructions.prototype.remove_edge_fringe = function (edge) {
             if (this.fringe_edge.has(edge))
                 this.fringe_edge.delete(edge);
-        }
-        add_node_alias(node, obj, alias, instruction) {
+        };
+        cyclicgraphinstructions.prototype.add_node_alias = function (node, obj, alias, instruction) {
             var node_aliases = node.alias_obj.get(obj);
             if (!node_aliases) {
                 node_aliases = [];
@@ -362,25 +365,26 @@ var cyclicgraphinstructions;
                 instruction_added: instruction,
                 instruction_removed: Infinity
             });
-        }
-        remove_node_alias_obj(node, obj, instruction) {
+        };
+        cyclicgraphinstructions.prototype.remove_node_alias_obj = function (node, obj, instruction) {
             var node_alias = node.alias_object([obj], instruction, false);
             if (node_alias) {
                 node_alias.instruction_removed = instruction;
             }
-        }
-        consume_node(node, instruction) {
+        };
+        cyclicgraphinstructions.prototype.consume_node = function (node, instruction) {
             if (node.built >= Infinity) {
                 node.built = instruction;
                 this.add_edges_fringe(node);
             }
-        }
-        consume_edge(edge, alias, instruction) {
+        };
+        cyclicgraphinstructions.prototype.consume_edge = function (edge, alias, instruction) {
             edge.built = instruction;
             edge.alias = alias;
             this.remove_edge_fringe(edge);
-        }
-    }
+        };
+        return cyclicgraphinstructions;
+    }());
     cyclicgraphinstructions_1.cyclicgraphinstructions = cyclicgraphinstructions;
 })(cyclicgraphinstructions || (cyclicgraphinstructions = {}));
 /// <reference path="./set_map.d.ts" />
@@ -388,21 +392,21 @@ var cyclicgraphinstructions;
 var cyclicgraphinserter;
 (function (cyclicgraphinserter_1) {
     "use strict";
-    class cyclicgraphinserter {
-        constructor(instructions) {
+    var cyclicgraphinserter = (function () {
+        function cyclicgraphinserter(instructions) {
             this.instructions = instructions;
         }
-        static rand_from_array(col) {
+        cyclicgraphinserter.rand_from_array = function (col) {
             var i = Math.floor(Math.random() * col.length);
             return col[i];
-        }
-        static rand_from_obj(obj) {
+        };
+        cyclicgraphinserter.rand_from_obj = function (obj) {
             var keys = Object.keys(obj);
             var key = cyclicgraphinserter.rand_from_array(keys);
             var value = obj[key];
             return { 'key': key, 'value': value };
-        }
-        static rand_from_set(set) {
+        };
+        cyclicgraphinserter.rand_from_set = function (set) {
             var m = Math.floor(Math.random() * set.size);
             var i = 0;
             var thing;
@@ -424,8 +428,8 @@ var cyclicgraphinserter;
             // 	}
             // });
             return thing;
-        }
-        add_inst_to_common_context(inst, obj) {
+        };
+        cyclicgraphinserter.prototype.add_inst_to_common_context = function (inst, obj) {
             var context = this.common_context.get(obj);
             if (context) {
                 context.push(inst);
@@ -435,8 +439,8 @@ var cyclicgraphinserter;
                 context.obj = obj;
                 this.common_context.set(obj, context);
             }
-        }
-        construct_common_contexts(trace) {
+        };
+        cyclicgraphinserter.prototype.construct_common_contexts = function (trace) {
             this.common_context = new Map();
             for (var inst = 0; inst < trace.length; inst++) {
                 var context = trace[inst].context;
@@ -448,8 +452,8 @@ var cyclicgraphinserter;
                     this.add_inst_to_common_context(inst, context[key]);
                 }
             }
-        }
-        assign_code_sites(trace) {
+        };
+        cyclicgraphinserter.prototype.assign_code_sites = function (trace) {
             var ordered_contexts = [];
             // iterate manually because of es5 compilation requirement
             // var cci = this.common_context.values();
@@ -497,14 +501,14 @@ var cyclicgraphinserter;
                     }
                 }
             }
-        }
-        static num_instruct(i, n, p) {
+        };
+        cyclicgraphinserter.num_instruct = function (i, n, p) {
             var m = Math.floor(n / p);
             if (i < n - m * p)
                 m++;
             return m;
-        }
-        static get_obj_alias(obj) {
+        };
+        cyclicgraphinserter.get_obj_alias = function (obj) {
             var alias = '';
             // get used keys for this object
             var keys = cyclicgraphinserter.used_obj_keys.get(obj);
@@ -524,11 +528,11 @@ var cyclicgraphinserter;
             }
             keys[alias] = true; // set key so it can't be used again
             return '.' + alias;
-        }
-        static reset_obj_keys() {
+        };
+        cyclicgraphinserter.reset_obj_keys = function () {
             cyclicgraphinserter.used_obj_keys = new Map();
-        }
-        static get_edge_alias(edge) {
+        };
+        cyclicgraphinserter.get_edge_alias = function (edge) {
             var alias = '';
             if (edge.backbone) {
                 // find name
@@ -560,16 +564,16 @@ var cyclicgraphinserter;
                 }
             }
             return alias;
-        }
+        };
         // find name (alias) of obj in context
-        static context_obj_alias(obj, context) {
+        cyclicgraphinserter.context_obj_alias = function (obj, context) {
             for (var k in context) {
                 if (context[k] == obj)
                     return k;
             }
             return '';
-        }
-        static code_from_idiom(check, set) {
+        };
+        cyclicgraphinserter.code_from_idiom = function (check, set) {
             var code = '';
             if (check) {
                 code += "if (" + check + ") {\n";
@@ -580,10 +584,10 @@ var cyclicgraphinserter;
                 code += set + "\n";
             }
             return code;
-        }
+        };
         // all of path must be valid as of instruction
         // num_check is the number of edges to check
-        static valid_path_check(trace, path, context, checked, check_set, instruction) {
+        cyclicgraphinserter.valid_path_check = function (trace, path, context, checked, check_set, instruction) {
             if (!path.first)
                 return '';
             var code = '';
@@ -624,10 +628,10 @@ var cyclicgraphinserter;
                 }
             }
             return code;
-        }
+        };
         // parts of path may have been constructed during current instruction
         // make paths to check existance of all nodes and edges
-        check_path(trace, path, context, checked, check_set, instruction) {
+        cyclicgraphinserter.prototype.check_path = function (trace, path, context, checked, check_set, instruction) {
             if (!path || !path.first)
                 return '';
             var code = '';
@@ -737,8 +741,8 @@ var cyclicgraphinserter;
                     code += (code ? ' && ' : '') + new_code;
             }
             return code;
-        }
-        code_check(trace, instruct, checked, instruction) {
+        };
+        cyclicgraphinserter.prototype.code_check = function (trace, instruct, checked, instruction) {
             var code = '';
             // if (instruct.alias_obj) {
             // 	var path: cyclicgraphinstructions.path_type = [];
@@ -754,8 +758,8 @@ var cyclicgraphinserter;
             if (new_code)
                 code += (code ? ' && ' : '') + new_code;
             return code;
-        }
-        static path_code(path, set_path, trace, context, instruction) {
+        };
+        cyclicgraphinserter.path_code = function (path, set_path, trace, context, instruction) {
             if (!path.first)
                 return '';
             var code = '';
@@ -766,15 +770,15 @@ var cyclicgraphinserter;
                 code += edge.alias;
             }
             return code;
-        }
-        static code_instruct(instruct, trace, instruction) {
+        };
+        cyclicgraphinserter.code_instruct = function (instruct, trace, instruction) {
             var alias = instruct.alias_str;
             var set = cyclicgraphinserter.path_code(instruct.path_set, true, trace, instruct.inst.context, instruction);
             var get = instruct.path_get ? cyclicgraphinserter.path_code(instruct.path_get, false, trace, instruct.inst.context, instruction) : "{}";
             var code = alias + set + ' = ' + get + ';\n';
             return code;
-        }
-        code_instructions(instructions, trace, inst, instruction) {
+        };
+        cyclicgraphinserter.prototype.code_instructions = function (instructions, trace, inst, instruction) {
             var location = trace[inst.instance].location;
             var code = (this.loc_code[location] || '');
             var check = '';
@@ -790,8 +794,8 @@ var cyclicgraphinserter;
             }
             code += cyclicgraphinserter.code_from_idiom(check, set);
             this.loc_code[location] = code;
-        }
-        add_node(edge, trace, inst, instruction) {
+        };
+        cyclicgraphinserter.prototype.add_node = function (edge, trace, inst, instruction) {
             var path_set;
             if (edge) {
                 var origin = edge.origin;
@@ -831,8 +835,8 @@ var cyclicgraphinserter;
                 path_get: null,
                 path_set: path_set
             };
-        }
-        add_edge(edge, trace, inst, instruction) {
+        };
+        cyclicgraphinserter.prototype.add_edge = function (edge, trace, inst, instruction) {
             var origin = edge.origin;
             var destination = edge.destination;
             // find paths to destination and origin
@@ -862,8 +866,8 @@ var cyclicgraphinserter;
                 path_get: path_get,
                 path_set: path_set
             };
-        }
-        add_alias(curr_instr, inst, force, instruction) {
+        };
+        cyclicgraphinserter.prototype.add_alias = function (curr_instr, inst, force, instruction) {
             if (Object.keys(inst.context).length == 0) {
                 return;
             }
@@ -894,8 +898,8 @@ var cyclicgraphinserter;
             this.instructions.add_node_alias(node, local_obj.value, alias_str, instruction);
             curr_instr.alias_str = local_obj.key + alias_str + " = ";
             curr_instr.alias_obj = local_obj.value;
-        }
-        handle_instance(trace, inst, instruction, num_instruct) {
+        };
+        cyclicgraphinserter.prototype.handle_instance = function (trace, inst, instruction, num_instruct) {
             if (num_instruct <= 0)
                 return;
             var instructions = [];
@@ -922,8 +926,8 @@ var cyclicgraphinserter;
                 instructions.push(curr_instr);
             }
             this.code_instructions(instructions, trace, inst, instruction);
-        }
-        construct_site_code(trace) {
+        };
+        cyclicgraphinserter.prototype.construct_site_code = function (trace) {
             this.construct_common_contexts(trace);
             this.assign_code_sites(trace);
             this.chosen_instances = [];
@@ -948,8 +952,8 @@ var cyclicgraphinserter;
                 this.handle_instance(trace, inst, instruction, num_instruct);
                 instruction += num_instruct;
             }
-        }
-        insert(trace) {
+        };
+        cyclicgraphinserter.prototype.insert = function (trace) {
             var this_ = this;
             this.construct_site_code(trace);
             this.count = 0;
@@ -964,74 +968,489 @@ var cyclicgraphinserter;
                     return this_.loc_code[this_.count++] || '';
                 }
             });
-        }
+        };
         ;
-    }
-    cyclicgraphinserter.dictionary = [
-        'next',
-        'prev',
-        'previous',
-        'self',
-        'mpx',
-        'stack',
-        'tree',
-        'heap',
-        'other',
-        'tmp',
-        'value',
-        'check',
-        'result',
-        'status',
-        'current',
-        'last',
-        'pos',
-        'rest',
-        'before',
-        'after',
-        'gry',
-        'car',
-        'cdr',
-        'head',
-        'aware',
-        'miyabi',
-        'yugen',
-        'wabi',
-        'sabi',
-        'tsukimi'
-    ];
-    cyclicgraphinserter.used_obj_keys = new Map();
+        cyclicgraphinserter.dictionary = [
+            'next',
+            'prev',
+            'previous',
+            'self',
+            'mpx',
+            'stack',
+            'tree',
+            'heap',
+            'other',
+            'tmp',
+            'value',
+            'check',
+            'result',
+            'status',
+            'current',
+            'last',
+            'pos',
+            'rest',
+            'before',
+            'after',
+            'gry',
+            'car',
+            'cdr',
+            'head',
+            'aware',
+            'miyabi',
+            'yugen',
+            'wabi',
+            'sabi',
+            'tsukimi'
+        ];
+        cyclicgraphinserter.used_obj_keys = new Map();
+        return cyclicgraphinserter;
+    }());
     cyclicgraphinserter_1.cyclicgraphinserter = cyclicgraphinserter;
 })(cyclicgraphinserter || (cyclicgraphinserter = {}));
+/// <reference path="set_map.d.ts" />
+var cycles;
+(function (cycles) {
+    "use strict";
+    var count_id;
+    var begin_digit = /^\d/;
+    function make_tarjanNode(obj, stk, map) {
+        var obj_node = map.get(obj);
+        if (!obj_node) {
+            // new node
+            obj_node = {
+                id: count_id,
+                component_id: count_id,
+                on_stack: true
+            };
+            count_id++;
+            stk.push(obj);
+            map.set(obj, obj_node);
+        }
+        return obj_node;
+    }
+    function tarjan_recurse(obj, stk, map, components, size) {
+        var obj_node = make_tarjanNode(obj, stk, map);
+        for (var k in obj) {
+            // skip non objects, numeric keys, and null
+            // (numeric keys are not allowed in the backbone)
+            var v;
+            try {
+                v = obj[k];
+            }
+            catch (e) {
+                v = undefined;
+            }
+            if (!v
+                || begin_digit.test(k)
+                || typeof (v) !== 'object')
+                continue;
+            var v_node = map.get(v);
+            if (!v_node) {
+                // visit v
+                tarjan_recurse(v, stk, map, components, size);
+                // v_node will be in the map now
+                v_node = map.get(v);
+                obj_node.component_id = (obj_node.component_id > v_node.component_id) ? v_node.component_id : obj_node.component_id;
+            }
+            else if (v_node.on_stack) {
+                obj_node.component_id = (obj_node.component_id > v_node.component_id) ? v_node.component_id : obj_node.component_id;
+            }
+        }
+        if (obj_node.id == obj_node.component_id) {
+            // found an entire strongly connected component, remove it from the stack
+            var component = stk.splice(stk.indexOf(obj));
+            for (var i = 0; i < component.length; i++) {
+                var v = component[i];
+                var v_node = map.get(v);
+                v_node.on_stack = false;
+            }
+            if (component.length >= size) {
+                components.push(component);
+            }
+        }
+    }
+    function tarjan(root, blacklist, size) {
+        // finds strongly connected components of the graph starting from root
+        var stk = [];
+        var map = new Map();
+        var components = [];
+        count_id = 0;
+        for (var k in root) {
+            // skip non objects, numeric keys, null and blacklisted keys
+            // (numeric keys are not allowed in the backbone)
+            var v;
+            try {
+                v = root[k];
+            }
+            catch (e) {
+                v = undefined;
+            }
+            if (!v
+                || begin_digit.test(k)
+                || typeof (v) !== 'object'
+                || blacklist.indexOf(k) >= 0)
+                continue;
+            if (!map.get(v)) {
+                // visit v
+                tarjan_recurse(v, stk, map, components, size);
+            }
+        }
+        return components;
+    }
+    function johnson_unblock(obj_info) {
+        // unblocks the node and all of its next_blocked
+        obj_info.blocked = false;
+        var v_info;
+        for (v_info in obj_info.next_blocked.keys()) {
+            v_info = v_info;
+            if (v_info.blocked)
+                johnson_unblock(v_info);
+        }
+        obj_info.next_blocked.clear();
+    }
+    function johnson_circuit(obj, stk, map, circuits) {
+        // finds circuits starting and ending at stk[0]
+        var found_circuit = false;
+        stk.push(obj);
+        var obj_info = map.get(obj);
+        obj_info.blocked = true;
+        for (var k in obj) {
+            // ignore edges whose keys start with digits
+            if (begin_digit.test(k))
+                continue;
+            var v;
+            try {
+                v = obj[k];
+            }
+            catch (e) {
+                v = undefined;
+            }
+            var v_info = map.get(v);
+            // skip edges not part of this connected component
+            if (!v_info)
+                continue;
+            if (v == stk[0]) {
+                // found a circuit
+                circuits.push(stk.slice());
+                // console.log('found circuit');
+                found_circuit = true;
+            }
+            else if (!v_info.blocked) {
+                // recurse using v
+                if (johnson_circuit(v, stk, map, circuits)) {
+                    found_circuit = true;
+                }
+            }
+        }
+        if (found_circuit) {
+            johnson_unblock(obj_info);
+        }
+        else {
+            for (var k in obj) {
+                // ignore edges whose keys start with digits
+                if (begin_digit.test(k))
+                    continue;
+                var v;
+                try {
+                    v = obj[k];
+                }
+                catch (e) {
+                    v = undefined;
+                }
+                var v_info = map.get(v);
+                // skip edges not part of this connected component
+                if (!v_info)
+                    continue;
+                if (!v_info.next_blocked.has(obj_info)) {
+                    v_info.next_blocked.add(obj_info);
+                }
+            }
+        }
+        stk.pop();
+        return found_circuit;
+    }
+    function johnson(components, size) {
+        // find all circuits in the graph
+        var circuits = [];
+        var stk = [];
+        var map = new Map();
+        for (var i = 0; i < components.length; i++) {
+            var component = components[i];
+            // skip components smaller than size
+            if (component.length < size)
+                continue;
+            // set-up map for this component
+            for (var j = 0; j < component.length; j++) {
+                var obj = component[j];
+                map.set(obj, {
+                    blocked: false,
+                    next_blocked: new Set()
+                });
+            }
+            // find circuits in this component
+            for (var j = 0; j < component.length; j++) {
+                var obj = component[j];
+                // only examine sub-components at least as big as size
+                if (component.length - j < size)
+                    break;
+                // reset map
+                for (var k = j; k < component.length; k++) {
+                    var v = component[k];
+                    var v_info = map.get(v);
+                    v_info.blocked = false;
+                    v_info.next_blocked.clear();
+                }
+                // find circuits
+                johnson_circuit(obj, stk, map, circuits);
+                // remove finished node
+                map.delete(obj);
+            }
+            // remove component from map
+            map.clear();
+        }
+        return circuits;
+    }
+    function find_cycles(root, size, blacklist) {
+        // find circular paths of length >= size via depth first search
+        // ensure the blacklist exists
+        blacklist = blacklist || [];
+        var found;
+        // find strongly connected components
+        found = tarjan(root, blacklist, size);
+        // find circuits in strongly connected components
+        // takes size of graph * number of simple cycles time, potentially exponential
+        // found = johnson(found, size);
+        return found;
+    }
+    cycles.find_cycles = find_cycles;
+})(cycles || (cycles = {}));
+/// <reference path="typings/main/ambient/node/node.d.ts" />
 /// <reference path="./permutationgraph.ts" />
 /// <reference path="./cyclicgraphinstructions.ts" />
 /// <reference path="./cyclicgraphinserter.ts" />
-var watermarkapplier;
-(function (watermarkapplier) {
+/// <reference path="./cycles.ts" />
+var preprocess;
+(function (preprocess_1) {
     "use strict";
-    function apply_watermark(trace) {
-        try {
-            var graph = new permutationgraph.permutationgraph(trace.watermark_num, trace.watermark_size);
-            var inst = new cyclicgraphinstructions.cyclicgraphinstructions(graph);
-            var inserter = new cyclicgraphinserter.cyclicgraphinserter(inst);
-            var code = inserter.insert(trace);
-            // console.log(code);
-            window.postMessage({
-                type: "jsw_inserted_watermark",
-                text: code,
-                file: trace.file_name,
-                number: trace.watermark_num,
-                size: trace.watermark_size
-            }, "*");
+    var jsw_count;
+    var jsw_global_count;
+    var jsw_end_count;
+    // TODO verify validity of identifiers
+    function replace_identifier(identifier) {
+        identifier = identifier.replace(/,$/, ''); // remove trailing comma
+        return "'" + identifier + "':" + identifier + ',';
+    }
+    function replace_jsw_default(code) {
+        code = code.substring(6).trim();
+        code = code.replace(/\w+,?/g, replace_identifier);
+        code = code.replace(/,$/, ''); // remove trailing comma
+        return "trace_stack.push({location:" + jsw_count++ + ",context:{" + code + "}});";
+    }
+    function replace_jsw_global(code) {
+        code = code.substring(13).trim();
+        code = code.replace(/\w+,?/g, replace_identifier);
+        code = code.replace(/,$/, ''); // remove trailing comma
+        jsw_global_count++;
+        return "trace_stack.global_context = {" + code + "};";
+    }
+    function replace_jsw_end(code) {
+        jsw_end_count++;
+        return ""
+            + "final_stack = trace_stack;\n"
+            + "trace_stack = [];\n";
+    }
+    function replace_jsw(code) {
+        if (code.indexOf("///jsw_end") == 0) {
+            return replace_jsw_end(code);
         }
-        catch (e) {
-            window.postMessage({
-                type: "jsw_insertion_error",
-                text: e.toString(),
-                file: trace.file_name,
-                number: trace.watermark_num,
-                size: trace.watermark_size
-            }, "*");
+        else if (code.indexOf("///jsw_global") == 0) {
+            return replace_jsw_global(code);
+        }
+        else {
+            return replace_jsw_default(code);
         }
     }
-    watermarkapplier.apply_watermark = apply_watermark;
-})(watermarkapplier || (watermarkapplier = {}));
+    function preprocess(code, header) {
+        jsw_count = 0;
+        jsw_global_count = 0;
+        jsw_end_count = 0;
+        // var orig_code = code;
+        // match ///jsw to end of line
+        code = code.replace(/\/\/\/jsw.*/g, replace_jsw);
+        if (jsw_count == 0) {
+            console.log("Error: no ///jsw annotations found");
+            process.exit(2);
+        }
+        if (jsw_global_count == 0) {
+            console.log("Error: no ///jsw_global annotations found");
+            process.exit(2);
+        }
+        if (jsw_end_count == 0) {
+            console.log("Error: no ///jsw_end annotations found");
+            process.exit(2);
+        }
+        return (header || "") + code;
+    }
+    preprocess_1.preprocess = preprocess;
+})(preprocess || (preprocess = {}));
+// import * as fs from 'fs';
+// import * as path from 'path';
+var fs = require('fs');
+var path = require('path');
+function printUsage() {
+    var usage = "Usage: node jsw.js (--harmony)";
+    usage += " file";
+    usage += " number (if inserting watermark)";
+    usage += " [options]";
+    console.log(usage);
+}
+function printHelp() {
+    printUsage();
+    var helpage = "Options\n";
+    helpage += "\t-h\t-\t Show Help\n";
+    helpage += "\t-f\t-\tFind a watermark in file\n";
+    helpage += "\t-s\t-\tSet Size (default 14)\n";
+    helpage += "\t-o\t-\tName of output file\n";
+    helpage += "\t-e\t-\t'code to execute during trace'\n";
+    console.log(helpage);
+}
+function checkNumArgs(i) {
+    if (i >= process.argv.length) {
+        printUsage();
+        process.exit(1);
+    }
+}
+var jsw_file = "";
+var jsw_number = -1;
+var jsw_size = 14;
+var jsw_fileout = "";
+var jsw_execute = "";
+var jsw_find = false;
+var num_args_processed = 0;
+// process args
+for (var i = 2; i < process.argv.length; i++) {
+    switch (process.argv[i]) {
+        case "-o":
+            {
+                // change output file name
+                checkNumArgs(i + 1);
+                jsw_fileout = process.argv[++i];
+                break;
+            }
+        case "-e":
+            {
+                // change code to execute with trace
+                checkNumArgs(i + 1);
+                jsw_execute = process.argv[++i];
+                break;
+            }
+        case "-s":
+            {
+                // change code to execute with trace
+                checkNumArgs(i + 1);
+                jsw_size = parseInt(process.argv[++i]);
+                break;
+            }
+        case "-f":
+            {
+                jsw_find = true;
+                break;
+            }
+        case "-h":
+            {
+                printHelp();
+                process.exit(0);
+                break;
+            }
+        default:
+            {
+                if (process.argv[i].indexOf('-') == 0) {
+                    console.log("Unknown Option: " + process.argv[i]);
+                    break;
+                }
+                // change input file name
+                if (num_args_processed == 0) {
+                    jsw_file = process.argv[i];
+                    num_args_processed++;
+                }
+                else if (num_args_processed == 1) {
+                    jsw_number = parseInt(process.argv[i]);
+                    num_args_processed++;
+                }
+                else {
+                    printUsage();
+                    process.exit(1);
+                }
+                break;
+            }
+    }
+}
+// check file input
+if (!jsw_file) {
+    printUsage();
+    process.exit(1);
+}
+function apply_preprocessor(fname, code) {
+    var header = "";
+    code = preprocess.preprocess(code, header);
+    return code + "\n";
+}
+var jsw_file_text = fs.readFileSync(jsw_file, 'utf-8');
+if (jsw_find) {
+    // find a watermark of size jsw_size or greater
+    var jsw_run_code = jsw_file_text + "\n" + jsw_execute;
+    // run code
+    eval(jsw_run_code);
+    // find watermarks
+    var found_cycles = cycles.find_cycles(global, jsw_size, []);
+    var found_watermarks = permutationgraph.permutationgraph.findnums(found_cycles);
+    console.log("Found " + found_watermarks.length + " watermark" + (found_watermarks.length == 1 ? "" : "s"));
+    if (found_watermarks.length != 0)
+        console.log("Number\t\tSize");
+    for (var i = 0; i < found_watermarks.length; ++i) {
+        var wtrmk = found_watermarks[i];
+        var str_num = wtrmk.num.toString();
+        if (str_num.length < 8) {
+            str_num += "\t\t";
+        }
+        else {
+            str_num += "\t";
+        }
+        console.log(str_num + wtrmk.size);
+    }
+}
+else {
+    // check number input
+    if (jsw_number < 0) {
+        printUsage();
+        process.exit(1);
+    }
+    // name output based on input file
+    if (!jsw_fileout) {
+        var jsw_fileout = path.basename(jsw_file);
+        jsw_fileout = jsw_fileout.replace('.jsw', '');
+        if (jsw_fileout.lastIndexOf(".js") != jsw_fileout.length - 3) {
+            // filename doesn't end in .js
+            jsw_fileout += ".js";
+        }
+        if (jsw_fileout === jsw_file) {
+            console.log("Warning: Use -o file.js to overwrite input file");
+            process.exit(1);
+        }
+    }
+    // insert a watermark with number jsw_number of size_jsw_size
+    var jsw_trace_code = apply_preprocessor(jsw_file, jsw_file_text) + "\n" + jsw_execute;
+    // define variables
+    var trace_stack = [];
+    var final_stack = [];
+    // evaluate code
+    eval(jsw_trace_code);
+    final_stack.watermark_size = jsw_size;
+    final_stack.watermark_num = jsw_number;
+    final_stack.orig_code = jsw_file_text;
+    var jsw_graph = new permutationgraph.permutationgraph(jsw_number, jsw_size);
+    var jsw_inst = new cyclicgraphinstructions.cyclicgraphinstructions(jsw_graph);
+    var inserter = new cyclicgraphinserter.cyclicgraphinserter(jsw_inst);
+    var jsw_codeout = inserter.insert(final_stack);
+    fs.writeFileSync(jsw_fileout, jsw_codeout);
+}

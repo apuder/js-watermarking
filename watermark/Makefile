@@ -2,7 +2,7 @@
 TSC=tsc
 BROWSERFLAGS=--target es6
 NODEFLAGS=
-SOURCES=watermark.ts watermarkapplier.ts permutationgraph.ts cyclicgraphinstructions.ts cyclicgraphinserter.ts cycles.ts find_watermark.ts jsonify.ts
+SOURCES=watermark.ts jsw.ts watermarkapplier.ts permutationgraph.ts cyclicgraphinstructions.ts cyclicgraphinserter.ts cycles.ts find_watermark.ts jsonify.ts
 SOURCE=watermark.ts
 
 TARGETS=$(SOURCES:.ts=.js)
@@ -12,7 +12,11 @@ CODE_DIR = watermark
 
 .PHONY: all clean tidy
 
-all: watermark.js watermarkapplier.js find_watermark.js
+all: watermark.js watermarkapplier.js find_watermark.js jsw.js
+
+jsw.js: jsw.ts  permutationgraph.ts cyclicgraphinstructions.ts cyclicgraphinserter.ts cycles.ts
+	$(TSC) $(NODEFLAGS) jsw.ts permutationgraph.ts cyclicgraphinstructions.ts cyclicgraphinserter.ts cycles.ts --outFile jsw.js
+	cp jsw.js ../
 
 watermark.js: watermark.ts watermarkapplier.json
 	$(TSC) $(NODEFLAGS) watermark.ts
@@ -20,8 +24,7 @@ watermark.js: watermark.ts watermarkapplier.json
 	cat watermarkapplier.json >> watermark2.js
 	echo ";\n" >> watermark2.js
 	cat watermark.js >> watermark2.js
-	cp watermark2.js ../jswpp.js
-	rm watermark2.js
+	mv watermark2.js ../jswpp.js
 
 watermarkapplier.js: watermarkapplier.ts permutationgraph.ts cyclicgraphinstructions.ts cyclicgraphinserter.ts
 	$(TSC) $(BROWSERFLAGS) watermarkapplier.ts permutationgraph.ts cyclicgraphinstructions.ts cyclicgraphinserter.ts --outFile watermarkapplier.js
@@ -43,4 +46,4 @@ clean:
 	rm $(TARGETS)
 
 tidy:
-	rm ../extension/find_watermark.js ../jswpp.js
+	rm ../extension/find_watermark.js ../jswpp.js ../jsw.js
