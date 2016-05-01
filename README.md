@@ -3,6 +3,7 @@ JavaScript Watermarking
 =======================
 
 A Tool for generating and extracting watermarks in JavaScript applications.
+There is a Chrome extension and a nodejs version of the tool.
 
 
 Usage
@@ -27,6 +28,7 @@ To watermark javascript code, insert annotations into the source code. These fil
 
 ##2. Tracing and Watermark insertion
 
+#### Chrome
 **```node jswpp.js```**
 
 Run the nodejs script jswpp.js before attempting to watermark code. ```jswpp.js``` is a small server that processes javascript files and provides a redirectable url on the fly.
@@ -40,6 +42,16 @@ Run the nodejs script jswpp.js before attempting to watermark code. ```jswpp.js`
   5. A download link will appear in the extension popup when watermark insertion is complete.  This may take some time depending on when your code reaches ///jsw_end.
   6. Change the number or size of the watermark and click Insert to produce as differently watermarked versions of the code.
 
+#### nodejs
+**```node jsw.js```**
+
+Run the nodejs script jsw.js traces your code and inserts a watermark in nodejs.
+
+##### Trace/Insert: 
+
+  1. Run ```node jsw.js file.jsw.js number [-s watermark_size -o outfile.js -e 'code to execute as part of trace']``` on the command line.
+  2. The outut file will be saved in the current directory.
+
 
 ##3. Minify watermarked code
 
@@ -48,26 +60,39 @@ To increase the difficulty of detecting the watermark code minify or otherwise o
 
 ##4. Find watermarks
 
+#### Chrome
+
   1. Navigate to a website suspected to contain a watermark.
   2. Open the jsw chrome extension by clicking on the jsw icon, *see installation*.
   3. Input the minimum size of the watermark in the size field, and click Find.
   4. The jsw chrome extension will look for valid watermarks of size >= the size input.
   5. Results will appear in the extension popup and in the console (```ctrl + shift + I```). If nothing is found, remember watermark construction will take as long as the insertion step, until the code original code reached ///jsw_end.
 
+#### nodejs
+
+  1. Run ```node jsw.js suspicious_code.js -f [-s watermark_size]``` on the commandline.
+  5. Results will appear in the extension popup and in the console (```ctrl + shift + I```). If nothing is found, remember watermark construction will take as long as the insertion step, until the code original code reached ///jsw_end.
+
 
 Installation
 =======================
+
+#### Chrome
 
   1. Open Chrome/Chromium and navigate to about:extensions.
   2. Enable Developer Mode if not enabled.
   3. Click load unpackaged extension and select the extension folder in the js-watermarking directory.
   4. The letters jsw should appear on the extension bar next to the menu icon.
 
+#### nodejs
+
+  1. Use jsw.js [-h] included in this reqository.
+
 
 
 ####Notes:
-* The Find watermarks button may fail the first time, press again.
-* The Insert watermarks button may fail the first time, press again.
+* If the Find watermarks button fails the first time, press again.
+* If the Insert watermarks button fails the first time, press again.
 * Find and Insert do not work on the same page at the same time.
 
 
